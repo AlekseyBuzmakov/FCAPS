@@ -19,7 +19,6 @@
 				"enum": [ "BinarySetUnionPatternManager" ]
 			},
 			"Params": {}
-			}
 		},
 		"required": [ "Type", "Name" ]
 	}]

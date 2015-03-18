@@ -19,7 +19,6 @@
 				"enum": [ "BinarySetJoinPatternManager" ]
 			},
 			"Params": {}
-			}
 		},
 		"required": [ "Type", "Name" ]
 	}]
