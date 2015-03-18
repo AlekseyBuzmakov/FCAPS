@@ -16,7 +16,7 @@
 				"enum": [ "Pattern Manager" ]
 			},
 			"Name": {
-				"type": "string",
+				"type": "string"
 			},
 			"Params": {
 				"type": "object",
