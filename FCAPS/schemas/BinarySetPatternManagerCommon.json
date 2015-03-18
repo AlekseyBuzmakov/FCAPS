@@ -1,12 +1,12 @@
 {
 	"$schema": "http://json-schema.org/draft-04/schema#",
-	"id": "http://@BASENAME/schema/BinarySetPatternManagerCommon",
+	"id": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/BinarySetPatternManagerCommon",
 	"title": "Common params for Binary Set Pattern Managers",
 	"description": "A params shared by all Binary Set Pattern Managers. The file is a request for creation of a PM working with sets",
 
 	"allOf":[{
 		"description": "It is a module",
-		"$ref": "http://@BASENAME/schema/module"
+		"$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/module"
 	},{
 		"type": "object",
 		"properties": {

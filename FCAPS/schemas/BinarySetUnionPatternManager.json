@@ -1,12 +1,12 @@
 {
 	"$schema": "http://json-schema.org/draft-04/schema#",
-	"id": "http://@BASENAME/schema/BinarySetUnionPatternManagerModule",
+	"id": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/BinarySetUnionPatternManagerModule",
 	"title": "Pattern Manager for Binary Set with Union operation",
 	"description": "A params of module Binary Set Union Pattern Manager. The file is a request for creation of a PM working with sets given as list of attribute numbers with union as a semilattice opperation",
 
 	"allOf":[{
 		"description": "It is a module and is a Binary Set Pattern Manager",
-		"$ref": "http://@BASENAME/schema/BinarySetPatternManagerCommon"
+		"$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/BinarySetPatternManagerCommon"
 	},{
 		"type": "object",
 		"properties": {
