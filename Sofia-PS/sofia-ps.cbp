@@ -16,7 +16,7 @@
 					<Add option="-g" />
 					<Add option="-D_DEBUG" />
 					<Add directory="FCAPS/inc" />
-					<Add directory="SharedTools/inc" />
+					<Add directory="Tools/inc" />
 					<Add directory="FCAPS/src/fcaps/modules" />
 				</Compiler>
 				<ExtraCommands>
@@ -37,7 +37,7 @@
 					<Add option="-DBOOST_DISABLE_ASSERTS" />
 					<Add option="-DNDEBUG" />
 					<Add directory="FCAPS/inc" />
-					<Add directory="SharedTools/inc" />
+					<Add directory="Tools/inc" />
 					<Add directory="FCAPS/src/fcaps/modules" />
 				</Compiler>
 				<Linker>
@@ -63,7 +63,7 @@
 					<Add option="-DBOOST_DISABLE_ASSERTS" />
 					<Add option="-DNDEBUG" />
 					<Add directory="FCAPS/inc" />
-					<Add directory="SharedTools/inc" />
+					<Add directory="Tools/inc" />
 					<Add directory="FCAPS/src/fcaps/modules" />
 				</Compiler>
 				<Linker>
@@ -86,11 +86,10 @@
 			<Add directory="src" />
 			<Add directory="../FCAPS/include" />
 			<Add directory="../FCAPS/src" />
-			<Add directory="../SharedTools/inc" />
+			<Add directory="../Tools" />
 			<Add directory="/home/leshyk/Soft/CppLibraries/boost_curr" />
 			<Add directory="/home/leshyk/Soft/CppLibraries/rapidjson/include" />
 		</Compiler>
-		<Unit filename="../FCAPS/inc/CachedPatternStorage.inl" />
 		<Unit filename="../FCAPS/include/fcaps/BasicTypes.h" />
 		<Unit filename="../FCAPS/include/fcaps/Classifier.h" />
 		<Unit filename="../FCAPS/include/fcaps/CompareResults.h" />
@@ -150,26 +149,24 @@
 		<Unit filename="../FCAPS/src/fcaps/tools/StabilityChildrenApproximation.h" />
 		<Unit filename="../FCAPS/src/fcaps/tools/StabilityMonteCarloApproximation.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/tools/StabilityMonteCarloApproximation.h" />
-		<Unit filename="../SharedTools/inc/AutoptrIterator.h" />
-		<Unit filename="../SharedTools/inc/BoostGraphs.h" />
-		<Unit filename="../SharedTools/inc/ConsoleApplication.h" />
-		<Unit filename="../SharedTools/inc/Exception.h" />
-		<Unit filename="../SharedTools/inc/JSONTools.h" />
-		<Unit filename="../SharedTools/inc/Lca.h" />
-		<Unit filename="../SharedTools/inc/ListWrapper.h" />
-		<Unit filename="../SharedTools/inc/Rmq.h" />
-		<Unit filename="../SharedTools/inc/StaticTree.h" />
-		<Unit filename="../SharedTools/inc/StdIteratorWrapper.h" />
-		<Unit filename="../SharedTools/inc/StdTools.h" />
-		<Unit filename="../SharedTools/inc/TopologicalSorting.h" />
-		<Unit filename="../SharedTools/inc/Tree.h" />
-		<Unit filename="../SharedTools/inc/common.h" />
-		<Unit filename="../SharedTools/src/ConsoleApplication.cpp" />
-		<Unit filename="../SharedTools/src/Exception.cpp" />
-		<Unit filename="../SharedTools/src/JSONTools.cpp" />
-		<Unit filename="../SharedTools/src/Lca.cpp" />
-		<Unit filename="../SharedTools/src/Rmq.cpp" />
-		<Unit filename="../SharedTools/src/TopologicalSorting.cpp" />
+		<Unit filename="../Tools/ConsoleApplication.cpp" />
+		<Unit filename="../Tools/ConsoleApplication.h" />
+		<Unit filename="../Tools/Exception.cpp" />
+		<Unit filename="../Tools/Exception.h" />
+		<Unit filename="../Tools/JSONTools.cpp" />
+		<Unit filename="../Tools/JSONTools.h" />
+		<Unit filename="../Tools/Lca.cpp" />
+		<Unit filename="../Tools/Lca.h" />
+		<Unit filename="../Tools/ListWrapper.h" />
+		<Unit filename="../Tools/PowerfulSaxJson.h" />
+		<Unit filename="../Tools/Rmq.cpp" />
+		<Unit filename="../Tools/Rmq.h" />
+		<Unit filename="../Tools/StaticTree.h" />
+		<Unit filename="../Tools/StdIteratorWrapper.h" />
+		<Unit filename="../Tools/StdTools.h" />
+		<Unit filename="../Tools/TopologicalSorting.cpp" />
+		<Unit filename="../Tools/TopologicalSorting.h" />
+		<Unit filename="../Tools/common.h" />
 		<Unit filename="inc/EPNewClassifier.h" />
 		<Unit filename="inc/MinCoverExactFinder.h" />
 		<Unit filename="inc/MinCoverFinder.h" />
