@@ -1,0 +1,26 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"id": "http://@BASENAME/schema/BinarySetJoinPatternManagerModule",
+	"title": "Pattern Manager for Binary Set with Join operation",
+	"description": "A params of module Binary Set Join Pattern Manager. The file is a request for creation of a PM working with sets given as list of attribute numbers with join as a semilattice opperation",
+
+	"allOf":[{
+		"description": "It is a module and is a Binary Set Pattern Manager",
+		"$ref": "http://@BASENAME/schema/BinarySetPatternManagerCommon"
+	},{
+		"type": "object",
+		"properties": {
+			"Type": {
+				"type": "string",
+				"enum": [ "Pattern Manager" ]
+			},
+			"Name": {
+				"type": "string",
+				"enum": [ "BinarySetUnionPatternManager" ]
+			},
+			"Params": {}
+			}
+		},
+		"required": [ "Type", "Name" ]
+	}]
+}

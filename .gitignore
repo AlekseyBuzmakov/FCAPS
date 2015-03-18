@@ -1,0 +1,18 @@
+# binaries
+bin
+obj
+.objs
+
+# CB project additional stuff
+*.depend
+*.layout
+*~
+*.cscope_file_list
+ValgrindOut.xml
+
+# There no need to save zips
+*.zip
+
+# Vim stuff
+.*.swp
+*.swo
