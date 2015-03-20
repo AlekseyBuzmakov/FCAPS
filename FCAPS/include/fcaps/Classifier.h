@@ -8,6 +8,12 @@
 
 interface IIntentStorage;
 
+//////////////////////////////////////////////////////////////////////////
+
+const char ClassifierModuleType[] = "ClassifierModules";
+
+//////////////////////////////////////////////////////////////////////////
+
 // A classes corresponding to no dicision
 const char CL_NotEnoughData[] = "###NotEnoughData###";
 const char CL_ContradictoryData[] = "###ContradictoryData###";
@@ -26,5 +32,6 @@ interface IClassifier : public IObject {
 	virtual std::string Classify( int intID ) const = 0;
 };
 
+//////////////////////////////////////////////////////////////////////////
 
 #endif // CLASSIFIER_H_INCLUDED

@@ -9,6 +9,10 @@
 
 ////////////////////////////////////////////////////////////////////
 
+const char PatternManagerModuleType[] = "PatternManagerModules";
+
+////////////////////////////////////////////////////////////////////
+
 // The type of the pattern used in the object
 enum TPatternType {
 	PT_Other = 0,
@@ -38,6 +42,8 @@ interface IPatternDescriptor : public virtual IObject {
 	//Get hash of the pattern.
 	virtual size_t Hash() const = 0;
 };
+
+////////////////////////////////////////////////////////////////////
 
 // Interface to the object to compare patterns.
 interface IPatternDescriptorComparator : public virtual IObject {

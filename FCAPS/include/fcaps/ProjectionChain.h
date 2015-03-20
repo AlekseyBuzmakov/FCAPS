@@ -9,6 +9,10 @@
 
 ////////////////////////////////////////////////////////////////////
 
+const char ProjectionChainModuleType[] = "ProjectionChainModules";
+
+////////////////////////////////////////////////////////////////////
+
 interface IProjectionChain : public virtual IObject {
 	// Memory inside CPattern is not controlled. The user is responsable for it.
 	typedef CList<const IPatternDescriptor*> CPatternList;
@@ -53,5 +57,7 @@ interface IProjectionChain : public virtual IObject {
 	virtual JSON SaveExtent( const IPatternDescriptor* d ) const = 0;
 	virtual JSON SaveIntent( const IPatternDescriptor* d ) const = 0;
 };
+
+////////////////////////////////////////////////////////////////////
 
 #endif // PROJECTIONCHAIN_H_INCLUDED

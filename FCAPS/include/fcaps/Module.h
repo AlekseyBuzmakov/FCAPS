@@ -19,43 +19,4 @@ interface IModule : public IObject {
 
 ////////////////////////////////////////////////////////////////////
 
-// Common Module Types
-const char PatternManagerModuleType[] = "Pattern Manager";
-const char LatticeBuilderModuleType[] = "Lattice Builder";
-const char ClassifierModuleType[] = "Classifier";
-const char ConceptBuilderModuleType[] = "Concept Builder";
-const char ProjectionChainType[] = "Projection Chain";
-
-////////////////////////////////////////////////////////////////////
-
-// Function for creating a module by type and name
-IModule* CreateModule( const std::string& type, const std::string& name, const JSON& params );
-
-template<typename ModuleInterface>
-ModuleInterface* CreateModule( const std::string& type, const std::string& name, const JSON& params )
-{
-	return dynamic_cast< ModuleInterface* >( CreateModule( type, name, params ) );
-}
-
-////////////////////////////////////////////////////////////////////
-
-// Type of function creating a new module
-typedef IModule* (*CreateFunc)();
-// Function to register a new module, normally used from CModuleRegistrar
-void RegisterModule(const std::string& type, const std::string& name, CreateFunc func );
-
-// Class for registering a module. Should be used as static member of ModuleClass.
-template<typename ModuleClass>
-class CModuleRegistrar {
-public:
-	CModuleRegistrar( const std::string& type, const std::string& name )
-		{ RegisterModule( type, name, &createModule ); }
-
-private:
-	static IModule* createModule()
-		{ return new ModuleClass; }
-};
-
-////////////////////////////////////////////////////////////////////
-
 #endif // MODULE_H_INCLUDED
