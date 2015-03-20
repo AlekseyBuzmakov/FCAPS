@@ -1,4 +1,4 @@
-#include <fcaps/modules/SofyaConceptBuilder.h>
+#include <fcaps/modules/SofiaContextProcessor.h>
 
 #include <fcaps/storages/CachedIntentStorage.h>
 
@@ -13,10 +13,10 @@
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////
-CModuleRegistrar<CSofyaConceptBuilder> CSofyaConceptBuilder::registrar(
-	ConceptBuilderModuleType, SofyaConceptBuilder );
+CModuleRegistrar<CSofiaContextProcessor> CSofiaContextProcessor::registrar(
+	ContextProcessorModuleType, SofiaContextProcessor );
 
-CSofyaConceptBuilder::CSofyaConceptBuilder() :
+CSofiaContextProcessor::CSofiaContextProcessor() :
 	callback(0),
 	thld( 0 ),
 	mpn( 1000 ),
@@ -25,19 +25,19 @@ CSofyaConceptBuilder::CSofyaConceptBuilder() :
 	storage.Reserve( mpn );
 }
 
-void CSofyaConceptBuilder::LoadParams( const JSON& json )
+void CSofiaContextProcessor::LoadParams( const JSON& json )
 {
 	CJsonError error;
 	rapidjson::Document params;
 	if( !ReadJsonString( json, params, error ) ) {
-		throw new CJsonException( "CSofyaConceptBuilder::LoadParams", error );
+		throw new CJsonException( "CSofiaContextProcessor::LoadParams", error );
 	}
-	assert( string( params["Type"].GetString() ) == ConceptBuilderModuleType );
-	assert( string( params["Name"].GetString() ) == SofyaConceptBuilder );
+	assert( string( params["Type"].GetString() ) == ContextProcessorModuleType );
+	assert( string( params["Name"].GetString() ) == SofiaContextProcessor );
 	if( !(params.HasMember( "Params" ) && params["Params"].IsObject()) ) {
 		error.Data = json;
 		error.Error = "Params is not found. Necessary for ProjectionChain";
-		throw new CJsonException("CSofyaConceptBuilder::LoadParams", error);
+		throw new CJsonException("CSofiaContextProcessor::LoadParams", error);
 	}
 
 	const rapidjson::Value& p = params["Params"];
@@ -63,25 +63,25 @@ void CSofyaConceptBuilder::LoadParams( const JSON& json )
 	if( !p.HasMember("ProjectionChain") ) {
 		error.Data = json;
 		error.Error = "Params is not found. Necessary for ProjectionChain";
-		throw new CJsonException("CSofyaConceptBuilder::LoadParams", error);
+		throw new CJsonException("CSofiaContextProcessor::LoadParams", error);
 	}
 
 	const rapidjson::Value& pc = params["Params"]["ProjectionChain"];
 	string errorText;
 	pChain.reset( CreateModuleFromJSON<IProjectionChain>(pc,errorText) );
 	if( pChain == 0 ) {
-		throw new CJsonException( "CSofyaConceptBuilder::LoadParams", CJsonError( json, errorText ) );
+		throw new CJsonException( "CSofiaContextProcessor::LoadParams", CJsonError( json, errorText ) );
 	}
 	storage.Initialize(CHasher(pChain));
 	storage.Reserve( mpn );
 }
-JSON CSofyaConceptBuilder::SaveParams() const
+JSON CSofiaContextProcessor::SaveParams() const
 {
 	rapidjson::Document params;
 	rapidjson::MemoryPoolAllocator<>& alloc = params.GetAllocator();
 	params.SetObject()
-		.AddMember( "Type", ConceptBuilderModuleType, alloc )
-		.AddMember( "Name", SofyaConceptBuilder, alloc )
+		.AddMember( "Type", ContextProcessorModuleType, alloc )
+		.AddMember( "Name", SofiaContextProcessor, alloc )
 		.AddMember( "Params", rapidjson::Value().SetObject()
 			.AddMember( "Thld", rapidjson::Value().SetDouble( thld ), alloc )
 			.AddMember( "MaxPatternNumber", rapidjson::Value().SetUint( mpn ), alloc ),
@@ -102,24 +102,24 @@ JSON CSofyaConceptBuilder::SaveParams() const
 	return result;
 }
 
-const std::vector<std::string>& CSofyaConceptBuilder::GetObjNames() const
+const std::vector<std::string>& CSofiaContextProcessor::GetObjNames() const
 {
 	assert(pChain != 0);
 	return pChain->GetObjNames();
 }
-void CSofyaConceptBuilder::SetObjNames( const std::vector<std::string>& names )
+void CSofiaContextProcessor::SetObjNames( const std::vector<std::string>& names )
 {
 	assert(pChain != 0);
 	pChain->SetObjNames( names );
 }
 
-void CSofyaConceptBuilder::AddObject( DWORD objectNum, const JSON& intent )
+void CSofiaContextProcessor::AddObject( DWORD objectNum, const JSON& intent )
 {
 	assert(pChain != 0);
 	pChain->AddObject(objectNum, intent);
 }
 
-void CSofyaConceptBuilder::ProcessAllObjectsAddition()
+void CSofiaContextProcessor::ProcessAllObjectsAddition()
 {
 	assert( pChain != 0 );
 	pChain->UpdateInterestThreshold( thld );
@@ -148,7 +148,7 @@ void CSofyaConceptBuilder::ProcessAllObjectsAddition()
 	reportProgress();
 }
 
-class CSofyaConceptBuilder::CConceptsForOrder {
+class CSofiaContextProcessor::CConceptsForOrder {
 public:
 	CConceptsForOrder( const IProjectionChain& _chain, const vector<CPatternMeasurePair>& _concepts ) :
 		cmp( _chain ), concepts( _concepts ) {}
@@ -174,7 +174,7 @@ private:
 	const IProjectionChain& cmp;
 	const vector<CPatternMeasurePair>& concepts;
 };
-void CSofyaConceptBuilder::SaveLatticeToFile( const std::string& path )
+void CSofiaContextProcessor::SaveResult( const std::string& path )
 {
 	vector<CPatternMeasurePair> concepts;
 	concepts.reserve(storage.Size() );
@@ -196,7 +196,7 @@ void CSofyaConceptBuilder::SaveLatticeToFile( const std::string& path )
 }
 
 // Adds new patterns to
-void CSofyaConceptBuilder::addNewPatterns( const IProjectionChain::CPatternList& newPatterns )
+void CSofiaContextProcessor::addNewPatterns( const IProjectionChain::CPatternList& newPatterns )
 {
 	CStdIterator<IProjectionChain::CPatternList::CConstIterator, false> itr(newPatterns);
 	DWORD i = 0;
@@ -207,16 +207,16 @@ void CSofyaConceptBuilder::addNewPatterns( const IProjectionChain::CPatternList&
 }
 
 ////////////////////////////////////////////////////////////////////
-// CSofyaConceptBuilder::adjustThreshold stuff
+// CSofiaContextProcessor::adjustThreshold stuff
 
-inline bool CSofyaConceptBuilder::compareCachedPatterns(
+inline bool CSofiaContextProcessor::compareCachedPatterns(
 	const CPatternMeasurePair& p1, const CPatternMeasurePair& p2)
 {
 	return p1.second > p2.second;
 }
 
 // Adjusts threshold in order to be in memory
-void CSofyaConceptBuilder::adjustThreshold()
+void CSofiaContextProcessor::adjustThreshold()
 {
 	if( storage.Size() <= mpn ) {
 		return;
@@ -246,7 +246,7 @@ void CSofyaConceptBuilder::adjustThreshold()
 	pChain->UpdateInterestThreshold( thld );
 }
 
-void CSofyaConceptBuilder::reportProgress() const
+void CSofiaContextProcessor::reportProgress() const
 {
 	if( callback == 0 ) {
 		return;
@@ -256,7 +256,7 @@ void CSofyaConceptBuilder::reportProgress() const
 		+ " Thld: " + StdExt::to_string(thld) );
 }
 
-void CSofyaConceptBuilder::saveToFile(
+void CSofiaContextProcessor::saveToFile(
 	const std::vector<CPatternMeasurePair>& concepts,
 	const CFindConceptOrder<CConceptsForOrder>& order,
 	const std::string& path )
@@ -350,7 +350,7 @@ void CSofyaConceptBuilder::saveToFile(
 	dst << "]\n";
 }
 
-void CSofyaConceptBuilder::printConceptToJson( const CPatternMeasurePair& c, std::ostream& dst )
+void CSofiaContextProcessor::printConceptToJson( const CPatternMeasurePair& c, std::ostream& dst )
 {
 dst << "{";
 

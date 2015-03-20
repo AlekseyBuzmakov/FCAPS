@@ -8,11 +8,6 @@
 
 ////////////////////////////////////////////////////////////////////
 
-// Common Module Types
-const char ConceptBuilderModuleType[] = "ContextProcessorModules";
-
-////////////////////////////////////////////////////////////////////
-
 // Function for creating a module by type and name
 IModule* CreateModule( const std::string& type, const std::string& name, const JSON& params );
 

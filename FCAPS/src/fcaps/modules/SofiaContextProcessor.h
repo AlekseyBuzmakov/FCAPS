@@ -1,7 +1,7 @@
 #ifndef CSOFYACONCEPTBUILDER_H
 #define CSOFYACONCEPTBUILDER_H
 
-#include <fcaps/ConceptBuilder.h>
+#include <fcaps/ContextProcessor.h>
 #include <fcaps/Module.h>
 #include <fcaps/ModuleTools.h>
 
@@ -14,29 +14,29 @@ class CFindConceptOrder;
 
 ////////////////////////////////////////////////////////////////////
 
-const char SofyaConceptBuilder[] = "SofyaConceptBuilderModule";
+const char SofiaContextProcessor[] = "SofiaContextProcessorModule";
 
 ////////////////////////////////////////////////////////////////////
 
-class CSofyaConceptBuilder : public IConceptBuilder, public IModule {
+class CSofiaContextProcessor : public IContextProcessor, public IModule {
 public:
-	CSofyaConceptBuilder();
+	CSofiaContextProcessor();
 
 	// Methods of IModule
 	virtual void LoadParams( const JSON& );
 	virtual JSON SaveParams() const;
 
-	// Methods of IConceptBuilder
+	// Methods of IContextProcessor
 	virtual const std::vector<std::string>& GetObjNames() const;
 	virtual void SetObjNames( const std::vector<std::string>& );
 
-	virtual void SetCallback( const IConceptBuilderCallback* cb )
+	virtual void SetCallback( const IContextProcessorCallback* cb )
 		{callback = cb;};
 
 	virtual void AddObject( DWORD objectNum, const JSON& intent );
 
 	virtual void ProcessAllObjectsAddition();
-	virtual void SaveLatticeToFile( const std::string& path );
+	virtual void SaveResult( const std::string& path );
 
 private:
 	class CHasher{
@@ -64,11 +64,11 @@ private:
 	class CConceptsForOrder;
 
 private:
-	static CModuleRegistrar<CSofyaConceptBuilder> registrar;
+	static CModuleRegistrar<CSofiaContextProcessor> registrar;
 	// Chain of projections for SOFYA algo
 	CSharedPtr<IProjectionChain> pChain;
 	// Callback for progess reporting
-	const IConceptBuilderCallback* callback;
+	const IContextProcessorCallback* callback;
 	// Current thld for a measure
 	double thld;
 	// Maximal number of patterns
