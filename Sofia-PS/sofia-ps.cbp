@@ -97,8 +97,8 @@
 		<Unit filename="../FCAPS/src/fcaps/modules/CompositPatternManager.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/IntervalPatternManager.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/IntervalPatternManager.h" />
-		<Unit filename="../FCAPS/src/fcaps/modules/SofyaConceptBuilder.cpp" />
-		<Unit filename="../FCAPS/src/fcaps/modules/SofyaConceptBuilder.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/SofiaContextProcessor.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/SofiaContextProcessor.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/StabBinClsPatternsProjectionChain.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/StabBinClsPatternsProjectionChain.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/StabIntervalClsPatternsProjectionChain.cpp" />

@@ -4,7 +4,7 @@
 
 #include <fcaps/Module.h>
 #include <fcaps/ModuleTools.h>
-#include <fcaps/ConceptBuilder.h>
+#include <fcaps/ContextProcessor.h>
 #include <fcaps/Filter.h>
 
 #include <fcaps/ModuleJSONTools.h>
@@ -28,7 +28,7 @@ using namespace boost;
 
 ////////////////////////////////////////////////////////////////////
 
-class CThisConsoleApplication : public CConsoleApplication, public IConceptBuilderCallback {
+class CThisConsoleApplication : public CConsoleApplication, public IContextProcessorCallback {
 public:
 	CThisConsoleApplication( int _argc, char** _argv ) :
 		CConsoleApplication( _argc, _argv ),
@@ -44,7 +44,7 @@ public:
 	virtual std::string GetCmdLineDescription( const std::string& progName ) const;
 	virtual int Execute();
 
-	// Methdos of IConceptBuilderCallback
+	// Methdos of IContextProcessorCallback
 	virtual void ReportProgress( const double& p, const std::string& info ) const;
 
 private:
@@ -59,12 +59,12 @@ private:
 	vector<string> objNames;
 
 	void printException( const CException& e ) const;
-	void runConceptBuilder();
+	void runContextProcessor();
 
-	void readConceptBuilderJson( rapidjson::Document& cb ) const;
+	void readContextProcessorJson( rapidjson::Document& cb ) const;
 	void readDataJson( rapidjson::Document& data ) const;
 	void extractObjectNames( rapidjson::Document& data );
-	IConceptBuilder* createConceptBuilder( rapidjson::Document& cb ) const;
+	IContextProcessor* createContextProcessor( rapidjson::Document& cb ) const;
 
 	void runFilters();
 	IFilter* createFilter() const;
@@ -151,7 +151,7 @@ int CThisConsoleApplication::Execute()
 	}
 	try{
 		if( !cbPath.empty() ) {
-			runConceptBuilder();
+			runContextProcessor();
 		} else {
 			outBaseName = dataPath;
 		}
@@ -176,9 +176,9 @@ void CThisConsoleApplication::ReportProgress( const double& p, const std::string
 }
 
 
-void CThisConsoleApplication::runConceptBuilder() {
+void CThisConsoleApplication::runContextProcessor() {
 	rapidjson::Document cb;
-	readConceptBuilderJson( cb );
+	readContextProcessorJson( cb );
 
 	rapidjson::Document data;
 	readDataJson( data );
@@ -187,7 +187,7 @@ void CThisConsoleApplication::runConceptBuilder() {
 
 	extractObjectNames( data );
 
-	CSharedPtr<IConceptBuilder> builder ( createConceptBuilder(cb) );
+	CSharedPtr<IContextProcessor> builder ( createContextProcessor(cb) );
 	builder->SetCallback( this );
 
 	//Iterate objects.
@@ -244,7 +244,7 @@ void CThisConsoleApplication::runConceptBuilder() {
 	GetInfoStream() << "\nProducing output...";
 	GetInfoStream().flush();
 
-	builder->SaveLatticeToFile( outBaseName );
+	builder->SaveResult( outBaseName );
 
 	const time_t endOutput = time( NULL );
 	GetInfoStream() << "\rOutput produced " << endOutput - startOutput << " seconds\n";
@@ -256,14 +256,14 @@ void CThisConsoleApplication::printException( const CException& e ) const
 		<< "\n" << e.GetText() << "\n\n";
 }
 
-void CThisConsoleApplication::readConceptBuilderJson( rapidjson::Document& cb ) const
+void CThisConsoleApplication::readContextProcessorJson( rapidjson::Document& cb ) const
 {
 	CJsonError jsonError;
 	if( !ReadJsonFile( cbPath, cb, jsonError ) ) {
-		throw new CJsonException( "ConceptBuilderJson", jsonError );
+		throw new CJsonException( "ContextProcessorJson", jsonError );
 	}
 	if( !cb.IsObject() ) {
-		throw new CTextException( "ConceptBuilderJson", "JSON params of CB are not in an json-object" );
+		throw new CTextException( "ContextProcessorJson", "JSON params of CB are not in an json-object" );
 	}
 	if( !cb.HasMember( "Params" ) ) {
 		cb.AddMember( "Params", rapidjson::Value().SetObject(), cb.GetAllocator() );
@@ -316,11 +316,11 @@ void CThisConsoleApplication::extractObjectNames( rapidjson::Document& data )
 	}
 }
 
-IConceptBuilder* CThisConsoleApplication::createConceptBuilder( rapidjson::Document& cb ) const
+IContextProcessor* CThisConsoleApplication::createContextProcessor( rapidjson::Document& cb ) const
 {
 	string errorText;
-	auto_ptr<IConceptBuilder> builder;
-	builder.reset( dynamic_cast<IConceptBuilder*>(
+	auto_ptr<IContextProcessor> builder;
+	builder.reset( dynamic_cast<IContextProcessor*>(
 		CreateModuleFromJSON( cb, errorText ) ) );
 
 	if( builder.get() == 0 ) {
@@ -352,7 +352,7 @@ IFilter* CThisConsoleApplication::createFilter() const
 	CJsonError jsonError;
 	rapidjson::Document fltrParams;
 	if( !ReadJsonFile( fltrPath, fltrParams, jsonError ) ) {
-		throw new CJsonException( "ConceptBuilderJson", jsonError );
+		throw new CJsonException( "ContextProcessorJson", jsonError );
 	}
 
 	string errorText;
