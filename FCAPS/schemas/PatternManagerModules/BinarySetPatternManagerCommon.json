@@ -6,7 +6,7 @@
 
 	"allOf":[{
 		"description": "It is a pattern manager",
-		"$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/PatternManagersModules/PatternManagerModule.json"
+		"$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/PatternManagerModules/PatternManagerModule.json"
 	},{
 		"type": "object",
 		"properties": {
