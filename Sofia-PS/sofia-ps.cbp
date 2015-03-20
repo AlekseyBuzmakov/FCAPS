@@ -87,10 +87,10 @@
 		<Unit filename="../FCAPS/include/fcaps/ModuleTools.h" />
 		<Unit filename="../FCAPS/include/fcaps/PatternManager.h" />
 		<Unit filename="../FCAPS/include/fcaps/ProjectionChain.h" />
-		<Unit filename="../FCAPS/src/fcaps/modules/BinarySetDescriptorsWithDependenciesComparator.cpp" />
-		<Unit filename="../FCAPS/src/fcaps/modules/BinarySetDescriptorsWithDependenciesComparator.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/BinarySetPatternManager.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/BinarySetPatternManager.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/BinarySetWithDependenciesPatternManager.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/BinarySetWithDependenciesPatternManager.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/CAEPByDongClassifier.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/CAEPByDongClassifier.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/CompositPatternManager.cpp" />

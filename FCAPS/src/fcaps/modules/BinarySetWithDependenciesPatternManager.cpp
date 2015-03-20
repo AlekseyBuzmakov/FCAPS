@@ -1,4 +1,4 @@
-#include <fcaps/modules/BinarySetDescriptorsWithDependenciesComparator.h>
+#include <fcaps/modules/BinarySetWithDependenciesPatternManager.h>
 
 #include <JSONTools.h>
 #include <StdTools.h>
