@@ -13,8 +13,8 @@
 			"Name": {
 				"type": "string",
 				"enum": [ "BinarySetUnionPatternManager" ]
-			},
+			}
+		},
 		"required": [ "Name" ]
-		}
 	}]
 }
