@@ -20,7 +20,7 @@
 					"AttrPosetPath": {
 						"type": "string",
 						"title": "Path to a File with Attribute Dependencies",
-						"description": "Path to a file with attribute dependendencies given as a poset (sutisfies json schema )."
+						"description": "Path to a file with attribute dependendencies given as a poset (sutisfies json schema https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/PatternManagerModules/AD.json)."
 					}
 				}
 			}
