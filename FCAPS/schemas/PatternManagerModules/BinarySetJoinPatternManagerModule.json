@@ -12,7 +12,7 @@
 		"properties": {
 			"Name": {
 				"type": "string",
-				"enum": [ "BinarySetUnionPatternManager" ]
+				"enum": [ "BinarySetJoinPatternManager" ]
 			}
 		},
 		"required": [ "Name" ]
