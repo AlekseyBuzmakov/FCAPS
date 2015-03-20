@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/patterns/BinarySet.json",
+  "title": "A binary set pattern",
+  "description": "A pattern given by a binary set",
+  "anyOf": [
+	  {
+		  "description": "It is a either a named est, ...",
+		  "$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/patterns/NamedSet.json"
+	  },
+	  {
+		  "description": "... or a indexed set",
+		  "$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/patterns/IndexedSet.json"
+	  }
+  ]
+}

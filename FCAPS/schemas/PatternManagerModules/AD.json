@@ -20,7 +20,7 @@
 				"items": {
 					"title": "Dependency Node",
 					"description": "Every node corresponds either to an attribute or to a set of attributes. Nodes with multiple attributes cannot have outcoming edges, i.e., they cannot deppend on something.",
-					"$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/patterns/BinarySet.json"
+					"$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/patterns/IndexedSet.json"
 				}
 			}
 		},
