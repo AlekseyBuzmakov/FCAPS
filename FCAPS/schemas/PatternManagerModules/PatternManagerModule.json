@@ -12,7 +12,7 @@
 			"Type": {
 				"type": "string",
 				"description": "It is a pattern manager module",
-				"enum": [ "Pattern Manager" ]
+				"enum": [ "PatternManagerModules" ]
 			},
 			"Name": {
 				"type": "string"
