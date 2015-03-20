@@ -1,6 +1,6 @@
 {
 	"$schema": "http://json-schema.org/draft-04/schema#",
-	"id": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/PatternManagersModules/BinarySetPatternManagerCommon.json",
+	"id": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/PatternManagerModules/BinarySetPatternManagerCommon.json",
 	"title": "Common params for Binary Set Pattern Managers",
 	"description": "A params shared by all Binary Set Pattern Managers. The file is a request for creation of a PM working with sets",
 
