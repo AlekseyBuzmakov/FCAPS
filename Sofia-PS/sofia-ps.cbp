@@ -80,18 +80,19 @@
 		<Unit filename="../FCAPS/include/fcaps/CompareResults.h" />
 		<Unit filename="../FCAPS/include/fcaps/ConceptBuilder.h" />
 		<Unit filename="../FCAPS/include/fcaps/Filter.h" />
-		<Unit filename="../FCAPS/include/fcaps/Module.cpp" />
 		<Unit filename="../FCAPS/include/fcaps/Module.h" />
 		<Unit filename="../FCAPS/include/fcaps/ModuleJSONTools.cpp" />
 		<Unit filename="../FCAPS/include/fcaps/ModuleJSONTools.h" />
-		<Unit filename="../FCAPS/include/fcaps/PatternDescriptor.h" />
+		<Unit filename="../FCAPS/include/fcaps/ModuleTools.cpp" />
+		<Unit filename="../FCAPS/include/fcaps/ModuleTools.h" />
+		<Unit filename="../FCAPS/include/fcaps/PatternManager.h" />
 		<Unit filename="../FCAPS/include/fcaps/ProjectionChain.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/BinarySetDescriptorsWithDependenciesComparator.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/BinarySetDescriptorsWithDependenciesComparator.h" />
-		<Unit filename="../FCAPS/src/fcaps/modules/BinarySetPatternDescriptor.cpp" />
-		<Unit filename="../FCAPS/src/fcaps/modules/BinarySetPatternDescriptor.h" />
-		<Unit filename="../FCAPS/src/fcaps/modules/CCAEPByDongClassifier.cpp" />
-		<Unit filename="../FCAPS/src/fcaps/modules/CCAEPByDongClassifier.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/BinarySetPatternManager.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/BinarySetPatternManager.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/CAEPByDongClassifier.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/CAEPByDongClassifier.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/CompositPatternManager.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/CompositPatternManager.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/IntervalPatternManager.cpp" />
@@ -110,8 +111,8 @@
 		<Unit filename="../FCAPS/src/fcaps/modules/TaxonomyPatternManager.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/TrainTestContextSplitter.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/TrainTestContextSplitter.h" />
-		<Unit filename="../FCAPS/src/fcaps/modules/TreeSetPatternDescriptor.cpp" />
-		<Unit filename="../FCAPS/src/fcaps/modules/TreeSetPatternDescriptor.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/TreeSetPatternManager.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/TreeSetPatternManager.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/details/BinClsPatternsProjectionChain.cpp" />
@@ -152,10 +153,6 @@
 		<Unit filename="../Tools/TopologicalSorting.cpp" />
 		<Unit filename="../Tools/TopologicalSorting.h" />
 		<Unit filename="../Tools/common.h" />
-		<Unit filename="inc/EPNewClassifier.h" />
-		<Unit filename="inc/MinCoverExactFinder.h" />
-		<Unit filename="inc/MinCoverFinder.h" />
-		<Unit filename="inc/MinCoverSetFinder.h" />
 		<Unit filename="src/main.cpp" />
 		<Extensions>
 			<code_completion>
