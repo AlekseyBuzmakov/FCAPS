@@ -3,6 +3,7 @@
 #include <ConsoleApplication.h>
 
 #include <fcaps/Module.h>
+#include <fcaps/ModuleTools.h>
 #include <fcaps/ConceptBuilder.h>
 #include <fcaps/Filter.h>
 

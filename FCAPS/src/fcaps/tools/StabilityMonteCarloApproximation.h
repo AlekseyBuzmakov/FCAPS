@@ -4,7 +4,7 @@
 #include <common.h>
 
 #include <fcaps/tools/StabilityCalculation.h>
-#include <fcaps/PatternDescriptor.h>
+#include <fcaps/PatternManager.h>
 
 class CVectorBinarySetJoinComparator;
 class CVectorBinarySetDescriptor;

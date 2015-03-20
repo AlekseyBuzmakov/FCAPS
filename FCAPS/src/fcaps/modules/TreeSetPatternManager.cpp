@@ -1,4 +1,4 @@
-#include <fcaps/modules/TreeSetPatternDescriptor.h>
+#include <fcaps/modules/TreeSetPatternManager.h>
 
 #include <fcaps/modules/details/TaxonomyJsonReader.h>
 #include <JSONTools.h>

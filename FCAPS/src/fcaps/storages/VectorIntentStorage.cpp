@@ -1,5 +1,5 @@
 #include <fcaps/storages/VectorIntentStorage.h>
-#include <fcaps/PatternDescriptor.h>
+#include <fcaps/PatternManager.h>
 
 using namespace std;
 

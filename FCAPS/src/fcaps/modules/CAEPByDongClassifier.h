@@ -3,8 +3,9 @@
 
 #include <fcaps/Classifier.h>
 #include <fcaps/Module.h>
+#include <fcaps/ModuleTools.h>
 
-const char CAEPByDongClassifier[] = "CAEP By Dong Classifier";
+const char CAEPByDongClassifier[] = "CAEPByDongClassifierModule";
 
 class CCAEPByDongClassifier : public IClassifier, public IModule {
 public:

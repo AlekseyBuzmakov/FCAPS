@@ -3,7 +3,7 @@
 ////////////////////////////////////////////////////////////////////
 
 CModuleRegistrar<CSuppBinClsPatternsProjectionChain> CSuppBinClsPatternsProjectionChain::registar
-	(ProjectionChainType,SuppBinClsPatternsProjectionChain);
+	(ProjectionChainModuleType,SuppBinClsPatternsProjectionChain);
 
 CSuppBinClsPatternsProjectionChain::CSuppBinClsPatternsProjectionChain()
 {
@@ -20,6 +20,6 @@ void CSuppBinClsPatternsProjectionChain::LoadParams( const JSON& )
 JSON CSuppBinClsPatternsProjectionChain::SaveParams() const
 {
 	return JSON("")
-		+ "{\"Type\":\"" + ProjectionChainType + "\","
+		+ "{\"Type\":\"" + ProjectionChainModuleType + "\","
 		+ "\"Name\":\"" + SuppBinClsPatternsProjectionChain + "\"}";
 }

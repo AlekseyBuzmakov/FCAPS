@@ -3,12 +3,13 @@
 
 #include <fcaps/Filter.h>
 #include <fcaps/Module.h>
+#include <fcaps/ModuleTools.h>
 
 #include <rapidjson/document.h>
 
 ////////////////////////////////////////////////////////////////////
 
-const char TrainTestContextSplitter[] = "TrainTestContextSplitter";
+const char TrainTestContextSplitter[] = "TrainTestContextSplitterModule";
 
 class CTrainTestContextSplitter : public IFilter, public IModule {
 public:

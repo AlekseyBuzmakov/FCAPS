@@ -1,4 +1,4 @@
-#include <AttrWithWeightPatternDescriptor.h>
+#include <AttrWithWeightPatternManager.h>
 
 using namespace std;
 

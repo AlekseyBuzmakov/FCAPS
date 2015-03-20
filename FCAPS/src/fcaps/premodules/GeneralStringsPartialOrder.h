@@ -15,7 +15,7 @@ public:
 		{}
 
 	// Set comparator of elements in strings.
-	void Initialize( const CSharedPtr<IPatternDescriptorComparator>& _elemsCmp )
+	void Initialize( const CSharedPtr<IPatternManager>& _elemsCmp )
 		{ elemsCmp = _elemsCmp; assert(elemsCmp != 0); }
 
 protected:
@@ -27,7 +27,7 @@ protected:
 	virtual void WriteElem( const TElem& el, std::ostream& dst ) const;
 
 private:
-	CSharedPtr<IPatternDescriptorComparator> elemsCmp;
+	CSharedPtr<IPatternManager> elemsCmp;
 };
 
 #endif // GENERALSTRINGSPARTIALORDER_H

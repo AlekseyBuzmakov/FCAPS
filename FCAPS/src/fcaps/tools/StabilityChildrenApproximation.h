@@ -3,7 +3,7 @@
 
 #include <common.h>
 
-#include <fcaps/PatternDescriptor.h>
+#include <fcaps/PatternManager.h>
 #include <fcaps/tools/StabilityCalculation.h>
 
 #include <ListWrapper.h>

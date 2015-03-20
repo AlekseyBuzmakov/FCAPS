@@ -2,7 +2,7 @@
 #define PROJECTIONCHAIN_H_INCLUDED
 
 #include <common.h>
-#include <fcaps/PatternDescriptor.h>
+#include <fcaps/PatternManager.h>
 
 #include <ListWrapper.h>
 #include <vector>

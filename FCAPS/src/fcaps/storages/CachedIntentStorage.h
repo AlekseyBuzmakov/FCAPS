@@ -9,7 +9,7 @@ public:
 	CCachedIntentStorage();
 
 	// Methods of IIntentStorage
-	virtual void Initialize( const CSharedPtr<IPatternDescriptorComparator>& cmp );
+	virtual void Initialize( const CSharedPtr<IPatternManager>& cmp );
 
 	virtual TIntentId LoadObject( const JSON& );
 	virtual JSON SavePattern( TIntentId id ) const;
@@ -26,7 +26,7 @@ public:
 	void Reserve( size_t size );
 
 private:
-	CSharedPtr<IPatternDescriptorComparator> cmp;
+	CSharedPtr<IPatternManager> cmp;
 	CPatternComparatorHasher hasher;
 	CCachedPatternStorage<CPatternComparatorHasher> storage;
 

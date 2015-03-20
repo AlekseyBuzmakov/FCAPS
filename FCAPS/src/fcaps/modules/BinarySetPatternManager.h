@@ -7,7 +7,8 @@
 #include <common.h>
 
 #include <fcaps/Module.h>
-#include <fcaps/PatternDescriptor.h>
+#include <fcaps/ModuleTools.h>
+#include <fcaps/PatternManager.h>
 
 #include <ListWrapper.h>
 
@@ -15,8 +16,8 @@
 
 ////////////////////////////////////////////////////////////////////
 
-const char BinarySetDescriptorsComparator[] = "BinarySetJoinPatternManager";
-const char UnionBinarySetDescriptorsComparator[] = "BinarySetUnionPatternManager";
+const char BinarySetDescriptorsComparator[] = "BinarySetJoinPatternManagerModule";
+const char UnionBinarySetDescriptorsComparator[] = "BinarySetUnionPatternManagerModule";
 
 ////////////////////////////////////////////////////////////////////
 
@@ -74,7 +75,7 @@ inline void CBinarySetPatternDescriptor::AddSortedNextAttribNumber( DWORD attrib
 
 ////////////////////////////////////////////////////////////////////
 
-class CBinarySetDescriptorsComparatorBase : public IPatternDescriptorComparator, public IModule {
+class CBinarySetDescriptorsComparatorBase : public IPatternManager, public IModule {
 public:
 	CBinarySetDescriptorsComparatorBase();
 
@@ -82,7 +83,7 @@ public:
 	virtual void LoadParams( const JSON& );
 	virtual JSON SaveParams() const;
 
-	// Methods of IPatternDescriptorComparator.
+	// Methods of IPatternManager.
 	virtual TPatternType GetPatternsType() const
 		{ return PT_BinarySet; }
 
@@ -159,7 +160,7 @@ private:
 
 class CBinarySetDescriptorsComparator : public CBinarySetDescriptorsComparatorBase {
 public:
-	// Methods of IPatternDescriptorComparator.
+	// Methods of IPatternManager.
 	virtual const CBinarySetPatternDescriptor* CalculateSimilarity(
 		const IPatternDescriptor* first, const IPatternDescriptor* second );
 
@@ -177,7 +178,7 @@ private:
 
 class CUnionBinarySetDescriptorsComparator : public CBinarySetDescriptorsComparatorBase {
 public:
-	// Methods of IPatternDescriptorComparator.
+	// Methods of IPatternManager.
 	virtual const CBinarySetPatternDescriptor* CalculateSimilarity(
 		const IPatternDescriptor* first, const IPatternDescriptor* second );
 

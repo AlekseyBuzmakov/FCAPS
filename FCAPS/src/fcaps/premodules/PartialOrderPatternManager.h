@@ -1,7 +1,7 @@
 #ifndef PARTIALORDERPATTERNDESCRIPTOR_H
 #define PARTIALORDERPATTERNDESCRIPTOR_H
 
-#include <PatternDescriptor.h>
+#include <PatternManager.h>
 #include <ListWrapper.h>
 
 #include <vector>
@@ -81,14 +81,14 @@ private:
 	CElementSet elements;
 };
 
-class CPartialOrderPatternDescriptorComparator : public IPatternDescriptorComparator {
+class CPartialOrderPatternManager : public IPatternManager {
 public:
 	typedef CPartialOrderPatternDescriptor::CElementSet CElementSet;
 public:
-	CPartialOrderPatternDescriptorComparator()
+	CPartialOrderPatternManager()
 		{}
 
-	// Methods of IPatternDescriptorComparator
+	// Methods of IPatternManager
 	virtual TPatternType GetPatternsType() const
 		{ return PT_PartialOrder; }
 	virtual void PreprocessObjectDescription( const CSharedPtr<IPatternDescriptor>& desc ) const;
@@ -104,7 +104,7 @@ public:
 	void Initialize( const CSharedPtr<IPartialOrderElementsComparator>& _elemsCmp );
 
 protected:
-	// Methods of IPatternDescriptorComparator
+	// Methods of IPatternManager
 	virtual CPartialOrderPatternDescriptor* NewPattern() const;
 
 private:

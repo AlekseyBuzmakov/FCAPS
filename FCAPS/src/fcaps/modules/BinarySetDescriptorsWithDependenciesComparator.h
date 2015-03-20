@@ -1,10 +1,10 @@
 #ifndef BINARYSETDESCRIPTORSWITHDEPENDENCIESCOMPARATOR_H
 #define BINARYSETDESCRIPTORSWITHDEPENDENCIESCOMPARATOR_H
 
-#include <fcaps/modules/BinarySetPatternDescriptor.h>
+#include <fcaps/modules/BinarySetPatternManager.h>
 #include <boost/ptr_container/ptr_vector.hpp>
 
-const char BinarySetDescriptorsWithDependenciesComparator[] = "BinarySetDescriptorsWithDependenciesComparator";
+const char BinarySetDescriptorsWithDependenciesComparator[] = "BinarySetPatternManagerWithDependenciesModules";
 
 class CBinarySetDescriptorsWithDependenciesComparator : public CBinarySetDescriptorsComparator {
 public:

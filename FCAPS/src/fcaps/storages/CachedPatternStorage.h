@@ -3,7 +3,7 @@
 
 #include <common.h>
 
-#include <fcaps/PatternDescriptor.h>
+#include <fcaps/PatternManager.h>
 
 #include <StdIteratorWrapper.h>
 
@@ -58,9 +58,9 @@ class CPatternComparatorHasher {
 public:
 	CPatternComparatorHasher()
 		{}
-	CPatternComparatorHasher( const CSharedPtr<IPatternDescriptorComparator>& _cmp ) :
+	CPatternComparatorHasher( const CSharedPtr<IPatternManager>& _cmp ) :
 		cmp(_cmp) {}
-	void Init( const CSharedPtr<IPatternDescriptorComparator>& _cmp )
+	void Init( const CSharedPtr<IPatternManager>& _cmp )
 		{ cmp = _cmp; }
 
 	// boost Hasher
@@ -72,7 +72,7 @@ public:
 
 
 private:
-	CSharedPtr<IPatternDescriptorComparator> cmp;
+	CSharedPtr<IPatternManager> cmp;
 };
 
 #include "CachedPatternStorage.inl"

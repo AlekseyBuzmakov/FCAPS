@@ -9,7 +9,7 @@ public:
 	CVectorIntentStorage();
 	~CVectorIntentStorage();
 	// Methods of IIntentStorage
-	virtual void Initialize( const CSharedPtr<IPatternDescriptorComparator>& _cmp )
+	virtual void Initialize( const CSharedPtr<IPatternManager>& _cmp )
 		{ cmp = _cmp; assert( cmp != 0 );}
 
 	virtual TIntentId LoadObject( const JSON& );
@@ -24,7 +24,7 @@ public:
 	virtual void Write( TIntentId id, std::ostream& dst ) const;
 
 private:
-	CSharedPtr<IPatternDescriptorComparator> cmp;
+	CSharedPtr<IPatternManager> cmp;
 	std::deque<const IPatternDescriptor*> patterns;
 
 	const IPatternDescriptor* getPattern(TIntentId id) const;

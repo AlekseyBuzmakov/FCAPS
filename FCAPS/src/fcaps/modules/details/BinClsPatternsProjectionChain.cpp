@@ -1,6 +1,6 @@
 #include <fcaps/modules/details/BinClsPatternsProjectionChain.h>
 
-#include <fcaps/modules/BinarySetPatternDescriptor.h>
+#include <fcaps/modules/BinarySetPatternManager.h>
 
 using namespace std;
 

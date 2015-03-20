@@ -1,7 +1,7 @@
 #ifndef SIMPLESTRINGPARTIALORDER_H
 #define SIMPLESTRINGPARTIALORDER_H
 
-#include <PartialOrderPatternDescriptor.h>
+#include <PartialOrderPatternManager.h>
 
 ////////////////////////////////////////////////////////////////////
 

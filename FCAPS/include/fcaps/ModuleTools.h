@@ -4,12 +4,12 @@
 #ifndef MODULETOOLS_H_INCLUDED
 #define MODULETOOLS_H_INCLUDED
 
-#include <Module.h>
+#include <fcaps/Module.h>
 
 ////////////////////////////////////////////////////////////////////
 
 // Common Module Types
-const char ContextProcessorModuleType[] = "ContextProcessorModules";
+const char ConceptBuilderModuleType[] = "ContextProcessorModules";
 
 ////////////////////////////////////////////////////////////////////
 

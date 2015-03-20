@@ -1,6 +1,7 @@
 #include <fcaps/ModuleJSONTools.h>
 
 #include <fcaps/Module.h>
+#include <fcaps/ModuleTools.h>
 
 #include <JSONTools.h>
 

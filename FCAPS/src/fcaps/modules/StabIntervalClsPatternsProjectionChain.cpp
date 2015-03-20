@@ -9,7 +9,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 CModuleRegistrar<CStabIntervalClsPatternsProjectionChain> CStabIntervalClsPatternsProjectionChain::registar(
-	ProjectionChainType, StabIntervalClsPatternsProjectionChain );
+	ProjectionChainModuleType, StabIntervalClsPatternsProjectionChain );
 
 CStabIntervalClsPatternsProjectionChain::CStabIntervalClsPatternsProjectionChain() :
 	currStateNum(0)
@@ -83,7 +83,7 @@ void CStabIntervalClsPatternsProjectionChain::LoadParams( const JSON& json )
 	if( !ReadJsonString( json, params, errorText ) ) {
 		throw new CJsonException( "CStabIntervalClsPatternsProjectionChain::LoadParams", errorText );
 	}
-	assert( string( params["Type"].GetString() ) == ProjectionChainType );
+	assert( string( params["Type"].GetString() ) == ProjectionChainModuleType );
 	assert( string( params["Name"].GetString() ) == StabIntervalClsPatternsProjectionChain );
 	if( !(params.HasMember( "Params" ) && params["Params"].IsObject()) ) {
 		return;
@@ -111,7 +111,7 @@ JSON CStabIntervalClsPatternsProjectionChain::SaveParams() const
 	rapidjson::Document params;
 	rapidjson::MemoryPoolAllocator<>& alloc = params.GetAllocator();
 	params.SetObject()
-		.AddMember( "Type", ProjectionChainType, alloc )
+		.AddMember( "Type", ProjectionChainModuleType, alloc )
 		.AddMember( "Name", StabIntervalClsPatternsProjectionChain, alloc )
 		.AddMember( "Params", rapidjson::Value().SetObject(), alloc );
 	rapidjson::Value& p = params["Params"];

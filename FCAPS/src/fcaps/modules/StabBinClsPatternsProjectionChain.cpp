@@ -3,7 +3,7 @@
 ////////////////////////////////////////////////////////////////////
 
 CModuleRegistrar<CStabBinClsPatternsProjectionChain> CStabBinClsPatternsProjectionChain::registar
-	(ProjectionChainType, StabBinClsPatternsProjectionChain);
+	(ProjectionChainModuleType, StabBinClsPatternsProjectionChain);
 
 CStabBinClsPatternsProjectionChain::CStabBinClsPatternsProjectionChain() :
 	stabApprox( ExtCmp() )
@@ -86,7 +86,7 @@ void CStabBinClsPatternsProjectionChain::LoadParams( const JSON& )
 JSON CStabBinClsPatternsProjectionChain::SaveParams() const
 {
 	return JSON("")
-		+ "{\"Type\":\"" + ProjectionChainType + "\","
+		+ "{\"Type\":\"" + ProjectionChainModuleType + "\","
 		+ "\"Name\":\"" + StabBinClsPatternsProjectionChain + "\"}";
 }
 

@@ -166,8 +166,8 @@ void CCompositPatternManager::LoadParams( const JSON& json )
 		if( !pms[i].IsObject() ) {
 			continue;
 		}
-		auto_ptr<IPatternDescriptorComparator> newPM(
-			dynamic_cast<IPatternDescriptorComparator*>( CreateModuleFromJSON( pms[i], errorText ) ) );
+		auto_ptr<IPatternManager> newPM(
+			dynamic_cast<IPatternManager*>( CreateModuleFromJSON( pms[i], errorText ) ) );
 		if( newPM.get() == 0 ) {
 			stringstream destStr;
 			destStr << "Cannot create the module " << i;

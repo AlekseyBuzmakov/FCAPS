@@ -6,7 +6,7 @@
 
 #include <fcaps/CompareResults.h>
 
-interface IPatternDescriptorComparator;
+interface IPatternManager;
 interface IPatternDescriptor;
 
 typedef intptr_t TIntentId;
@@ -17,7 +17,7 @@ typedef intptr_t TIntentId;
 
 interface IIntentStorage : public virtual IObject {
 	// Set the comparater this intent storage working with
-	virtual void Initialize( const CSharedPtr<IPatternDescriptorComparator>& cmp ) = 0;
+	virtual void Initialize( const CSharedPtr<IPatternManager>& cmp ) = 0;
 
 	// Load object description from JSON
 	virtual TIntentId LoadObject( const JSON& ) = 0;

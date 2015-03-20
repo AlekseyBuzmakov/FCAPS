@@ -1,4 +1,4 @@
-#include <PartialOrderPatternDescriptor.h>
+#include <PartialOrderPatternManager.h>
 
 //#define OUT_DEBUG_INFO
 
@@ -12,7 +12,7 @@ void CPartialOrderPatternDescriptor::AddElement(
 
 ////////////////////////////////////////////////////////////////////
 
-void CPartialOrderPatternDescriptorComparator::PreprocessObjectDescription( const CSharedPtr<IPatternDescriptor>& desc ) const
+void CPartialOrderPatternManager::PreprocessObjectDescription( const CSharedPtr<IPatternDescriptor>& desc ) const
 {
 	assert( desc != 0 && desc->GetType() == PT_PartialOrder );
 	assert( elemsCmp != 0 );
@@ -33,7 +33,7 @@ void CPartialOrderPatternDescriptorComparator::PreprocessObjectDescription( cons
 	}
 }
 
-CSharedPtr<IPatternDescriptor> CPartialOrderPatternDescriptorComparator::CalculateSimilarity(
+CSharedPtr<IPatternDescriptor> CPartialOrderPatternManager::CalculateSimilarity(
 	const CSharedPtr<IPatternDescriptor>& first, const CSharedPtr<IPatternDescriptor>& second ) const
 {
 	assert( first != 0 );
@@ -69,7 +69,7 @@ CSharedPtr<IPatternDescriptor> CPartialOrderPatternDescriptorComparator::Calcula
 	return result;
 }
 
-TCompareResult CPartialOrderPatternDescriptorComparator::Compare(
+TCompareResult CPartialOrderPatternManager::Compare(
 	const CSharedPtr<IPatternDescriptor>& first, const CSharedPtr<IPatternDescriptor>& second,
 	DWORD interestingResults, DWORD possibleResults ) const
 {
@@ -161,7 +161,7 @@ TCompareResult CPartialOrderPatternDescriptorComparator::Compare(
 	return static_cast<TCompareResult>( possibleAnswers );
 }
 
-void CPartialOrderPatternDescriptorComparator::Write( const CSharedPtr<IPatternDescriptor>& patternInt, std::ostream& dst ) const
+void CPartialOrderPatternManager::Write( const CSharedPtr<IPatternDescriptor>& patternInt, std::ostream& dst ) const
 {
 	assert( patternInt != 0 );
 	assert( patternInt->GetType() == PT_PartialOrder );
@@ -176,18 +176,18 @@ void CPartialOrderPatternDescriptorComparator::Write( const CSharedPtr<IPatternD
 	dst << "}";
 }
 
-void CPartialOrderPatternDescriptorComparator::Initialize( const CSharedPtr<IPartialOrderElementsComparator>& _elemsCmp )
+void CPartialOrderPatternManager::Initialize( const CSharedPtr<IPartialOrderElementsComparator>& _elemsCmp )
 {
 	elemsCmp = _elemsCmp;
 	assert( elemsCmp != 0 );
 }
 
-CPartialOrderPatternDescriptor* CPartialOrderPatternDescriptorComparator::NewPattern() const
+CPartialOrderPatternDescriptor* CPartialOrderPatternManager::NewPattern() const
 {
 	return new CPartialOrderPatternDescriptor;
 }
 
-void CPartialOrderPatternDescriptorComparator::addElementToPattern(
+void CPartialOrderPatternManager::addElementToPattern(
 	const CSharedPtr<IPartialOrderElement>& el, CPartialOrderPatternDescriptor& ptrn ) const
 {
 	CElementSet::CIterator begin = ptrn.GetElements().Begin();

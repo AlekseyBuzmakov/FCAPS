@@ -1,7 +1,7 @@
 #ifndef CVECTORBINARYSETDESCRIPTOR_H
 #define CVECTORBINARYSETDESCRIPTOR_H
 
-#include <fcaps/PatternDescriptor.h>
+#include <fcaps/PatternManager.h>
 #include <ListWrapper.h>
 #include <vector>
 #include <stdint.h>
@@ -36,11 +36,11 @@ private:
 
 ////////////////////////////////////////////////////////////////////
 
-class CVectorBinarySetJoinComparator : public  IPatternDescriptorComparator {
+class CVectorBinarySetJoinComparator : public  IPatternManager {
 public:
 	CVectorBinarySetJoinComparator();
 
-	// Methods of IPatternDescriptorComparator.
+	// Methods of IPatternManager.
 	virtual TPatternType GetPatternsType() const
 		{ return PT_VectorBinarySet; }
 

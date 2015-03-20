@@ -1,10 +1,11 @@
 #ifndef CTREESETPATTERNDESCRIPTOR_H
 #define CTREESETPATTERNDESCRIPTOR_H
 
-#include <fcaps/PatternDescriptor.h>
+#include <fcaps/PatternManager.h>
 #include <fcaps/Module.h>
+#include <fcaps/ModuleTools.h>
 
-#include <fcaps/modules/BinarySetPatternDescriptor.h> // Used for pattern
+#include <fcaps/modules/BinarySetPatternManager.h> // Used for pattern
 
 #include <fcaps/modules/details/TaxonomyJsonReader.h>
 
@@ -17,7 +18,7 @@
 
 ////////////////////////////////////////////////////////////////////
 
-const char TreeSetPatternManager[] = "TreeSetPatternManager";
+const char TreeSetPatternManager[] = "TreeSetPatternManagerModule";
 
 ////////////////////////////////////////////////////////////////////
 
@@ -62,11 +63,11 @@ private:
 
 ////////////////////////////////////////////////////////////////////
 
-class CTreeSetDescriptorsComparator : public IPatternDescriptorComparator, public IModule {
+class CTreeSetDescriptorsComparator : public IPatternManager, public IModule {
 public:
 	CTreeSetDescriptorsComparator();
 
-	// Methods of IPatternDescriptorComparator
+	// Methods of IPatternManager
 	virtual TPatternType GetPatternsType() const
 		{ return PT_TreeSet; }
 

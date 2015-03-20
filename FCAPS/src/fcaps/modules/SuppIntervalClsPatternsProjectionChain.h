@@ -4,8 +4,9 @@
 #include <fcaps/modules/details/IntervalClsPatternsProjectionChain.h>
 
 #include <fcaps/Module.h>
+#include <fcaps/ModuleTools.h>
 
-const char SuppIntervalClsPatternsProjectionChain[] = "SuppIntervalClsPatternsProjectionChain";
+const char SuppIntervalClsPatternsProjectionChain[] = "SuppIntervalClsPatternsProjectionChainModule";
 
 class CSuppIntervalClsPatternsProjectionChain : public CIntervalClsPatternsProjectionChain, public IModule {
 public:

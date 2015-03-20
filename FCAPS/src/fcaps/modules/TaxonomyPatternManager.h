@@ -1,8 +1,9 @@
 #ifndef CTAXONOMYPATTERNMANAGER_H
 #define CTAXONOMYPATTERNMANAGER_H
 
-#include <fcaps/PatternDescriptor.h>
+#include <fcaps/PatternManager.h>
 #include <fcaps/Module.h>
+#include <fcaps/ModuleTools.h>
 #include <fcaps/modules/details/TaxonomyJsonReader.h>
 
 #include <Lca.h>
@@ -11,7 +12,7 @@
 
 ////////////////////////////////////////////////////////////////////
 
-const char TaxonomyPatternManager[] = "TaxonomyPatternManager";
+const char TaxonomyPatternManager[] = "TaxonomyPatternManagerModule";
 
 ////////////////////////////////////////////////////////////////////
 
@@ -35,11 +36,11 @@ private:
 
 ////////////////////////////////////////////////////////////////////
 
-class CTaxonomyPatternManager : public IPatternDescriptorComparator, public IModule {
+class CTaxonomyPatternManager : public IPatternManager, public IModule {
 public:
 	CTaxonomyPatternManager();
 
-	// Methods of IPatternDescriptorComparator
+	// Methods of IPatternManager
 	virtual TPatternType GetPatternsType() const
 		{ return PT_TaxonomyElement; }
 

@@ -3,12 +3,13 @@
 
 #include <fcaps/modules/details/BinClsPatternsProjectionChain.h>
 #include <fcaps/Module.h>
+#include <fcaps/ModuleTools.h>
 
 #include <fcaps/tools/StabilityChildrenApproximation.h>
 
 ////////////////////////////////////////////////////////////////////
 
-char StabBinClsPatternsProjectionChain[] = "StabBinClsPatternsProjectionChain";
+char StabBinClsPatternsProjectionChain[] = "StabBinClsPatternsProjectionChainModule";
 
 class CStabBinClsPatternsProjectionChain : public CBinClsPatternsProjectionChain, public IModule {
 	public:

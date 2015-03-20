@@ -1,7 +1,7 @@
 #ifndef ATTRIBUTEWITHWEIGHTPATTERNDESCRIPTOR_H
 #define ATTRIBUTEWITHWEIGHTPATTERNDESCRIPTOR_H
 
-#include <PatternDescriptor.h>
+#include <PatternManager.h>
 
 class CAttrWithWeightPatternDescriptor : public IPatternDescriptor {
 public:
@@ -33,15 +33,15 @@ private:
 	DWORD weight;
 };
 
-class CAttrWithWeightPatternComparator : public IPatternDescriptorComparator {
+class CAttrWithWeightPatternComparator : public IPatternManager {
 public:
-	// Methods of IPatternDescriptorComparator
+	// Methods of IPatternManager
 	virtual TPatternType GetPatternsType() const
 		{ return PT_AttrWithWeight; }
 	virtual void PreprocessObjectDescription( const IPatternDescriptor* desc ) const;
 
 protected:
-	// Methods of IPatternDescriptorComparator
+	// Methods of IPatternManager
 	virtual IPatternDescriptor* CalculateSimilarity(
 		const IPatternDescriptor* first, const IPatternDescriptor* second ) const;
 	virtual TCompareResult Compare(

@@ -3,10 +3,11 @@
 
 #include <fcaps/modules/details/IntervalClsPatternsProjectionChain.h>
 #include <fcaps/Module.h>
+#include <fcaps/ModuleTools.h>
 
 ////////////////////////////////////////////////////////////////////
 
-const char StabIntervalClsPatternsProjectionChain[] = "StabIntervalClsPatternsProjectionChain";
+const char StabIntervalClsPatternsProjectionChain[] = "StabIntervalClsPatternsProjectionChainModule";
 
 class CStabIntervalClsPatternsProjectionChain : public CIntervalClsPatternsProjectionChain, public IModule {
 public:

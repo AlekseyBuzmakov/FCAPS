@@ -3,6 +3,7 @@
 
 #include <fcaps/ConceptBuilder.h>
 #include <fcaps/Module.h>
+#include <fcaps/ModuleTools.h>
 
 #include <fcaps/ProjectionChain.h>
 
@@ -13,7 +14,7 @@ class CFindConceptOrder;
 
 ////////////////////////////////////////////////////////////////////
 
-const char SofyaConceptBuilder[] = "Sofya Concept Builder";
+const char SofyaConceptBuilder[] = "SofyaConceptBuilderModule";
 
 ////////////////////////////////////////////////////////////////////
 

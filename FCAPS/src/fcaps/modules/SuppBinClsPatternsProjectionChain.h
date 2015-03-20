@@ -3,10 +3,11 @@
 
 #include <fcaps/modules/details/BinClsPatternsProjectionChain.h>
 #include <fcaps/Module.h>
+#include <fcaps/ModuleTools.h>
 
 ////////////////////////////////////////////////////////////////////
 
-char SuppBinClsPatternsProjectionChain[] = "SuppBinClsPatternsProjectionChain";
+char SuppBinClsPatternsProjectionChain[] = "SuppBinClsPatternsProjectionChainModule";
 
 class CSuppBinClsPatternsProjectionChain : public CBinClsPatternsProjectionChain, public IModule {
 public:

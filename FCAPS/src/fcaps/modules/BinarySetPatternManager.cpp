@@ -1,4 +1,4 @@
-#include <fcaps/modules/BinarySetPatternDescriptor.h>
+#include <fcaps/modules/BinarySetPatternManager.h>
 
 #include <JSONTools.h>
 #include <rapidjson/document.h>

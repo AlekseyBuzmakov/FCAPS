@@ -46,7 +46,7 @@ interface IPatternDescriptor : public virtual IObject {
 ////////////////////////////////////////////////////////////////////
 
 // Interface to the object to compare patterns.
-interface IPatternDescriptorComparator : public virtual IObject {
+interface IPatternManager : public virtual IObject {
 	// Get types of pattern object works with.
 	virtual TPatternType GetPatternsType() const = 0;
 
@@ -91,7 +91,7 @@ interface IPatternDescriptorComparator : public virtual IObject {
 	void WriteZero( const IPatternDescriptor* pattern, std::ostream& dst ) const;
 };
 
-inline const IPatternDescriptor* IPatternDescriptorComparator::CalculateSimilarityZero(
+inline const IPatternDescriptor* IPatternManager::CalculateSimilarityZero(
 const IPatternDescriptor* first, const IPatternDescriptor* second )
 {
 	if( first == 0 ) {
@@ -104,7 +104,7 @@ const IPatternDescriptor* first, const IPatternDescriptor* second )
 	return CalculateSimilarity( first, second );
 }
 
-inline TCompareResult IPatternDescriptorComparator::CompareZero(
+inline TCompareResult IPatternManager::CompareZero(
 	const IPatternDescriptor* first, const IPatternDescriptor* second,
 	DWORD interestingResults, DWORD possibleResults )
 {
@@ -129,7 +129,7 @@ inline TCompareResult IPatternDescriptorComparator::CompareZero(
 	return Compare( first, second, interestingResults, possibleResults );
 }
 
-inline void IPatternDescriptorComparator::WriteZero( const IPatternDescriptor* pattern, std::ostream& dst ) const
+inline void IPatternManager::WriteZero( const IPatternDescriptor* pattern, std::ostream& dst ) const
 {
 	if( pattern == 0 ) {
 		dst << "*BOTTOM*";
@@ -150,17 +150,17 @@ enum TPrunnerScope {
 // Deleter of patterns with help of Pattern Manager
 class CPatternDeleter {
 public:
-	CPatternDeleter( const CSharedPtr<IPatternDescriptorComparator>& _cmp ) :
+	CPatternDeleter( const CSharedPtr<IPatternManager>& _cmp ) :
 		cmpHolder( _cmp ), cmp( *cmpHolder ) {}
-	CPatternDeleter( IPatternDescriptorComparator& _cmp ) :
+	CPatternDeleter( IPatternManager& _cmp ) :
 		cmp( _cmp ) {}
 
 	void operator()( const IPatternDescriptor* ptrn )
 		{ cmp.FreePattern( ptrn ); }
 
 private:
-	CSharedPtr<IPatternDescriptorComparator> cmpHolder;
-	IPatternDescriptorComparator& cmp;
+	CSharedPtr<IPatternManager> cmpHolder;
+	IPatternManager& cmp;
 };
 
 ////////////////////////////////////////////////////////////////

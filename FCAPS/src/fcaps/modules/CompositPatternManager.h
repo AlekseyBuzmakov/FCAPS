@@ -3,14 +3,15 @@
 
 #include <common.h>
 
-#include <fcaps/PatternDescriptor.h>
+#include <fcaps/PatternManager.h>
 #include <fcaps/Module.h>
+#include <fcaps/ModuleTools.h>
 
 #include<boost/ptr_container/ptr_vector.hpp>
 
 ////////////////////////////////////////////////////////////////////
 
-const char CompositPatternManager[] = "CompositPatternManager";
+const char CompositPatternManager[] = "CompositPatternManagerModule";
 
 ////////////////////////////////////////////////////////////////////
 
@@ -37,11 +38,11 @@ private:
 
 ////////////////////////////////////////////////////////////////////
 
-class CCompositPatternManager : public IPatternDescriptorComparator, public IModule {
+class CCompositPatternManager : public IPatternManager, public IModule {
 public:
 	CCompositPatternManager();
 
-	// Methods of IPatternDescriptorComparatorr
+	// Methods of IPatternManagerr
 	virtual TPatternType GetPatternsType() const
 		{ return PT_Composit; }
 
@@ -66,7 +67,7 @@ public:
 private:
 	static const CModuleRegistrar<CCompositPatternManager> registrar;
 
-	boost::ptr_vector<IPatternDescriptorComparator> cmps;
+	boost::ptr_vector<IPatternManager> cmps;
 
 	static const CCompositePatternDescriptor& getCompositPattern( const IPatternDescriptor* ptrn );
 	JSON savePattern( const IPatternDescriptor* ) const;

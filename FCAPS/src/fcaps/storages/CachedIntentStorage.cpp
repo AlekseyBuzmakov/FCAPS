@@ -1,6 +1,6 @@
 #include <fcaps/storages/CachedIntentStorage.h>
 
-#include <fcaps/PatternDescriptor.h>
+#include <fcaps/PatternManager.h>
 
 using namespace std;
 using namespace boost;
@@ -12,7 +12,7 @@ CCachedIntentStorage::CCachedIntentStorage()
 	//ctor
 }
 
-void CCachedIntentStorage::Initialize( const CSharedPtr<IPatternDescriptorComparator>& _cmp )
+void CCachedIntentStorage::Initialize( const CSharedPtr<IPatternManager>& _cmp )
 {
 	cmp = _cmp;
 	storage.Clear();

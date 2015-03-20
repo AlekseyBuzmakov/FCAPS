@@ -1,8 +1,9 @@
 #ifndef CINTERVALPATTERNMANAGER_H
 #define CINTERVALPATTERNMANAGER_H
 
-#include <fcaps/PatternDescriptor.h>
+#include <fcaps/PatternManager.h>
 #include <fcaps/Module.h>
+#include <fcaps/ModuleTools.h>
 
 #include <fcaps/modules/details/JsonIntervalPattern.h>
 
@@ -31,7 +32,7 @@ private:
 
 ////////////////////////////////////////////////////////////////////
 
-class CIntervalPatternManager : public IPatternDescriptorComparator, public IModule {
+class CIntervalPatternManager : public IPatternManager, public IModule {
 public:
 	CIntervalPatternManager();
 

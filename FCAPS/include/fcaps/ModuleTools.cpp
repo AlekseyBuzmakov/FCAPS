@@ -2,6 +2,7 @@
 // Description: Module interface for creting modules by the module name.
 
 #include <fcaps/Module.h>
+#include <fcaps/ModuleTools.h>
 
 #include <boost/unordered_map.hpp>
 
