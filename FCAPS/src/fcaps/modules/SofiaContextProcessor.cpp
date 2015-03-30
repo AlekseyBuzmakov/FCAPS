@@ -20,7 +20,8 @@ CSofiaContextProcessor::CSofiaContextProcessor() :
 	callback(0),
 	thld( 0 ),
 	mpn( 1000 ),
-	shouldFindPartialOrder(false)
+	shouldFindPartialOrder(false),
+	shouldAdjustThld(true)
 {
 	storage.Reserve( mpn );
 }
@@ -60,11 +61,19 @@ void CSofiaContextProcessor::LoadParams( const JSON& json )
 		}
 	}
 
+	if( p.HasMember("AdjustThreshold")) {
+		const rapidjson::Value& atJson = params["Params"]["AdjustThreshold"];
+		if( atJson.IsBool() ) {
+			shouldAdjustThld = atJson.GetBool();
+		}
+	}
+
 	if( !p.HasMember("ProjectionChain") ) {
 		error.Data = json;
 		error.Error = "Params is not found. Necessary for ProjectionChain";
 		throw new CJsonException("CSofiaContextProcessor::LoadParams", error);
 	}
+
 
 	const rapidjson::Value& pc = params["Params"]["ProjectionChain"];
 	string errorText;
@@ -84,7 +93,9 @@ JSON CSofiaContextProcessor::SaveParams() const
 		.AddMember( "Name", SofiaContextProcessor, alloc )
 		.AddMember( "Params", rapidjson::Value().SetObject()
 			.AddMember( "Thld", rapidjson::Value().SetDouble( thld ), alloc )
-			.AddMember( "MaxPatternNumber", rapidjson::Value().SetUint( mpn ), alloc ),
+			.AddMember( "MaxPatternNumber", rapidjson::Value().SetUint( mpn ), alloc )
+			.AddMember( "AdjustThreshold", rapidjson::Value().SetBool( shouldAdjustThld ), alloc )
+			.AddMember( "FindPartialOrder", rapidjson::Value().SetBool( shouldFindPartialOrder ), alloc ),
 		alloc );
 	IModule* m = dynamic_cast<IModule*>(pChain.get());
 	assert( m!=0);
@@ -218,7 +229,7 @@ inline bool CSofiaContextProcessor::compareCachedPatterns(
 // Adjusts threshold in order to be in memory
 void CSofiaContextProcessor::adjustThreshold()
 {
-	if( storage.Size() <= mpn ) {
+	if( !shouldAdjustThld || storage.Size() <= mpn ) {
 		return;
 	}
 

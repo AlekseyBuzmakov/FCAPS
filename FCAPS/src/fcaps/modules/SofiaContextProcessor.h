@@ -75,6 +75,8 @@ private:
 	DWORD mpn;
 	// Should find partial order of the resulting concepts
 	bool shouldFindPartialOrder;
+	// Should adjust thld to have a polynomial algo
+	bool shouldAdjustThld;
 
 	// TODO: move hashed storage to projections.
 	//  then it would be possible to check if a stability for a pattern should be computed

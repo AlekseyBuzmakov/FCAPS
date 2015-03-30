@@ -11,7 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters="-data:/home/leshyk/PhD/data/uci-yeast/ClBySOFIA/train.json -CB:/home/leshyk/PhD/data/uci-yeast/ClBySOFIA/sofia-stab1000.json -out:/home/leshyk/PhD/data/uci-yeast/ClBySOFIA/result.json" />
+				<Option parameters="-data:/home/leshyk/PhD/data/uci-yeast/ClBySOFIA/train.json -CB:/home/leshyk/PhD/data/Bilkent-Airport/sofia-suppDT20.json" />
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-D_DEBUG" />
@@ -78,7 +78,7 @@
 		<Unit filename="../FCAPS/include/fcaps/BasicTypes.h" />
 		<Unit filename="../FCAPS/include/fcaps/Classifier.h" />
 		<Unit filename="../FCAPS/include/fcaps/CompareResults.h" />
-		<Unit filename="../FCAPS/include/fcaps/ConceptBuilder.h" />
+		<Unit filename="../FCAPS/include/fcaps/ContextProcessor.h" />
 		<Unit filename="../FCAPS/include/fcaps/Filter.h" />
 		<Unit filename="../FCAPS/include/fcaps/Module.h" />
 		<Unit filename="../FCAPS/include/fcaps/ModuleJSONTools.cpp" />
