@@ -52,6 +52,7 @@ private:
 	bool isJustHelp;
 	std::string outParamFile;
 	std::string paramFileContent;
+	mutable std::ofstream infoStream;
 
 	void processArg( const std::string& arg );
 	void processParamFile( const std::string& path );

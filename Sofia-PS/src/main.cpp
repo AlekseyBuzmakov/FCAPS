@@ -32,6 +32,7 @@ class CThisConsoleApplication : public CConsoleApplication, public IContextProce
 public:
 	CThisConsoleApplication( int _argc, char** _argv ) :
 		CConsoleApplication( _argc, _argv ),
+		writeOutput(false),
 		maxObjsCount( -1 )
 	{
 	}
@@ -52,11 +53,13 @@ private:
 	string cbPath;
 	string fltrPath;
 	string outBaseName;
+	bool writeOutput;
 
 	DWORD maxObjsCount;
 	CList<DWORD> indexes;
 
 	vector<string> objNames;
+	mutable string lastCtxProcessorInfo;
 
 	void printException( const CException& e ) const;
 	void runContextProcessor();
@@ -80,6 +83,7 @@ bool CThisConsoleApplication::ProcessParam( const std::string& param, const std:
 		fltrPath = value;
 	} else if ( param == "-out" ) {
 		outBaseName = value;
+		writeOutput = true;
 	} else if ( param == "-n" ) {
 		maxObjsCount = lexical_cast<DWORD>( value );
 	} else if ( param == "-index" ) {
@@ -106,7 +110,8 @@ bool CThisConsoleApplication::ProcessParam( const std::string& param, const std:
 
 bool CThisConsoleApplication::ProcessOption( const std::string& option )
 {
-	if ( false ) {
+	if ( option == "-out" ) {
+		writeOutput = true;
 	} else {
 		return CConsoleApplication::ProcessOption( option );
 	}
@@ -155,10 +160,10 @@ int CThisConsoleApplication::Execute()
 		} else {
 			outBaseName = dataPath;
 		}
-		if( !fltrPath.empty() ) {
+		if( !fltrPath.empty() && !outBaseName.empty() ) {
 			runFilters();
 		}
-		GetStatusStream() << "DONE\n";
+		GetStatusStream() << "\n--------------DONE---------------\n";
 		return 0;
 	} catch( CException* e ) {
 		printException( *e );
@@ -170,6 +175,8 @@ int CThisConsoleApplication::Execute()
 
 void CThisConsoleApplication::ReportProgress( const double& p, const std::string& info ) const
 {
+	lastCtxProcessorInfo = info;
+
 	GetStatusStream() << std::fixed << std::setprecision(3);
 	GetStatusStream() << "\rProcessing " << p*100 << "%. " << info;
 	GetStatusStream().flush();
@@ -227,27 +234,29 @@ void CThisConsoleApplication::runContextProcessor() {
 			<< ". Time is " << end - start;
 		GetStatusStream().flush();
 	}
-	GetStatusStream() << "\rAdded all objects. Processing...";
+	GetStatusStream() << "\rAdded all objects. Processing...\r";
 	GetStatusStream().flush();
 
 	builder->ProcessAllObjectsAddition();
 
 	const time_t end = time( NULL );
-	GetInfoStream() << "\nTotal time is " << end - start << "\n";
+	GetInfoStream() << "Processing time is " << end - start << "\n";
+	GetInfoStream() << lastCtxProcessorInfo << "\n";
 
 	// Output base path
-	if( outBaseName.empty() ) {
-		outBaseName = dataPath + ".out.json";
+	if( writeOutput ) {
+		if( outBaseName.empty() ) {
+			outBaseName = dataPath + ".out.json";
+		}
+		const time_t startOutput = time( NULL );
+		GetStatusStream() << "\nProducing output...\r";
+		GetStatusStream().flush();
+
+		builder->SaveResult( outBaseName );
+
+		const time_t endOutput = time( NULL );
+		GetInfoStream() << "Output produced " << endOutput - startOutput << " seconds\n";
 	}
-
-	const time_t startOutput = time( NULL );
-	GetInfoStream() << "\nProducing output...";
-	GetInfoStream().flush();
-
-	builder->SaveResult( outBaseName );
-
-	const time_t endOutput = time( NULL );
-	GetInfoStream() << "\rOutput produced " << endOutput - startOutput << " seconds\n";
 }
 
 void CThisConsoleApplication::printException( const CException& e ) const

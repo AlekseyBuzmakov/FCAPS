@@ -37,6 +37,7 @@ int CConsoleApplication::Run()
 			GetInfoStream() << GetCmdLineDescription( argv[0] ) << "\n";
 			GetInfoStream() << "General Params:\n";
 			GetInfoStream() << "\t--help - out only help, all other params are ignored\n";
+			GetInfoStream() << "\t--infoLogging:{PATH} - print INFO in a file\n";
 			GetInfoStream() << "\t--silent - minimaze output\n";
 			GetInfoStream() << "\t--paramfile:{PATH} - path to file with one param per one line\n";
 			GetInfoStream() << "\t--writeparamfile:{PATH} - write down the file with all params\n\n";
@@ -65,6 +66,8 @@ bool CConsoleApplication::ProcessParam( const std::string& param, const std::str
 		processParamFile( value );
 	} else if ( param == "--writeparamfile" ) {
 		outParamFile = value;
+	} else if ( param == "--infoLogging" ) {
+		infoStream.open( value.c_str() );
 	} else {
 		return false;
 	}
@@ -94,7 +97,11 @@ ostream& CConsoleApplication::GetStatusStream() const
 }
 ostream& CConsoleApplication::GetInfoStream() const
 {
-	return cout;
+	if( !infoStream.is_open() ) {
+		return cout;
+	} else {
+		return infoStream;
+	}
 }
 
 ostream& CConsoleApplication::GetWarningStream() const
