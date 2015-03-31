@@ -73,8 +73,8 @@
 	},
 	{
 		"title": "Visualisation Info",
-		"description": "All info that is related to graph visualisation is given here, such as level in concept lattices"
+		"description": "All info that is related to graph visualisation is given here, such as vertices positions or level in concept lattices"
 	}
   ],
-  "minItems": 2
+  "minItems": 3
 }

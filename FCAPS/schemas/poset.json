@@ -1,0 +1,42 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"id": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/poset.json",
+	"title": "Directed Acyclic Graph",
+	"description": "A directed acyclec graph that gives a poset of the vectices",
+	"allOf": [{
+		"$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/graph.json"
+	},{
+		"type": "array",
+		"items": [{
+			"type": "object",
+			"properties": {
+				"Tops": {
+					"title": "Output Vertices",
+					"description": "A set of vectices having no input arcs. Vectices are given by the indexes in the THIS[1].Nodes array",
+					"type": "array",
+					"minItems": 1,
+					"items": {
+						"title": "Vertex Index",
+						"description": "An index of a vertex",
+						"type": "integer",
+						"minimum": 0
+					}
+
+				},
+				"Bottoms": {
+					"title": "Input Vertices",
+					"description": "A set of vectices having no output arcs. Vectices are given by the indexes in the THIS[1].Nodes array",
+					"type": "array",
+					"minItems": 1,
+					"items": {
+						"title": "Vertex Index",
+						"description": "An index of a vertex",
+						"type": "integer",
+						"minimum": 0
+					}
+
+				}
+			}
+		}]
+	}]
+}
