@@ -246,9 +246,9 @@ bool CStabIntervalClsPatternsProjectionChain::canChangeLeft(const CStabPatternDe
 // Check if the attribute @param attr can be changed w.r.t. to current projection
 bool CStabIntervalClsPatternsProjectionChain::canChangeRight(const CStabPatternDescription& p, int attr ) const
 {
-	const DWORD stateValueNum = ValuesNumber(AttrOrder()[attr]) - 1 - State().ValueNum;
-	return stateValueNum < p.Intent()[AttrOrder()[attr]].second
-		|| stateValueNum == p.Intent()[AttrOrder()[attr]].second
+	const int stateValueNum = (int)ValuesNumber(AttrOrder()[attr]) - 1 - (int)State().ValueNum;
+	return stateValueNum < (int)p.Intent()[AttrOrder()[attr]].second
+		|| stateValueNum == (int)p.Intent()[AttrOrder()[attr]].second
 			&& State().State == CCurrState::S_Right
 			&& attr <= State().AttrNum;
 }
