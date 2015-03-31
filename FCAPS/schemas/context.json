@@ -24,6 +24,11 @@
 					"description": "A name of a single object",
 					"type": "string"
 				}
+			},
+			"Params":{
+				"title": "Description Common Info",
+				"description": "A shared info for descriptions in the context such as attribute names",
+				"type": "object"
 			}
 		}
 	},
