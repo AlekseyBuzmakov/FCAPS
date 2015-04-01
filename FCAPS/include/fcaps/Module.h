@@ -13,8 +13,13 @@
 // An interface of a module.
 interface IModule : public IObject {
 	// Load/Save module params.
+	// Works with successors of schemas/module.json
+	//  the params that are not in the JSON does not change
 	virtual void LoadParams( const JSON& ) = 0;
 	virtual JSON SaveParams() const = 0;
+	// Get type and name of the module
+	virtual const char* const GetType() const = 0;
+	virtual const char* const GetName() const = 0;
 };
 
 ////////////////////////////////////////////////////////////////////

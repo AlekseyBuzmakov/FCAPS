@@ -3,6 +3,7 @@
 #include <fcaps/ModuleJSONTools.h>
 
 #include <JSONTools.h>
+#include <StdTools.h>
 
 #include <rapidjson/document.h>
 
@@ -234,11 +235,9 @@ const CCompositePatternDescriptor* CCompositPatternManager::loadPattern( const J
 	rapidjson::Document patternJSON;
 	patternJSON.Parse( json.c_str() );
 	if( !patternJSON.IsArray() || patternJSON.Size() != cmps.size() ) {
-		char tmp[10];
-		sprintf(tmp, "%d", cmps.size());
 		new CTextException( "CCompositPatternManager::loadPattern",
 			string("The JSON is not an array or does not contain ")
-			 + tmp + "elements " + "('" + json + "')" );
+			 + StdExt::to_string( cmps.size() ) + "elements " + "('" + json + "')" );
 	}
 
 	auto_ptr<CCompositePatternDescriptor> compositPattern( new CCompositePatternDescriptor );
@@ -248,10 +247,8 @@ const CCompositePatternDescriptor* CCompositPatternManager::loadPattern( const J
 		CreateStringFromJSON( patternJSON[i], internalPattern );
 		auto_ptr<const IPatternDescriptor> internalPatternObj( cmps[i].LoadPattern( internalPattern ) );
 		if( internalPatternObj.get() == 0 ) {
-			char tmp[10];
-			sprintf(tmp, "%d", i);
 			throw new CTextException( "CCompositPatternManager::loadPattern",
-				string("The ") + tmp + "th component of the JSON cannot be parsed"
+				string("The ") + StdExt::to_string( cmps.size() ) + "th component of the JSON cannot be parsed"
 				 + "('" + json + "')");
 		}
 		compositPattern->ptrns.push_back( internalPatternObj.release() );

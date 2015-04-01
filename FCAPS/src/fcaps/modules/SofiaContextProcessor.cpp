@@ -124,6 +124,18 @@ void CSofiaContextProcessor::SetObjNames( const std::vector<std::string>& names 
 	pChain->SetObjNames( names );
 }
 
+void CSofiaContextProcessor::PassDescriptionParams( const JSON& json )
+{
+	assert( pChain != 0 );
+	IModule& pChainModule = dynamic_cast<IModule&>(*pChain);
+	const JSON params = string("{") +
+		"\"Type\":\"" + pChainModule.GetType() + "\","
+		"\"Name\":\"" + pChainModule.GetName() + "\","
+		"\"Params\":" + json +
+		"}";
+	pChainModule.LoadParams( params );
+}
+
 void CSofiaContextProcessor::AddObject( DWORD objectNum, const JSON& intent )
 {
 	assert(pChain != 0);

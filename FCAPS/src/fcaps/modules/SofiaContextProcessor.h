@@ -25,10 +25,15 @@ public:
 	// Methods of IModule
 	virtual void LoadParams( const JSON& );
 	virtual JSON SaveParams() const;
+	virtual const char* const GetType() const
+		{ return ContextProcessorModuleType; };
+	virtual const char* const GetName() const
+		{ return SofiaContextProcessor; };
 
 	// Methods of IContextProcessor
 	virtual const std::vector<std::string>& GetObjNames() const;
 	virtual void SetObjNames( const std::vector<std::string>& );
+	virtual void PassDescriptionParams( const JSON& json );
 
 	virtual void SetCallback( const IContextProcessorCallback* cb )
 		{callback = cb;};

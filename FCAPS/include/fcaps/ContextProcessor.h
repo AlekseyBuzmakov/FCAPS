@@ -27,6 +27,9 @@ interface IContextProcessor : public virtual IObject {
 	virtual const std::vector<std::string>& GetObjNames() const = 0;
 	virtual void SetObjNames( const std::vector<std::string>& ) = 0;
 
+	// Passes common params of all descriptions.
+	virtual void PassDescriptionParams( const JSON& ) = 0;
+
 	// Add next object to algorithm.
 	//  objectNum -- numero of the object.
 	virtual void AddObject( DWORD objectNum, const JSON& intent ) = 0;

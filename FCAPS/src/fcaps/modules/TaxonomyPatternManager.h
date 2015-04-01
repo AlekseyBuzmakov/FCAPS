@@ -61,6 +61,10 @@ public:
 	// Methods of IModule
 	virtual void LoadParams( const JSON& );
 	virtual JSON SaveParams() const;
+	virtual const char* const GetType() const
+		{ return PatternManagerModuleType; };
+	virtual const char* const GetName() const
+		{ return TaxonomyPatternManager; };
 
 private:
 	typedef CTaxonomyJsonReader::CTree CTree;

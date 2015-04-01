@@ -26,6 +26,10 @@ public:
 	// Methods of IModule
 	virtual void LoadParams( const JSON& );
 	virtual JSON SaveParams() const;
+	virtual const char* const GetType() const
+		{ return FilterModuleType; };
+	virtual const char* const GetName() const
+		{ return TrainTestContextSplitter; };
 
 private:
 	static const CModuleRegistrar<CTrainTestContextSplitter> registrar;

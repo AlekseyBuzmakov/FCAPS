@@ -14,6 +14,10 @@ public:
 	// Methods of CBinarySetDescriptorsComparator
 	virtual void LoadParams( const JSON& json );
 	virtual JSON SaveParams() const;
+	virtual const char* const GetType() const
+		{ return PatternManagerModuleType; };
+	virtual const char* const GetName() const
+		{ return BinarySetDescriptorsWithDependenciesComparator; };
 
 	virtual const CBinarySetPatternDescriptor* LoadObject( const JSON& json );
 	virtual JSON SavePattern( const IPatternDescriptor* ptrn ) const;

@@ -82,6 +82,8 @@ public:
 	// Methods of IModule
 	virtual void LoadParams( const JSON& );
 	virtual JSON SaveParams() const;
+	virtual const char* const GetType() const
+		{ return PatternManagerModuleType; };
 
 	// Methods of IPatternManager.
 	virtual TPatternType GetPatternsType() const
@@ -160,6 +162,9 @@ private:
 
 class CBinarySetDescriptorsComparator : public CBinarySetDescriptorsComparatorBase {
 public:
+	// Methods of IModule
+	virtual const char* const GetName() const
+		{ return BinarySetDescriptorsComparator; }
 	// Methods of IPatternManager.
 	virtual const CBinarySetPatternDescriptor* CalculateSimilarity(
 		const IPatternDescriptor* first, const IPatternDescriptor* second );
@@ -178,6 +183,9 @@ private:
 
 class CUnionBinarySetDescriptorsComparator : public CBinarySetDescriptorsComparatorBase {
 public:
+	// Methods of IModule
+	virtual const char* const GetName() const
+		{ return UnionBinarySetDescriptorsComparator; }
 	// Methods of IPatternManager.
 	virtual const CBinarySetPatternDescriptor* CalculateSimilarity(
 		const IPatternDescriptor* first, const IPatternDescriptor* second );

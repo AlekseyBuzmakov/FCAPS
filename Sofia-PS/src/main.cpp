@@ -190,12 +190,14 @@ void CThisConsoleApplication::runContextProcessor() {
 	rapidjson::Document data;
 	readDataJson( data );
 
-	// TODO: should copy params from the context? How to copy them the PM.
-
 	extractObjectNames( data );
 
-	CSharedPtr<IContextProcessor> builder ( createContextProcessor(cb) );
-	builder->SetCallback( this );
+	CSharedPtr<IContextProcessor> processor ( createContextProcessor(cb) );
+	processor->SetCallback( this );
+
+	string dataParams;
+	CreateStringFromJSON(data[0]["Params"], dataParams);
+	processor->PassDescriptionParams( dataParams );
 
 	//Iterate objects.
 	time_t start = time( NULL );
@@ -220,7 +222,7 @@ void CThisConsoleApplication::runContextProcessor() {
 
 		CreateStringFromJSON( dataBody[i], objectJson );
 		try{
-			builder->AddObject( i, objectJson );
+			processor->AddObject( i, objectJson );
 			++objNum;
 		} catch( CException* e ) {
 			GetWarningStream() << "Object " << i << " has a bad description -> IGNORED\n";
@@ -237,7 +239,7 @@ void CThisConsoleApplication::runContextProcessor() {
 	GetStatusStream() << "\rAdded all objects. Processing...\r";
 	GetStatusStream().flush();
 
-	builder->ProcessAllObjectsAddition();
+	processor->ProcessAllObjectsAddition();
 
 	const time_t end = time( NULL );
 	GetInfoStream() << "Processing time is " << end - start << "\n";
@@ -252,7 +254,7 @@ void CThisConsoleApplication::runContextProcessor() {
 		GetStatusStream() << "\nProducing output...\r";
 		GetStatusStream().flush();
 
-		builder->SaveResult( outBaseName );
+		processor->SaveResult( outBaseName );
 
 		const time_t endOutput = time( NULL );
 		GetInfoStream() << "Output produced " << endOutput - startOutput << " seconds\n";
@@ -328,19 +330,19 @@ void CThisConsoleApplication::extractObjectNames( rapidjson::Document& data )
 IContextProcessor* CThisConsoleApplication::createContextProcessor( rapidjson::Document& cb ) const
 {
 	string errorText;
-	auto_ptr<IContextProcessor> builder;
-	builder.reset( dynamic_cast<IContextProcessor*>(
+	auto_ptr<IContextProcessor> processor;
+	processor.reset( dynamic_cast<IContextProcessor*>(
 		CreateModuleFromJSON( cb, errorText ) ) );
 
-	if( builder.get() == 0 ) {
+	if( processor.get() == 0 ) {
 		if( errorText.empty() ) {
 			throw new CTextException( "execute", "PM given by params is not Pattern Manager.");
 		} else {
 			throw new CTextException( "execute",  errorText );
 		}
 	}
-	builder->SetObjNames( objNames );
-	return builder.release();
+	processor->SetObjNames( objNames );
+	return processor.release();
 }
 
 void CThisConsoleApplication::runFilters()
