@@ -1,0 +1,32 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"id": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/lattice.json",
+	"title": "Directed Graph JSON",
+	"description": "Json file gives a description of a directed graph",
+	"allOf": [{
+		"description": "Lattice is a poset of concepts",
+		"$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/poset.json"
+	},{
+		"type": "array",
+		"items": [
+		{},
+		{
+			"title": "Concept Info",
+			"description": "All concepts are enumerated in this object",
+			"type": "object",
+			"properties": {
+				"Nodes": {
+					"title": "List of Concepts",
+					"description": "The concepts of the lattice are given within this array",
+					"type": "array",
+					"items": {
+						"id": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/concept.json"
+					}
+				}
+			},
+			"required":["Nodes"]
+		}
+		],
+			"minItems": 3
+	}]
+}

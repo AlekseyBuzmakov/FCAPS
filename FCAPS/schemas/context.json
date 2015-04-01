@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/context.json",
+  "title": "FCA or PS Context",
+  "description": "Context for FCA or pattern structures that gives description of every object",
+  "type": "array",
+  "items": [
+  	{
+		"type": "object",
+		"title": "Context Metadata",
+		"description": "Context metadata such as object names and common params of descriptions",
+		"properties": {
+			"Description": {
+				"title": "Context Description",
+				"description": "Human readable description of the context",
+				"type": "string"
+			},
+			"ObjNames": {
+				"title": "Names of Objects",
+				"description": "Names of objects in the context",
+				"type": "array",
+				"items": {
+					"title": "Object Name",
+					"description": "A name of a single object",
+					"type": "string"
+				}
+			},
+			"Params":{
+				"title": "Description Common Info",
+				"description": "A shared info for descriptions in the context such as attribute names",
+				"type": "object"
+			}
+		}
+	},
+  	{
+		"title": "Object Info",
+		"description": "Descriptions of all objects",
+		"type": "object",
+		"properties": {
+			"Count": {
+				"title": "Number of Objects",
+				"description": "Total number of all objets in the context",
+				"type": "integer",
+				"minimum": 0
+			},
+			"Data": {
+				"title": "List of Object Descriptions",
+				"description": "Object descriptions are given in this array. The name of object is given by THIS[0].ObjNames and by the index of the object in this array",
+				"type": "array",
+				"items": {
+					"title": "Object Description",
+					"description": "A description of a single object. Every description is a pattern.",
+					"$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/patterns/pattern.json"
+				}
+			}
+		},
+		"required":["Data"]
+	}
+  ],
+  "minItems": 2
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/concept.json",
+  "title": "Formal Concept",
+  "description": "A description of predefined members of a concept",
+  "type": "object",
+  "properties": {
+    "Ext": {
+      "title": "Extent of a Formal Concept",
+      "description": "Extent of a Formal Concept",
+      "$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/patterns/BinarySet.json"
+    },
+    "Int": {
+      "title": "Intent of a Formal Concept",
+      "description": "Intent of a Formal Concept",
+      "$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/patterns/pattern.json"
+    },
+    "Supp": {
+      "title": "Support of the Intent",
+      "description": "Support of the intent, i.e., the cardinality of the extent",
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}
