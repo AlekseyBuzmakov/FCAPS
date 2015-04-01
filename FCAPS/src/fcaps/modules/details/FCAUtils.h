@@ -2,7 +2,7 @@
 // Different small FCA utils
 
 #include <common.h>
-#include <fcaps/premodules/Lattice.h>
+#include <fcaps/modules/details/Lattice.h>
 
 #include <boost/unordered_map.hpp>
 #include <rapidjson/document.h>
@@ -46,15 +46,10 @@ struct CLattice;
 interface IIntentStorage;
 interface IExtentStorage;
 
+////////////////////////////////////////////////////////////////////
 // Out full lattice and filtered lattice.
 // Returns the number of "interesting" concepts.
-DWORD OutputFilteredLattice( const CLattice& lattice,
-	const CSharedPtr<IIntentStorage>& cmp,
-	const CSharedPtr<IExtentStorage>& extManager,
-	const CLatticeFilterParams& params,
-	const std::string& latticeOutPath,  const std::string& filteredLatticeOutPath );
 
-////////////////////////////////////////////////////////////////////
 
 class CLatticeWriter {
 public:

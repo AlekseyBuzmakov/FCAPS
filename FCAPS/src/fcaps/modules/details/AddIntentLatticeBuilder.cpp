@@ -1,8 +1,8 @@
 // Author: Aleksey Buzmakov
 // Description: Implementation of AddIntent algorithm.
 
-#include <fcaps/premodules/AddIntentLatticeBuilder.h>
-#include <fcaps/premodules/Extent.h>
+#include <fcaps/modules/details/AddIntentLatticeBuilder.h>
+#include <fcaps/modules/details/Extent.h>
 #include <fcaps/storages/IntentStorage.h>
 
 #include <StdTools.h>

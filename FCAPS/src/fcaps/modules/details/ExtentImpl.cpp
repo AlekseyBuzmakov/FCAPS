@@ -1,4 +1,4 @@
-#include <fcaps/premodules/ExtentImpl.h>
+#include <fcaps/modules/details/ExtentImpl.h>
 
 #include <JSONTools.h>
 

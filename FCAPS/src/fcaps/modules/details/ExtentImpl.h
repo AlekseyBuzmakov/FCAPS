@@ -1,7 +1,7 @@
 #ifndef CEXTENTIMPL_H
 #define CEXTENTIMPL_H
 
-#include <fcaps/premodules/Extent.h>
+#include <fcaps/modules/details/Extent.h>
 
 #include <ListWrapper.h>
 
@@ -26,6 +26,10 @@ public:
 	virtual void Write( DWORD extentID, std::ostream& dst ) const;
 	virtual DWORD Load( const JSON& json );
 	virtual JSON Save( DWORD id ) const;
+	virtual const std::vector<std::string>& GetNames() const
+		{return names;}
+	virtual void SetNames(const std::vector<std::string>& n)
+		{names = n;}
 
 	// Get extent by id
 	const CExtent& GetExtent( DWORD extentID ) const
@@ -34,11 +38,6 @@ public:
 	void Delete( DWORD extentID )
 		{ extents.replace( extentID, 0 ); }
 
-	// Get/Set object names
-	const std::vector<std::string>& GetNames() const
-		{return names;}
-	void SetNames(const std::vector<std::string>& n)
-		{names = n;}
 private:
 	boost::ptr_deque< boost::nullable<CExtent> > extents;
 	std::vector<std::string> names;

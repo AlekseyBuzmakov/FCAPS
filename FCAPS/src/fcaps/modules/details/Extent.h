@@ -7,6 +7,8 @@
 
 #include <ListWrapper.h>
 
+#include <vector>
+
 // A storage for extents, works with their ids
 //  id == 0 is empty read-only extent
 interface IExtentStorage : public virtual IObject {
@@ -26,6 +28,10 @@ interface IExtentStorage : public virtual IObject {
 	// Load/Save pattern from/to JSON
 	virtual DWORD Load( const JSON& ) = 0;
 	virtual JSON Save( DWORD id ) const = 0;
+
+	// Get/Set object names
+	virtual const std::vector<std::string>& GetNames() const = 0;
+	virtual void SetNames(const std::vector<std::string>& n) = 0;
 };
 
 #endif // EXTENT_H_INCLUDED

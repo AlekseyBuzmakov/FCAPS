@@ -1,8 +1,8 @@
 #include <common.h>
 
-#include <fcaps/tools/FCAUtils.h>
-#include <fcaps/premodules/Lattice.h>
-#include <fcaps/premodules/Extent.h>
+#include <fcaps/modules/details/FCAUtils.h>
+#include <fcaps/modules/details/Lattice.h>
+#include <fcaps/modules/details/Extent.h>
 #include <fcaps/storages/IntentStorage.h>
 #include <fcaps/tools/FindConceptOrder.h>
 
@@ -370,7 +370,6 @@ void CLatticeWriter::outInterestingConcepts(
 {
 	CInterestingConcepts concepts( nodes, lattice, *cmp, *extStorage );
 	CFindConceptOrder<CInterestingConcepts> order( concepts );
-	DWORD arcsCount = 0;
 	if( params.OutOrder ) {
 		std::cout << "Interesting concepts order BEGIN\n";
 		order.Compute();
