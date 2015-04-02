@@ -30,6 +30,8 @@ interface IContextProcessor : public virtual IObject {
 	// Passes common params of all descriptions.
 	virtual void PassDescriptionParams( const JSON& ) = 0;
 
+	// Preparation for object addition
+	virtual void Prepare() = 0;
 	// Add next object to algorithm.
 	//  objectNum -- numero of the object.
 	virtual void AddObject( DWORD objectNum, const JSON& intent ) = 0;

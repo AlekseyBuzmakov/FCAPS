@@ -28,10 +28,16 @@ void RegisterModule(const std::string& type, const std::string& name, CreateFunc
 template<typename ModuleClass>
 class CModuleRegistrar {
 public:
-	CModuleRegistrar( const std::string& type, const std::string& name )
-		{ RegisterModule( type, name, &createModule ); }
+	CModuleRegistrar( const std::string& t, const std::string& n ) :
+		type( t ), name( n ) { RegisterModule( type, name, &createModule ); }
 
+	const char* const GetType() const
+		 { return type.c_str(); }
+	const char* const GetName() const
+		 { return name.c_str(); }
 private:
+	const std::string type;
+	const std::string name;
 	static IModule* createModule()
 		{ return new ModuleClass; }
 };

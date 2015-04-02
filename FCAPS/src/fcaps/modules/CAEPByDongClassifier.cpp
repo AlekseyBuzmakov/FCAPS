@@ -1,6 +1,9 @@
 #include <fcaps/modules/CAEPByDongClassifier.h>
 
-#include <fcaps/storages/IntentStorage.h>
+#include <fcaps/storages/VectorIntentStorage.h>
+#include <fcaps/PatternManager.h>
+
+#include <fcaps/ModuleJSONTools.h>
 
 #include <PowerfulSaxJson.h>
 
@@ -145,7 +148,7 @@ private:
 const CModuleRegistrar<CCAEPByDongClassifier> CCAEPByDongClassifier::registrar( ClassifierModuleType, CAEPByDongClassifier );
 
 CCAEPByDongClassifier::CCAEPByDongClassifier() :
-	classes( 0 ),
+	cmp( new CVectorIntentStorage ),
 	emThld( 1.01 )
 {
 	//ctor
@@ -155,16 +158,46 @@ const char jsonEmergencyThld[] = "EmergencyThld";
 
 void CCAEPByDongClassifier::LoadParams( const JSON& json )
 {
+	static const char place[] = "CCAEPByDongClassifier::LoadParams";
+
 	rapidjson::Document dParams;
-	CJsonError errorText;
-	if( !ReadJsonString( json, dParams, errorText ) ) {
-		throw new CJsonException( "CCAEPByDongClassifier", errorText );
+	CJsonError error;
+	if( !ReadJsonString( json, dParams, error ) ) {
+		throw new CJsonException( place, error );
 	}
 
 	if( !dParams.HasMember("Params") || !dParams["Params"].IsObject() ) {
-		return;
+		error.Data = json;
+		error.Error = "Params is not found. Necessary for PatternManager, ClassesPath, and TrainPath";
+		throw new CJsonException(place, error);
 	}
 	const rapidjson::Value& params = dParams["Params"];
+	if( !params.HasMember("ClassesPath") || !params["ClassesPath"].IsString() ) {
+		error.Data = json;
+		error.Error = "THIS.Params.ClassesPath is not found.";
+		throw new CJsonException(place, error);
+	}
+	classesPath = params["ClassesPath"].GetString();
+	JsonClassifierClasses::Load( classesPath, classes );
+
+	if( !params.HasMember("TrainPath") || !params["TrainPath"].IsString() ) {
+		error.Data = json;
+		error.Error = "THIS.Params.TrainPath is not found.";
+		throw new CJsonException(place, error);
+	}
+	trainPath = params["TrainPath"].GetString();
+
+	if( !params.HasMember("PatternManager") || !params["PatternManager"].IsObject() ) {
+		error.Data = json;
+		error.Error = "THIS.Params.PatternManager is not found.";
+		throw new CJsonException(place, error);
+	}
+	string errorText;
+	pm.reset( CreateModuleFromJSON<IPatternManager>(params["PatternManager"],errorText) );
+	if( pm == 0 ) {
+		throw new CJsonException( place, CJsonError( json, errorText ) );
+	}
+	cmp->Initialize( pm );
 
 	if( params.HasMember(jsonEmergencyThld) && params[jsonEmergencyThld].IsNumber()) {
 		const double emThldJson = params[jsonEmergencyThld].GetDouble();
@@ -184,24 +217,36 @@ JSON CCAEPByDongClassifier::SaveParams() const
 		.AddMember( "Name", rapidjson::Value().SetString( rapidjson::StringRef( CAEPByDongClassifier ) ), alloc )
 		.AddMember( "Params", rapidjson::Value().SetObject(), alloc );
 	params["Params"]
+		.AddMember( "ClassesPath", rapidjson::Value().SetString( rapidjson::StringRef( classesPath.c_str() ) ), alloc )
+		.AddMember( "TrainPath", rapidjson::Value().SetString( rapidjson::StringRef( trainPath.c_str() ) ), alloc )
 		.AddMember( jsonEmergencyThld, rapidjson::Value().SetDouble( emThld ), alloc );
+
+	IModule* m = dynamic_cast<IModule*>(pm.get());
+	assert( m!=0);
+	if( m != 0 ) {
+		JSON pmParams = m->SaveParams();
+		rapidjson::Document pmParamsDoc;
+		CJsonError error;
+		const bool rslt = ReadJsonString( pmParams, pmParamsDoc, error );
+		assert(rslt);
+		params["Params"].AddMember("PatternManager", pmParamsDoc.Move(), alloc );
+	}
 
 	JSON result;
 	CreateStringFromJSON( params, result );
 	return result;
 }
 
-void CCAEPByDongClassifier::SetPatternManager( const CSharedPtr<IIntentStorage>& cmp )
+void CCAEPByDongClassifier::PassDescriptionParams( const JSON& json )
 {
-	this->cmp=cmp;
-}
-void CCAEPByDongClassifier::SetTrainData( const string& path )
-{
-	trainPath = path;
-}
-void CCAEPByDongClassifier::SetClasses( const CObjToClassesMap& classes )
-{
-	this->classes = &classes;
+	assert( pm != 0 );
+	IModule& pmModule = dynamic_cast<IModule&>(*pm);
+	const JSON params = string("{") +
+		"\"Type\":\"" + pmModule.GetType() + "\","
+		"\"Name\":\"" + pmModule.GetName() + "\","
+		"\"Params\":" + json +
+		"}";
+	pmModule.LoadParams( params );
 }
 
 void CCAEPByDongClassifier::Prepare()
@@ -211,8 +256,10 @@ void CCAEPByDongClassifier::Prepare()
 	computeAgregateScores();
 }
 
-string CCAEPByDongClassifier::Classify( int intId ) const
+string CCAEPByDongClassifier::Classify( const JSON& ptrn ) const
 {
+	const TIntentId intId = cmp->LoadObject( ptrn );
+
 	unordered_map<string,double> rank;
 	CStdIterator<vector<CEmergingPattern>::const_iterator> ep( eps );
 	for( ; !ep.IsEnd(); ++ep ) {
@@ -252,7 +299,7 @@ void CCAEPByDongClassifier::AddPattern( const std::vector<std::string>& extent, 
 	CStdIterator<vector<string>::const_iterator> itr( extent );
 	int totalNumber = extent.size();
 	for( ; !itr.IsEnd(); ++itr ) {
-		CStdIterator<unordered_map<string,string>::const_iterator> clFnd( classes->find(*itr),classes->end() );
+		CStdIterator<unordered_map<string,string>::const_iterator> clFnd( classes.find(*itr),classes.end() );
 		if( clFnd.IsEnd() ) {
 			--totalNumber;
 			continue;
@@ -299,7 +346,7 @@ void CCAEPByDongClassifier::AddPattern( const std::vector<std::string>& extent, 
 
 	itr.Reset( extent );
 	for( ; !itr.IsEnd(); ++itr ) {
-		CStdIterator<unordered_map<string,string>::const_iterator> clFnd( classes->find(*itr),classes->end() );
+		CStdIterator<unordered_map<string,string>::const_iterator> clFnd( classes.find(*itr),classes.end() );
 		if( clFnd.IsEnd() || (*clFnd).second != patternClass ) {
 			continue;
 		}
@@ -319,7 +366,7 @@ void CCAEPByDongClassifier::computeAgregateScores()
 	unordered_map< string,vector<int> > classToUsage;
 	CStdIterator<unordered_map<string,int>::const_iterator> itr(objToPtrnCoverage);
 	for( ; !itr.IsEnd(); ++itr ) {
-		const string& cl = (*classes).at((*itr).first);
+		const string& cl = classes.at((*itr).first);
 		assert( !cl.empty() );
 		classToUsage[cl].push_back((*itr).second);
 	}

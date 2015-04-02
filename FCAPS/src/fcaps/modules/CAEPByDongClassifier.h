@@ -5,7 +5,18 @@
 #include <fcaps/Module.h>
 #include <fcaps/ModuleTools.h>
 
+#include <fcaps/modules/details/JsonClassifierClasses.h>
+
+#include <vector>
+
+interface IIntentStorage;
+interface IPatternManager;
+
+////////////////////////////////////////////////////////////////////
+
 const char CAEPByDongClassifier[] = "CAEPByDongClassifierModule";
+
+////////////////////////////////////////////////////////////////////
 
 class CCAEPByDongClassifier : public IClassifier, public IModule {
 public:
@@ -20,11 +31,9 @@ public:
 		{ return CAEPByDongClassifier; };
 
 	// Methods of IClassifier
-	virtual void SetPatternManager( const CSharedPtr<IIntentStorage>& cmp );
-	virtual void SetTrainData( const std::string& path );
-	virtual void SetClasses( const CObjToClassesMap& classes );
+	virtual void PassDescriptionParams( const JSON& json );
 	virtual void Prepare();
-	virtual std::string Classify( int intID ) const;
+	virtual std::string Classify( const JSON& json ) const;
 
 	// SelfMethods
 	void AddPattern( const std::vector<std::string>& extent, const JSON& intent );
@@ -43,9 +52,11 @@ private:
 private:
 	static const CModuleRegistrar<CCAEPByDongClassifier> registrar;
 
+	CSharedPtr<IPatternManager> pm;
 	CSharedPtr<IIntentStorage> cmp;
 	std::string trainPath;
-	const CObjToClassesMap* classes;
+	std::string classesPath;
+	JsonClassifierClasses::CObjToClassesMap classes;
 	// The emergency threshold. If there are n_1, n_2, n_k objects of k classes, then emergency wrt class 1 is n_1 / (n_2+...+n_k).
 	double emThld;
 	// The coverage of an object
@@ -56,7 +67,6 @@ private:
 	boost::unordered_map<std::string,int> baseScores;
 
 	void computeAgregateScores();
-
 };
 
 #endif // CCAEPBYDONGCLASSIFIER_H

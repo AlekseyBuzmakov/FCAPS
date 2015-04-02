@@ -29,6 +29,8 @@ public:
 	virtual const std::vector<std::string>& GetObjNames() const;
 	virtual void SetObjNames( const std::vector<std::string>& names );
 	virtual void PassDescriptionParams( const JSON& json );
+	virtual void Prepare()
+		{}
 	virtual void AddObject( DWORD objectNum, const JSON& intent );
 	virtual void ProcessAllObjectsAddition();
 	virtual void SaveResult( const std::string& path );

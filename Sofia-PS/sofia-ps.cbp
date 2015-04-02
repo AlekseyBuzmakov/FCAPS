@@ -18,6 +18,7 @@
 					<Add directory="FCAPS/inc" />
 					<Add directory="Tools/inc" />
 					<Add directory="FCAPS/src/fcaps/modules" />
+					<Add directory="FCAPS/src/fcaps/modules/details" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
@@ -34,6 +35,7 @@
 					<Add directory="FCAPS/inc" />
 					<Add directory="Tools/inc" />
 					<Add directory="FCAPS/src/fcaps/modules" />
+					<Add directory="FCAPS/src/fcaps/modules/details" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -55,6 +57,7 @@
 					<Add directory="FCAPS/inc" />
 					<Add directory="Tools/inc" />
 					<Add directory="FCAPS/src/fcaps/modules" />
+					<Add directory="FCAPS/src/fcaps/modules/details" />
 				</Compiler>
 				<Linker>
 					<Add option="-pg" />
@@ -95,6 +98,8 @@
 		<Unit filename="../FCAPS/src/fcaps/modules/BinarySetWithDependenciesPatternManager.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/CAEPByDongClassifier.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/CAEPByDongClassifier.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/ClassifierContextProcessor.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/ClassifierContextProcessor.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/CompositPatternManager.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/CompositPatternManager.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/IntervalPatternManager.cpp" />
@@ -128,6 +133,8 @@
 		<Unit filename="../FCAPS/src/fcaps/modules/details/FCAUtils.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/details/IntervalClsPatternsProjectionChain.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/details/IntervalClsPatternsProjectionChain.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/JsonClassifierClasses.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/JsonClassifierClasses.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/details/JsonIntervalPattern.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/details/JsonIntervalPattern.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/details/Lattice.h" />

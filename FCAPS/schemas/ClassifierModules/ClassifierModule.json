@@ -1,0 +1,23 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"id": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/ClassifierModules/ClassifierModule.json",
+	"title": "Schema for all Classifier Modules",
+	"description": "A schema, all classifier modules should sattisfy to",
+	"allOf":[{
+		"description": "It is a module",
+		"$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/module.json"
+	},{
+		"type": "object",
+		"properties": {
+			"Type": {
+				"type": "string",
+				"description": "It is a classifier module",
+				"enum": [ "ClassifierModules" ]
+			},
+			"Name": {
+				"type": "string"
+			}
+		},
+		"required": [ "Type", "Name" ]
+	}]
+}

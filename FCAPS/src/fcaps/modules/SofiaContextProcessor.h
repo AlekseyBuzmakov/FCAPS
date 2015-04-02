@@ -38,9 +38,11 @@ public:
 	virtual void SetCallback( const IContextProcessorCallback* cb )
 		{callback = cb;};
 
+	virtual void Prepare()
+		{}
 	virtual void AddObject( DWORD objectNum, const JSON& intent );
-
 	virtual void ProcessAllObjectsAddition();
+
 	virtual void SaveResult( const std::string& path );
 
 private:
