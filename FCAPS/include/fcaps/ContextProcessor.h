@@ -17,7 +17,7 @@ interface IContextProcessorCallback;
 
 ////////////////////////////////////////////////////////////////////
 
-const char ContextProcessorModuleType[] = "ConceptProcessorModule";
+const char ContextProcessorModuleType[] = "ConceptProcessorModules";
 
 interface IContextProcessor : public virtual IObject {
 	// Callback for progress reporting.
