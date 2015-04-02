@@ -72,7 +72,7 @@ void CAddIntentContextProcessor::ProcessAllObjectsAddition()
 
 	if( callback != 0 ) {
 		callback->ReportProgress( 1,
-			"Lattice Size = " + StdExt::to_string( lattice.Size() ) +
+			"Lattice Size = " + StdExt::to_string( lattice.Size() ) + " "
 			"Edges Count = " + StdExt::to_string( edgeCount ) );
 	}
 }
@@ -83,7 +83,7 @@ void CAddIntentContextProcessor::SaveResult( const std::string& path )
 	string outSelectedDataPath( path );
 	const size_t ext = outSelectedDataPath.find_last_of( "." );
 	if( ext != string::npos ) {
-		outSelectedDataPath.substr(0,ext);
+		outSelectedDataPath = outSelectedDataPath.substr(0,ext);
 	}
 	outSelectedDataPath += ".selected.json";
 

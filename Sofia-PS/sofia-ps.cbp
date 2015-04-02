@@ -11,7 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters="-data:/home/leshyk/PhD/data/Bilkent-Airport/dataset.json -CB:/home/leshyk/PhD/data/Bilkent-Airport/sofia-stabFixedThld.json" />
+				<Option parameters="-data:/home/leshyk/PhD/data/my-tau-texts/small.json -CB:/home/leshyk/PhD/data/my-tau-texts/CB.json -out" />
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-D_DEBUG" />
@@ -25,7 +25,7 @@
 				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters="-data:/home/leshyk/PhD/data/uci-yeast/ClBySOFIA/train.json -CB:/home/leshyk/PhD/data/uci-yeast/ClBySOFIA/sofia-stab1000.json -out:/home/leshyk/PhD/data/uci-yeast/ClBySOFIA/result.json" />
+				<Option parameters="-data:/home/leshyk/PhD/data/uci-yeast/ClBySOFIA/train.json -CB:/home/leshyk/PhD/data/uci-yeast/ClBySOFIA/sofia-stab1000.json -out:/home/leshyk/PhD/data/uci-yeast/ClBySOFIA/result.json -out" />
 				<Compiler>
 					<Add option="-O2" />
 					<Add option="-Wno-unused-variable" />

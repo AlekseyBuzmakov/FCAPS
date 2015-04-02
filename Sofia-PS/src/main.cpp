@@ -32,6 +32,7 @@ class CThisConsoleApplication : public CConsoleApplication, public IContextProce
 public:
 	CThisConsoleApplication( int _argc, char** _argv ) :
 		CConsoleApplication( _argc, _argv ),
+		state( S_AddingObjects ),
 		writeOutput(false),
 		maxObjsCount( -1 )
 	{
@@ -49,6 +50,15 @@ public:
 	virtual void ReportProgress( const double& p, const std::string& info ) const;
 
 private:
+	enum TState {
+		S_AddingObjects = 0,
+		S_ProcessingAllAditions,
+		S_SavingResults,
+
+		S_EnumCount
+	};
+private:
+	TState state;
 	string dataPath;
 	string cbPath;
 	string fltrPath;
@@ -177,11 +187,14 @@ void CThisConsoleApplication::ReportProgress( const double& p, const std::string
 {
 	lastCtxProcessorInfo = info;
 
+	if( state == S_AddingObjects ) {
+		return;
+	}
 	GetStatusStream() << std::fixed << std::setprecision(3);
-	GetStatusStream() << "\rProcessing " << p*100 << "%. " << info;
+	GetStatusStream() << "Processing " << p*100 << "%. ";
+	GetStatusStream() << info << "   ";
 	GetStatusStream().flush();
 }
-
 
 void CThisConsoleApplication::runContextProcessor() {
 	rapidjson::Document cb;
@@ -200,6 +213,7 @@ void CThisConsoleApplication::runContextProcessor() {
 	processor->PassDescriptionParams( dataParams );
 
 	//Iterate objects.
+	state = S_AddingObjects;
 	time_t start = time( NULL );
 	string objectJson;
 	const rapidjson::Value& dataBody=data[1]["Data"];
@@ -233,22 +247,29 @@ void CThisConsoleApplication::runContextProcessor() {
 
 		const time_t end = time( NULL );
 		GetStatusStream() << "\rAdded " << objNum << "th object. "
-			<< ". Time is " << end - start;
+			<< lastCtxProcessorInfo << " "
+			<< "Time is " << end - start;
 		GetStatusStream().flush();
 	}
-	GetStatusStream() << "\rAdded all objects. Processing...\r";
-	GetStatusStream().flush();
+	GetStatusStream() << "\rAdded all objects.                                       \n";
 
+	state = S_ProcessingAllAditions;
 	processor->ProcessAllObjectsAddition();
 
 	const time_t end = time( NULL );
-	GetInfoStream() << "Processing time is " << end - start << "\n";
+	GetInfoStream() << "\rProcessing time is " << end - start << "                                 \n";
 	GetInfoStream() << lastCtxProcessorInfo << "\n";
 
 	// Output base path
 	if( writeOutput ) {
+		state = S_SavingResults;
 		if( outBaseName.empty() ) {
-			outBaseName = dataPath + ".out.json";
+			outBaseName = dataPath;
+			const size_t ext = outBaseName.find_last_of( "." );
+			if( ext != string::npos ) {
+				outBaseName = outBaseName.substr(0,ext);
+			}
+			outBaseName += ".out.json";
 		}
 		const time_t startOutput = time( NULL );
 		GetStatusStream() << "\nProducing output...\r";
@@ -336,7 +357,7 @@ IContextProcessor* CThisConsoleApplication::createContextProcessor( rapidjson::D
 
 	if( processor.get() == 0 ) {
 		if( errorText.empty() ) {
-			throw new CTextException( "execute", "PM given by params is not Pattern Manager.");
+			throw new CTextException( "execute", "CB given by params is not a Context Processor.");
 		} else {
 			throw new CTextException( "execute",  errorText );
 		}
