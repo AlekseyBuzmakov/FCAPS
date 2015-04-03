@@ -20,7 +20,7 @@
 					"Classifier": {
 						"title": "Classifier of Object Descriptions",
 						"description": "A specific algorithm for classification",
-						"$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/PatternManagerModules/ClassifierModule.json"
+						"$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/ClassifierModules/ClassifierModule.json"
 					},
 					"ClassesPath": {
 						"title": "Path to Classes File",

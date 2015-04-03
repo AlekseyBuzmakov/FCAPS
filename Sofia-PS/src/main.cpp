@@ -51,7 +51,8 @@ public:
 
 private:
 	enum TState {
-		S_AddingObjects = 0,
+		S_Prepare = 0,
+		S_AddingObjects,
 		S_ProcessingAllAditions,
 		S_SavingResults,
 
@@ -212,7 +213,13 @@ void CThisConsoleApplication::runContextProcessor() {
 	CreateStringFromJSON(data[0]["Params"], dataParams);
 	processor->PassDescriptionParams( dataParams );
 
+	// Preparation
+	GetStatusStream() << "Preparation...                               \r" << flush;
+	state=S_Prepare;
+	processor->Prepare();
+
 	//Iterate objects.
+	GetStatusStream() << "Adding objects...                               \r" << flush;
 	state = S_AddingObjects;
 	time_t start = time( NULL );
 	string objectJson;
@@ -248,8 +255,7 @@ void CThisConsoleApplication::runContextProcessor() {
 		const time_t end = time( NULL );
 		GetStatusStream() << "\rAdded " << objNum << "th object. "
 			<< lastCtxProcessorInfo << " "
-			<< "Time is " << end - start;
-		GetStatusStream().flush();
+			<< "Time is " << end - start << flush;
 	}
 	GetStatusStream() << "\rAdded all objects.                                       \n";
 
@@ -272,8 +278,7 @@ void CThisConsoleApplication::runContextProcessor() {
 			outBaseName += ".out.json";
 		}
 		const time_t startOutput = time( NULL );
-		GetStatusStream() << "\nProducing output...\r";
-		GetStatusStream().flush();
+		GetStatusStream() << "\nProducing output...\r" << flush;
 
 		processor->SaveResult( outBaseName );
 

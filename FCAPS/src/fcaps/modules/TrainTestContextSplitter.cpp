@@ -11,7 +11,7 @@ using namespace std;
 
 ////////////////////////////////////////////////////////////////////
 const CModuleRegistrar<CTrainTestContextSplitter> CTrainTestContextSplitter::registrar(
-	FilterModuleType, TrainTestContextSplitter );
+	ContextFilterModuleType, TrainTestContextSplitter );
 
 CTrainTestContextSplitter::CTrainTestContextSplitter() :
 	proportion(0.9),
@@ -85,7 +85,7 @@ void CTrainTestContextSplitter::LoadParams( const JSON& json )
 	if( !ReadJsonString( json, doc, error ) ) {
 		throw new CJsonException( place, error );
 	}
-	assert( string( doc["Type"].GetString() ) == FilterModuleType );
+	assert( string( doc["Type"].GetString() ) == ContextFilterModuleType );
 	assert( string( doc["Name"].GetString() ) == TrainTestContextSplitter );
 	if( !(doc.HasMember( "Params" ) && doc["Params"].IsObject()) ) {
 		error.Error = "Params is not found. Necessary for output names";
@@ -119,7 +119,7 @@ JSON CTrainTestContextSplitter::SaveParams() const
 	rapidjson::Document params;
 	rapidjson::MemoryPoolAllocator<>& alloc = params.GetAllocator();
 	params.SetObject()
-		.AddMember( "Type", FilterModuleType, alloc )
+		.AddMember( "Type", ContextFilterModuleType, alloc )
 		.AddMember( "Name", TrainTestContextSplitter, alloc )
 		.AddMember( "Params", rapidjson::Value().SetObject()
 			.AddMember( "TrainPath", rapidjson::Value().SetString(

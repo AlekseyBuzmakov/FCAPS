@@ -6,7 +6,8 @@
 #include <string>
 #include <vector>
 
-const char FilterModuleType[] = "FilterModuleType";
+const char ContextFilterModuleType[] = "ContextFilters";
+const char LatticeFilterModuleType[] = "LatticeFilters";
 
 interface IFilter : public virtual IObject {
 	// Returns the list of the resulting files.
