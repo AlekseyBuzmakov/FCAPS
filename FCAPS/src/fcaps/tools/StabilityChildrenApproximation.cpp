@@ -188,7 +188,7 @@ void CStabilityChildrenApproximation::ComputeLowerBound()
 		// Lets take the biggest member out of brackets: 2^-mindiff * (1+2^-(x-mindiff))
 		double coef = 0;
 		for( ; !itr.IsEnd(); ++itr ) {
-			coef += pow( 2.0l, -1.0 * (*itr - minDiff) );
+			coef += pow( 2.0l, -1.0l * (*itr - minDiff) );
 		}
 		assert( coef >= 0.99999999 || minDiff == -1 );
 		leftLimit = minDiff - log2( coef );
@@ -196,7 +196,7 @@ void CStabilityChildrenApproximation::ComputeLowerBound()
 		leftLimit = 1.0;
 		CStdIterator<CList<DWORD>::CConstIterator,false> itr( childDiffs );
 		for( ; !itr.IsEnd(); ++itr ) {
-			leftLimit -= pow( 2.0l, -1.0 * *itr );
+			leftLimit -= pow( 2.0l, -1.0l * *itr );
 		}
 	}
 	leftLimit = max( 0.0, leftLimit );

@@ -63,6 +63,30 @@
 					<Add option="-pg" />
 				</Linker>
 			</Target>
+			<Target title="Release_Win">
+				<Option output="bin/Release_Win/sofia-ps.exe" prefix_auto="1" extension_auto="0" />
+				<Option object_output="obj/Release_Win/" />
+				<Option type="1" />
+				<Option compiler="mingw32_compiler" />
+				<Option parameters="-data:/home/leshyk/PhD/data/uci-yeast/ClBySOFIA/train.json -CB:/home/leshyk/PhD/data/uci-yeast/ClBySOFIA/sofia-stab1000.json -out:/home/leshyk/PhD/data/uci-yeast/ClBySOFIA/result.json -out" />
+				<Option projectCompilerOptionsRelation="1" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-fexceptions" />
+					<Add option="-Wno-parentheses" />
+					<Add option="-Wno-sign-compare" />
+					<Add option="-Wno-unused-variable" />
+					<Add option="-DBOOST_DISABLE_ASSERTS" />
+					<Add option="-DNDEBUG" />
+					<Add directory="FCAPS/inc" />
+					<Add directory="Tools/inc" />
+					<Add directory="FCAPS/src/fcaps/modules" />
+					<Add directory="FCAPS/src/fcaps/modules/details" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -151,8 +175,6 @@
 		<Unit filename="../FCAPS/src/fcaps/tools/StabilityCalculation.h" />
 		<Unit filename="../FCAPS/src/fcaps/tools/StabilityChildrenApproximation.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/tools/StabilityChildrenApproximation.h" />
-		<Unit filename="../FCAPS/src/fcaps/tools/StabilityMonteCarloApproximation.cpp" />
-		<Unit filename="../FCAPS/src/fcaps/tools/StabilityMonteCarloApproximation.h" />
 		<Unit filename="../Tools/ConsoleApplication.cpp" />
 		<Unit filename="../Tools/ConsoleApplication.h" />
 		<Unit filename="../Tools/Exception.cpp" />
