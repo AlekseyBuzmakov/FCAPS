@@ -1,7 +1,7 @@
 # An example of a context for binary data
 Here we provide a context for a well known example ['Live in water'](http://www.upriss.org.uk/fca/examples.html).
 
-In a cross-table form in can be rebresented as on the next figure.
+In a cross-table form it can be represented as on the next figure.
 
 ![A cross-table for the json context below](resourses.md/liveinwater-crosstable.png "Cross-table of 'Live in watter'")
 
