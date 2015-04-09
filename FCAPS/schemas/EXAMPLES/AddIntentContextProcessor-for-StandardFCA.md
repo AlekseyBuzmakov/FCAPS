@@ -7,7 +7,8 @@ In the final lattice extent and intent of the concepts are printed but not the s
 
 This lattice is filtered into another file by selecting concepts with stability >= 1, Lift >=1 and Support >= 2.
 
-[```json
+[
+```json
 {
 	"Type": "ContextProcessorModules",
 	"Name": "AddIntentContextProcessorModule",
@@ -33,4 +34,5 @@ This lattice is filtered into another file by selecting concepts with stability 
 		}
 	}
 }
-```](https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/EXAMPLES/AddIntentContextProcessor-for-StandardFCA.json)
+```
+](https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/EXAMPLES/AddIntentContextProcessor-for-StandardFCA.json)
