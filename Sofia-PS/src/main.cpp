@@ -193,7 +193,7 @@ void CThisConsoleApplication::ReportProgress( const double& p, const std::string
 	}
 	GetStatusStream() << std::fixed << std::setprecision(3);
 	GetStatusStream() << "Processing " << p*100 << "%. ";
-	GetStatusStream() << info << "   ";
+	GetStatusStream() << info << "   \r";
 	GetStatusStream().flush();
 }
 
@@ -210,8 +210,10 @@ void CThisConsoleApplication::runContextProcessor() {
 	processor->SetCallback( this );
 
 	string dataParams;
-	CreateStringFromJSON(data[0]["Params"], dataParams);
-	processor->PassDescriptionParams( dataParams );
+	if( data[0].HasMember("Params") ) {
+		CreateStringFromJSON(data[0]["Params"], dataParams);
+		processor->PassDescriptionParams( dataParams );
+	}
 
 	// Preparation
 	GetStatusStream() << "Preparation...                               \r" << flush;

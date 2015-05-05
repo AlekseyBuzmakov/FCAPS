@@ -1,6 +1,6 @@
 // Author: Aleksey Buzmakov
 // Class implements a projection chain for cosine similarity in accordance with
-//  Cao, J., Wu, Z., & Wu, J.q s
+//  Cao, J., Wu, Z., & Wu, J.
 //  Scaling up cosine interesting pattern discovery: A depth-first method.
 //  Information Sciences, 266(0), 31–46.
 //  doi:http://dx.doi.org/10.1016/j.ins.2013.12.062

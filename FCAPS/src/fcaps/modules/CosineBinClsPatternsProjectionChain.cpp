@@ -1,5 +1,10 @@
 #include "CosineBinClsPatternsProjectionChain.h"
 
+////////////////////////////////////////////////////////////////////
+
+CModuleRegistrar<CCosineBinClsPatternsProjectionChain> CCosineBinClsPatternsProjectionChain::registar(
+	ProjectionChainModuleType, CosineBinClsPatternsProjectionChain );
+
 CCosineBinClsPatternsProjectionChain::CCosineBinClsPatternsProjectionChain()
 {
 	Thld() = 0;
@@ -8,8 +13,8 @@ CCosineBinClsPatternsProjectionChain::CCosineBinClsPatternsProjectionChain()
 
 void CCosineBinClsPatternsProjectionChain::ComputeZeroProjection( CPatternList& ptrns )
 {
-	computeItemValues();
 	CBinClsPatternsProjectionChain::ComputeZeroProjection( ptrns );
+	computeItemValues();
 }
 
 double CCosineBinClsPatternsProjectionChain::GetPatternInterest( const IPatternDescriptor* p )
@@ -17,7 +22,7 @@ double CCosineBinClsPatternsProjectionChain::GetPatternInterest( const IPatternD
 	const CPatternDescription& ptrn = Pattern( p );
 	DWORD size = 0;
 	double sum = 0;
-	for( DWORD i = 0; i <= CurrAttr(); ++i ) {
+	for( DWORD i = 0; i < std::min( CurrAttr() + 1, (DWORD)Order().size() ); ++i ) {
 		const TCompareResult rslt = ExtCmp().Compare(
 			ptrn.Extent(), GetTidset( i ),
 			CR_MoreOrEqual, CR_AllResults |CR_Incomparable );
@@ -27,7 +32,10 @@ double CCosineBinClsPatternsProjectionChain::GetPatternInterest( const IPatternD
 		++size;
 		sum += itemValues[i];
 	}
-	assert (0 < size && size <= CurrAttr() );
+	assert ( size <= CurrAttr() + 1 );
+	if( size == 0 ) {
+		return 1;
+	}
 	return ptrn.Extent().Size() / exp(sum/size);
 }
 
