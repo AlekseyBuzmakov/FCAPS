@@ -126,6 +126,8 @@
 		<Unit filename="../FCAPS/src/fcaps/modules/ClassifierContextProcessor.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/CompositPatternManager.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/CompositPatternManager.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/CosineBinClsPatternsProjectionChain.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/CosineBinClsPatternsProjectionChain.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/IntervalPatternManager.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/IntervalPatternManager.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/SofiaContextProcessor.cpp" />

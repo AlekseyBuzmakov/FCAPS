@@ -100,6 +100,8 @@ protected:
 		{return objCount;}
 	const CBinarySetCollection& AttrToTidsetMap() const
 		{return attrToTidsetMap; }
+	const CVectorBinarySetDescriptor& GetTidset( DWORD attr ) const
+		{ assert(attr < CurrAttr()); return *attrToTidsetMap[attrOrder[attr]]; }
 	const std::vector<DWORD>& Order() const
 		{return attrOrder;}
 
