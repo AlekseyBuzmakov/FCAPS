@@ -9,7 +9,7 @@
 
 ////////////////////////////////////////////////////////////////////
 
-char StabBinClsPatternsProjectionChain[] = "StabBinClsPatternsProjectionChainModule";
+const char StabBinClsPatternsProjectionChain[] = "StabBinClsPatternsProjectionChainModule";
 
 class CStabBinClsPatternsProjectionChain : public CBinClsPatternsProjectionChain, public IModule {
 	public:

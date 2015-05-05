@@ -34,6 +34,12 @@ public:
 	void SetAttrOrder( const std::vector<DWORD>* order )
 		{ attrOrder = order; }
 
+	// Get/Set base parameter should be more then 0
+	const double& GetBase() const
+		{ return base; }
+	void SetBase(const double& b)
+		{ assert( b > 0); base = b;}
+
 	// Get/Set threshold for the stable concepts
 	//  depends on isLog parameter
 	const double& GetStableThreshold() const
@@ -67,6 +73,9 @@ private:
 	CPatternDeleter deleter;
 	const CBinarySetCollection* attrToTidsetMap;
 	const std::vector<DWORD>* attrOrder;
+
+	// The base that is used in the estimate
+	double base;
 
 	// threshold for stable concepts
 	double threshold;

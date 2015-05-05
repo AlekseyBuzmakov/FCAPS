@@ -1,5 +1,11 @@
 #include <fcaps/modules/StabBinClsPatternsProjectionChain.h>
 
+#include <JSONTools.h>
+
+#include <rapidjson/document.h>
+
+using namespace std;
+
 ////////////////////////////////////////////////////////////////////
 
 CModuleRegistrar<CStabBinClsPatternsProjectionChain> CStabBinClsPatternsProjectionChain::registar
@@ -79,15 +85,40 @@ void CStabBinClsPatternsProjectionChain::Preimages( const IPatternDescriptor* d,
 	}
 }
 
-void CStabBinClsPatternsProjectionChain::LoadParams( const JSON& )
+void CStabBinClsPatternsProjectionChain::LoadParams( const JSON& json)
 {
-
+	CJsonError errorText;
+	rapidjson::Document params;
+	if( !ReadJsonString( json, params, errorText ) ) {
+		throw new CJsonException( "CStabBinClsPatternsProjectionChain::LoadParams", errorText );
+	}
+	assert( string( params["Type"].GetString() ) == ProjectionChainModuleType );
+	assert( string( params["Name"].GetString() ) == StabBinClsPatternsProjectionChain );
+	if( !(params.HasMember( "Params" ) && params["Params"].IsObject()) ) {
+		return;
+	}
+	const rapidjson::Value& paramsObj = params["Params"];
+	if( paramsObj.HasMember("alpha") && paramsObj["alpha"].IsNumber() ) {
+		const double alpha = paramsObj["alpha"].GetDouble();
+		stabApprox.SetBase( 1.0 / (1-alpha) ); // Robustness Tatti2014
+	} else {
+		stabApprox.SetBase( 2.0 ); // Classical stability case
+	}
 }
 JSON CStabBinClsPatternsProjectionChain::SaveParams() const
 {
-	return JSON("")
-		+ "{\"Type\":\"" + ProjectionChainModuleType + "\","
-		+ "\"Name\":\"" + StabBinClsPatternsProjectionChain + "\"}";
+	rapidjson::Document params;
+	rapidjson::MemoryPoolAllocator<>& alloc = params.GetAllocator();
+	params.SetObject()
+		.AddMember( "Type", ProjectionChainModuleType, alloc )
+		.AddMember( "Name", StabBinClsPatternsProjectionChain, alloc )
+		.AddMember( "Params", rapidjson::Value().SetObject(), alloc );
+	rapidjson::Value& p = params["Params"];
+	p.AddMember( "alpha", rapidjson::Value().SetDouble( 1 / (1-stabApprox.GetBase())) , alloc );
+
+	JSON result;
+	CreateStringFromJSON( params, result );
+	return result;
 }
 
 const CStabBinClsPatternsProjectionChain::CStabPatternDescription&

@@ -14,6 +14,7 @@ CStabilityChildrenApproximation::CStabilityChildrenApproximation(
 	deleter( cmp ),
 	attrToTidsetMap( 0 ),
 	attrOrder( 0 ),
+	base( 2.0l ),
 	threshold( 0 ),
 	extentSize( -1 ),
 	minDiff( 0 ),
@@ -83,9 +84,9 @@ void CStabilityChildrenApproximation::InitComputation(
 	if( isLog ) {
 		// In the logariphimc scale threshold is equal to diffThld
 		diffThld = threshold;
-	} else if( threshold >= 0.5 ) {
+	} else if( threshold >= 1/base ) {
 		// Can be computed directly
-		diffThld = floor( -log2(1.0 - threshold) );
+		diffThld = floor( -log(1.0 - threshold)/log(base) );
 	} else {
 		// Too low threshold
 		diffThld = 0;
@@ -124,7 +125,10 @@ void CStabilityChildrenApproximation::InitComputation(
 	if( isLog ) {
 		rightLimit = minDiff;
 	} else {
-		rightLimit = minDiff < 32 ? 1.0 - 1.0 / ( 1 << minDiff ) : 1.0;
+// For the case of 2 it looks like this
+		//rightLimit = minDiff < 32 ? 1.0 - 1.0 / ( 1 << minDiff ) : 1.0;
+// For the general case
+		rightLimit = 1.0l - 1.0l / pow( (long double)base, minDiff);
 		rightLimit = min( 1.0, rightLimit );
 	}
 	if( rightLimit < threshold ) {
@@ -186,17 +190,18 @@ void CStabilityChildrenApproximation::ComputeLowerBound()
 	if( isLog ) {
 		CStdIterator<CList<DWORD>::CConstIterator,false> itr( childDiffs );
 		// Lets take the biggest member out of brackets: 2^-mindiff * (1+2^-(x-mindiff))
+		//  the only difference the we work with a general base
 		double coef = 0;
 		for( ; !itr.IsEnd(); ++itr ) {
-			coef += pow( 2.0l, -1.0l * (*itr - minDiff) );
+			coef += pow( base, -1.0l * (*itr - minDiff) );
 		}
 		assert( coef >= 0.99999999 || minDiff == -1 );
-		leftLimit = minDiff - log2( coef );
+		leftLimit = minDiff - log( coef )/log(base);
 	} else {
 		leftLimit = 1.0;
 		CStdIterator<CList<DWORD>::CConstIterator,false> itr( childDiffs );
 		for( ; !itr.IsEnd(); ++itr ) {
-			leftLimit -= pow( 2.0l, -1.0l * *itr );
+			leftLimit -= pow( base, -1.0l * *itr );
 		}
 	}
 	leftLimit = max( 0.0, leftLimit );
