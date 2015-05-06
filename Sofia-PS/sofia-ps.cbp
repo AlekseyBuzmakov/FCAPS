@@ -11,7 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters="-data:/home/leshyk/PhD/data/uci-mushroom/data.fimi.json -CB:/home/leshyk/PhD/data/uci-mushroom/CB.json -out" />
+				<Option parameters="-data:/home/leshyk/PhD/data/nguyen/context.json -CB:/home/leshyk/PhD/data/nguyen/CB.json -out" />
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-D_DEBUG" />

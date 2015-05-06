@@ -134,7 +134,10 @@ void CAddIntentContextProcessor::LoadParams( const JSON& json )
 		}
 		getFromJson( MinExtentSize, Uint );
 		getFromJson( MinLift, Uint );
-		getFromJson( MinStab, Double );
+		// We should check IsNumber rather than IsDouble here.
+		if( opJson.HasMember( "MinStab" ) && opJson["MinStab"].IsNumber() ) {
+			outputParams.MinStab = opJson["MinStab"].GetDouble();
+		}
 		getFromJson( OutExtent, Bool );
 		getFromJson( OutSupport, Bool );
 		getFromJson( OutOrder, Bool );

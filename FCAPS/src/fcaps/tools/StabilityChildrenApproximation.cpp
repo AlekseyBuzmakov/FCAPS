@@ -128,7 +128,7 @@ void CStabilityChildrenApproximation::InitComputation(
 // For the case of 2 it looks like this
 		//rightLimit = minDiff < 32 ? 1.0 - 1.0 / ( 1 << minDiff ) : 1.0;
 // For the general case
-		rightLimit = 1.0l - 1.0l / pow( (long double)base, minDiff);
+		rightLimit = 1.0l - 1.0l / pow( (long double)base, (long double)minDiff);
 		rightLimit = min( 1.0, rightLimit );
 	}
 	if( rightLimit < threshold ) {
@@ -193,7 +193,7 @@ void CStabilityChildrenApproximation::ComputeLowerBound()
 		//  the only difference the we work with a general base
 		double coef = 0;
 		for( ; !itr.IsEnd(); ++itr ) {
-			coef += pow( base, -1.0l * (*itr - minDiff) );
+			coef += pow( (long double)base, -1.0l * (*itr - minDiff) );
 		}
 		assert( coef >= 0.99999999 || minDiff == -1 );
 		leftLimit = minDiff - log( coef )/log(base);
@@ -201,7 +201,7 @@ void CStabilityChildrenApproximation::ComputeLowerBound()
 		leftLimit = 1.0;
 		CStdIterator<CList<DWORD>::CConstIterator,false> itr( childDiffs );
 		for( ; !itr.IsEnd(); ++itr ) {
-			leftLimit -= pow( base, -1.0l * *itr );
+			leftLimit -= pow( (long double)base, -1.0l * *itr );
 		}
 	}
 	leftLimit = max( 0.0, leftLimit );
