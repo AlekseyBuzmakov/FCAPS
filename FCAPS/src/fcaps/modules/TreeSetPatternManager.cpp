@@ -109,41 +109,7 @@ const CTreeSetPatternDescriptor* CTreeSetDescriptorsComparator::CalculateSimilar
 		}
 	}
 
-	// Filter antichain comparing neighbourhoods
-	CStdIterator<CList<DWORD>::CIterator, false> i( resultIndexes );
-	last = *i;
-	++i;
-	CStdIterator<CList<DWORD>::CIterator, false> itr;
-
-	for( ; !i.IsEnd(); ) {
-		assert( last <= *i );
-		const TCompareResult result = compareIndexes( last, *i );
-		itr = i;
-		++i;
-
-		switch( result ) {
-			case CR_Equal:
-				// We already have this one
-				resultIndexes.Erase( itr );
-				break;
-			case CR_MoreGeneral:
-				// Prev attrib is more general, so remove it
-				last = *itr;
-				--itr;
-				resultIndexes.Erase( itr );
-				break;
-			case CR_LessGeneral:
-				// This is more general, remove.
-				resultIndexes.Erase( itr );
-				break;
-			case CR_Incomparable:
-				// New candidate to antichain
-				last = *itr;
-				break;
-			default:
-				assert( false );
-		}
-	}
+	filterAntichain( resultIndexes );
 
 // TOKILL?
 // It is not a projection, so it cannot be applied.
@@ -378,6 +344,9 @@ const CTreeSetPatternDescriptor* CTreeSetDescriptorsComparator::loadPattern( con
 		}
 		ptrn->AddNextAttribNumber( itr->second );
 	}
+
+	filterAntichain( ptrn->GetAttribs() );
+
 	return ptrn.release();
 }
 
@@ -431,6 +400,46 @@ void CTreeSetDescriptorsComparator::initMultiLca()
 	}
 	rmq.reset( new CRmqAlgorithmAuto<DWORD>( depthArray ) );
 	rmq->Initialize();
+}
+
+// filters a set of attributes to form an antichain
+void CTreeSetDescriptorsComparator::filterAntichain( CList<DWORD>& chain ) const
+{
+	// Filter antichain comparing neighbourhoods
+	CStdIterator<CList<DWORD>::CIterator, false> i( chain );
+	DWORD last = *i;
+	++i;
+	CStdIterator<CList<DWORD>::CIterator, false> itr;
+
+	for( ; !i.IsEnd(); ) {
+		assert( last <= *i );
+		const TCompareResult result = compareIndexes( last, *i );
+		itr = i;
+		++i;
+
+		switch( result ) {
+			case CR_Equal:
+				// We already have this one
+				chain.Erase( itr );
+				break;
+			case CR_MoreGeneral:
+				// Prev attrib is more general, so remove it
+				last = *itr;
+				--itr;
+				chain.Erase( itr );
+				break;
+			case CR_LessGeneral:
+				// This is more general, remove.
+				chain.Erase( itr );
+				break;
+			case CR_Incomparable:
+				// New candidate to antichain
+				last = *itr;
+				break;
+			default:
+				assert( false );
+		}
+	}
 }
 
 // Compare to elements by their indexes.

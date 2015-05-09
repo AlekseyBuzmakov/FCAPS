@@ -59,6 +59,8 @@ private:
 
 	const CAttrsList& GetAttribs() const
 		{ return data.GetAttribs(); }
+	CAttrsList& GetAttribs()
+		{ return data.GetAttribs(); }
 };
 
 ////////////////////////////////////////////////////////////////////
@@ -124,6 +126,7 @@ private:
 
 	void initMultiLca();
 
+	void filterAntichain( CList<DWORD>& chain ) const;
 	TCompareResult compareIndexes( DWORD first, DWORD second ) const;
 	void projectIndexes( CList<DWORD>& inds ) const;
 	DWORD projectIndex( DWORD ind, DWORD maxWeight ) const;
