@@ -70,6 +70,14 @@ private:
 	typedef std::pair<const IPatternDescriptor*,double> CPatternMeasurePair;
 	class CConceptsForOrder;
 
+	struct COutputParams {
+		bool OutExtent;
+		bool OutIntent;
+
+		COutputParams() :
+			OutExtent( true ), OutIntent( true ) {}
+	};
+
 private:
 	static CModuleRegistrar<CSofiaContextProcessor> registrar;
 	// Chain of projections for SOFYA algo
@@ -84,6 +92,8 @@ private:
 	bool shouldFindPartialOrder;
 	// Should adjust thld to have a polynomial algo
 	bool shouldAdjustThld;
+	// The params of the output
+	COutputParams outParams;
 
 	// TODO: move hashed storage to projections.
 	//  then it would be possible to check if a stability for a pattern should be computed

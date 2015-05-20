@@ -67,6 +67,15 @@ void CSofiaContextProcessor::LoadParams( const JSON& json )
 			shouldAdjustThld = atJson.GetBool();
 		}
 	}
+	if( p.HasMember("OutputParams") && p["OutputParams"].IsObject() ) {
+		const rapidjson::Value& outJson = p["OutputParams"];
+		if( outJson.HasMember("OutExtent") && outJson["OutExtent"].IsBool() ) {
+			outParams.OutExtent = outJson["OutExtent"].GetBool();
+		}
+		if( outJson.HasMember("OutIntent") && outJson["OutIntent"].IsBool() ) {
+			outParams.OutIntent = outJson["OutIntent"].GetBool();
+		}
+	}
 
 	if( !p.HasMember("ProjectionChain") ) {
 		error.Data = json;
@@ -95,7 +104,11 @@ JSON CSofiaContextProcessor::SaveParams() const
 			.AddMember( "Thld", rapidjson::Value().SetDouble( thld ), alloc )
 			.AddMember( "MaxPatternNumber", rapidjson::Value().SetUint( mpn ), alloc )
 			.AddMember( "AdjustThreshold", rapidjson::Value().SetBool( shouldAdjustThld ), alloc )
-			.AddMember( "FindPartialOrder", rapidjson::Value().SetBool( shouldFindPartialOrder ), alloc ),
+			.AddMember( "FindPartialOrder", rapidjson::Value().SetBool( shouldFindPartialOrder ), alloc )
+			.AddMember( "OutputParams", rapidjson::Value().SetObject()
+				.AddMember( "OutExtent",rapidjson::Value().SetBool(outParams.OutExtent), alloc)
+				.AddMember( "OutIntent",rapidjson::Value().SetBool(outParams.OutIntent), alloc),
+			alloc ),
 		alloc );
 	IModule* m = dynamic_cast<IModule*>(pChain.get());
 	assert( m!=0);
@@ -377,8 +390,12 @@ void CSofiaContextProcessor::printConceptToJson( const CPatternMeasurePair& c, s
 {
 dst << "{";
 
-	dst << "\"Ext\":" << pChain->SaveExtent( c.first ) << ",";
-	dst << "\"Int\":" << pChain->SaveIntent( c.first ) << ",";
+	if( outParams.OutExtent ) {
+		dst << "\"Ext\":" << pChain->SaveExtent( c.first ) << ",";
+	}
+	if( outParams.OutIntent ) {
+		dst << "\"Int\":" << pChain->SaveIntent( c.first ) << ",";
+	}
 
 	dst << "\"Interest\":" << c.second;
 
