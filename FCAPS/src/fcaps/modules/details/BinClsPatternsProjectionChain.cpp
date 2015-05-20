@@ -128,23 +128,7 @@ void CBinClsPatternsProjectionChain::convertContext()
 void CBinClsPatternsProjectionChain::addColumnToTable(
 	DWORD columnNum, const CList<DWORD>& values, CBinarySetCollection& table )
 {
-	CList<DWORD>::CConstReverseIterator i = values.RBegin();
-	for( ; i!= values.REnd(); ++i ) {
-		expandTable( *i, table );
-		assert( table.size() > *i );
-		extCmp->AddValue( columnNum, *table[*i] );
-	}
-}
-
-// Increase size of the table if neccesary, to include at least minimalSize elements.
-void CBinClsPatternsProjectionChain::expandTable( DWORD minimalSize, CBinarySetCollection& table )
-{
-	for( size_t i = table.size(); i <= minimalSize; ++i ) {
-		table.push_back( CSharedPtr<CVectorBinarySetDescriptor>(
-			extCmp->NewPattern(), extDeleter ) );
-	}
-
-	assert( table.size() > minimalSize );
+	AddColumnToCollection( extCmp, columnNum, values, table );
 }
 
 ////////////////////////////////////////////////////////////////////

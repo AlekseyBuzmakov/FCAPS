@@ -128,7 +128,6 @@ private:
 	void convertContext();
 	void addColumnToTable(
 		DWORD columnNum, const CList<DWORD>& values, CBinarySetCollection& table );
-	void expandTable( DWORD minimalSize, CBinarySetCollection& table );
 	void initAttrOrder();
 	void computeIntent( const CPatternDescription& d, CList<DWORD>& intent ) const;
 };

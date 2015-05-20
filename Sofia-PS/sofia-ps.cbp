@@ -136,6 +136,8 @@
 		<Unit filename="../FCAPS/src/fcaps/modules/StabBinClsPatternsProjectionChain.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/StabIntervalClsPatternsProjectionChain.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/StabIntervalClsPatternsProjectionChain.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/StabilityEstimatorContextProcessor.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/StabilityEstimatorContextProcessor.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/SuppBinClsPatternsProjectionChain.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/SuppBinClsPatternsProjectionChain.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/SuppIntervalClsPatternsProjectionChain.cpp" />
@@ -159,6 +161,8 @@
 		<Unit filename="../FCAPS/src/fcaps/modules/details/FCAUtils.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/details/IntervalClsPatternsProjectionChain.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/details/IntervalClsPatternsProjectionChain.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/JsonBinaryPattern.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/JsonBinaryPattern.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/details/JsonClassifierClasses.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/details/JsonClassifierClasses.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/details/JsonIntervalPattern.cpp" />
@@ -174,6 +178,7 @@
 		<Unit filename="../FCAPS/src/fcaps/storages/VectorIntentStorage.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/storages/VectorIntentStorage.h" />
 		<Unit filename="../FCAPS/src/fcaps/tools/FindConceptOrder.h" />
+		<Unit filename="../FCAPS/src/fcaps/tools/StabilityCalculation.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/tools/StabilityCalculation.h" />
 		<Unit filename="../FCAPS/src/fcaps/tools/StabilityChildrenApproximation.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/tools/StabilityChildrenApproximation.h" />
