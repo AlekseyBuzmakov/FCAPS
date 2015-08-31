@@ -1,0 +1,86 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"id": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/ContextProcessorModules/AddIntentContextProcessorModule.json",
+	"title": "AddIntent Context Processor",
+	"description": "A context processor implementing AddIntent algorithm for formal lattice construction",
+	"allOf":[{
+		"description": "It is a context processor",
+		"$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/ContextProcessorModules/ContextProcessorModule.json"
+	},{
+		"type": "object",
+		"properties": {
+			"Name": {
+				"type": "string",
+				"enum": [ "AddIntentContextProcessorModule" ]
+			},
+			"Params": {
+				"title": "Params of AddIntent",
+				"type": "object",
+				"properties":{
+					"PatternManager": {
+						"title": "Pattern Manager for Descriptions",
+						"description": "Pattern manager used to process (intersection, checking subsumption) patterns and objects in the context",
+						"$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/PatternManagerModules/PatternManagerModule.json"
+					},
+					"OutputParams": {
+						"title": "Lattice Output Params",
+						"description": "Params that specify how lattice should be printed into the file and what should be computed for a concept",
+						"type": "object",
+						"properties": {
+							"MinExtentSize" : {
+								"title": "Minimal cardinality of a concept extent",
+								"description": "If cardinality of a concept extent is smaller then a given value, the concept is not outputted as a selected concept",
+								"type": "integer",
+								"minimum": 0
+							},
+							"MinLift" : {
+								"title": "Minimal lift of a concept",
+								"description": "If lift of a concept, i.e., the minimal differnce in objects between the concept extent and extents of its children, is smaller then a given value, the concept is not outputted as a selected concept",
+								"type": "integer",
+								"minimum": 0
+							},
+							"MinStab" : {
+								"title": "Minimal stability of a concept",
+								"description": "If stability of a concept (see Sergei O. Kuznetsov 1990, 2007) is smaller than a given value, the concept is not outputted as a selected concept. Depending on 'IsStabilityInLog' it can be given either in (0,1), if not in log, or in (0,+inf).",
+								"type": "number",
+								"minimum": 0
+							},
+							"OutExtent" : {
+								"title": "Output Extent",
+								"description": "Should output extent of a concept?",
+								"type": "boolean"
+							},
+							"OutSupport" : {
+								"title": "Output Support",
+								"description": "Should output support of a concept (cardinality of concept extent)?",
+								"type": "boolean"
+							},
+							"OutOrder" : {
+								"title": "Output Concept Order",
+								"description": "Should output order of concepts in the lattice?",
+								"type": "boolean"
+							},
+							"OutStability" : {
+								"title": "Output Concept Stability",
+								"description": "Should output concept stability?",
+								"type": "boolean"
+							},
+							"OutStabEstimation" : {
+								"title": "Output Estimation of Concept Stability",
+								"description": "Should output estimation of concept stability? Much faster then concept stability.",
+								"type": "boolean"
+							},
+							"IsStabilityInLog" : {
+								"title": "Stability in Loragithmic Scale",
+								"description": "Should stability be computed and outputed in a logarithmic scale? Logarithmic scale has a better precision but the results are in (0,+inf).",
+								"type": "boolean"
+							}
+						}
+					}
+				},
+				"required": ["PatternManager"]
+			}
+		},
+		"required": [ "Name" ]
+	}]
+}

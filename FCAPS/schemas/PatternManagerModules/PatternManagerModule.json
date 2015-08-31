@@ -1,0 +1,23 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"id": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/PatternManagersModules/PatternManagerModule.json",
+	"title": "Schema for all Pattern Manager Modules",
+	"description": "A schema, all pattern managers modules should sattisfy to",
+	"allOf":[{
+		"description": "It is a module",
+		"$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/module.json"
+	},{
+		"type": "object",
+		"properties": {
+			"Type": {
+				"type": "string",
+				"description": "It is a pattern manager module",
+				"enum": [ "PatternManagerModules" ]
+			},
+			"Name": {
+				"type": "string"
+			}
+		},
+		"required": [ "Type", "Name" ]
+	}]
+}

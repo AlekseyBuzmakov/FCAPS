@@ -1,0 +1,20 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"id": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/PatternManagerModules/BinarySetJoinPatternManagerModule.json",
+	"title": "Pattern Manager for Binary Set with Join operation",
+	"description": "A params of module Binary Set Join Pattern Manager. The file is a request for creation of a PM working with sets given as list of attribute numbers with join as a semilattice opperation",
+
+	"allOf":[{
+		"description": "It is a module and is a Binary Set Pattern Manager",
+		"$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/PatternManagerModules/BinarySetPatternManagerCommon.json"
+	},{
+		"type": "object",
+		"properties": {
+			"Name": {
+				"type": "string",
+				"enum": [ "BinarySetJoinPatternManager" ]
+			}
+		},
+		"required": [ "Name" ]
+	}]
+}

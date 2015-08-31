@@ -1,0 +1,55 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"id": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/ContextProcessorModules/ClassifierContextProcessorModule.json",
+	"title": "Classifier Context Processor",
+	"description": "This context processor classifies the objects in the context by a classifier",
+	"allOf":[{
+		"description": "It is a context processor",
+		"$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/ContextProcessorModules/ContextProcessorModule.json"
+	},{
+		"type": "object",
+		"properties": {
+			"Name": {
+				"type": "string",
+				"enum": [ "ClassifierContextProcessorModule" ]
+			},
+			"Params": {
+				"title": "Params of Classifier CP",
+				"type": "object",
+				"properties":{
+					"Classifier": {
+						"title": "Classifier of Object Descriptions",
+						"description": "A specific algorithm for classification",
+						"$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/ClassifierModules/ClassifierModule.json"
+					},
+					"ClassesPath": {
+						"title": "Path to Classes File",
+						"description": "Path to file containing the correspondance between objectnames and classes. File should satisfy https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/Other/ClassifierClasses.json",
+						"type": "string"
+					},
+					"OutputParams": {
+						"title": "Output Params for Classification Results",
+						"description": "Params that specify what kind of results should be saved",
+						"type": "object",
+						"properties": {
+							"OutAccuracy" : {
+								"title": "Should Output Accuracy?",
+								"type": "boolean"
+							},
+							"OutConfusion" : {
+								"title": "Should Output Confusion Matrix?",
+								"type": "boolean"
+							},
+							"OutObjectClassification" : {
+								"title": "Should Output Prediction for every Single Object?",
+								"type": "boolean"
+							}
+						}
+					}
+				},
+				"required": ["Classifier","ClassesPath"]
+			}
+		},
+		"required": [ "Name" ]
+	}]
+}

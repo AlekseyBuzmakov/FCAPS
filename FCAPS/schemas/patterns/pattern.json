@@ -1,0 +1,6 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/patterns/pattern.json",
+  "title": "Pattern Description",
+  "description": "A description of a pattern"
+}

@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/PatternManagerModules/AD.json",
+  "title": "Attribute Dependencies Graph",
+  "description": "It gives dependencies for binary attributes",
+  "allOf":[
+  {
+	  "description": "It is a graph",
+	  "$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/graph.json"
+  },{
+
+  "type": "array",
+  "items": [
+  	{},
+  	{
+		"type": "object",
+		"properties": {
+			"Nodes": {
+				"type": "array",
+				"items": {
+					"title": "Dependency Node",
+					"description": "Every node corresponds either to an attribute or to a set of attributes. Nodes with multiple attributes cannot have outcoming edges, i.e., they cannot deppend on something.",
+					"$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/patterns/IndexedSet.json"
+				}
+			}
+		},
+		"required":["Nodes"]
+	},
+  	{},
+	{}
+  ],
+  "minItems": 2
+  }]
+}

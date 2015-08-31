@@ -1,0 +1,30 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"id": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/PatternManagerModules/BinarySetWithDependenciesPatternManagerModule.json",
+	"title": "Pattern Manager for Binary Set with Join operation and Dependecies",
+	"description": "A params of module Binary Set Join Pattern Manager with Dependencies. Dependencies between attributes allows to express when one attribute can appear in a pattern. In particular, if 'a' depends on 'b', then 'a' cannot appera in a pattern that does not contain 'b'. The file is a request for creation of a PM working with sets given as list of attribute numbers with join as a semilattice opperation and dependencies on attributes.",
+
+	"allOf":[{
+		"description": "It is a module and is a Binary Set Pattern Manager",
+		"$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/PatternManagerModules/BinarySetPatternManagerCommon.json"
+	},{
+		"type": "object",
+		"properties": {
+			"Name": {
+				"type": "string",
+				"enum": [ "BinarySetWithDependenciesPatternManagerModule" ]
+			},
+			"Params": {
+				"type": "object",
+				"properties": {
+					"AttrPosetPath": {
+						"type": "string",
+						"title": "Path to a File with Attribute Dependencies",
+						"description": "Path to a file with attribute dependendencies given as a poset (sutisfies json schema https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/PatternManagerModules/AD.json)."
+					}
+				}
+			}
+		},
+		"required": [ "Name" ]
+	}]
+}

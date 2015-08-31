@@ -1,0 +1,39 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"id": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/PatternManagerModules/BinarySetPatternManagerCommon.json",
+	"title": "Common params for Binary Set Pattern Managers",
+	"description": "A params shared by all Binary Set Pattern Managers. The file is a request for creation of a PM working with sets",
+
+	"allOf":[{
+		"description": "It is a pattern manager",
+		"$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/PatternManagerModules/PatternManagerModule.json"
+	},{
+		"type": "object",
+		"properties": {
+			"Params": {
+				"type": "object",
+				"properties": {
+					"AttrNames":{
+						"type": "array",
+						"title": "Names of attributes",
+						"description": "The mapping between 0-based indices of attributes and their string names",
+						"items": {
+							"type": "string"
+						},
+						"uniqueItems": true
+					},
+					"UseInds":{
+						"type": "boolean",
+						"title": "Attribute indices writing",
+						"description": "In pattern saving, the PM write attribute indices as they were used/given"
+					},
+					"UseNames":{
+						"type": "boolean",
+						"title": "Attribute names writing",
+						"description": "In pattern saving, the PM write attribute names"
+					}
+				}
+			}
+		}
+	}]
+}

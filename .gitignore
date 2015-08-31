@@ -1,0 +1,23 @@
+# binaries
+bin
+obj
+.objs
+
+# rapidjson folder that is taken from other repo
+rapidjson/
+# boost is also not under git
+boost
+
+# CB project additional stuff
+*.depend
+*.layout
+*~
+*.cscope_file_list
+ValgrindOut.xml
+
+# There no need to save zips
+*.zip
+
+# Vim stuff
+.*.swp
+*.swo

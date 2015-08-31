@@ -1,0 +1,47 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"id": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/ClassifierModules/CAEPByDongClassifierModule.json",
+	"title": "CAEP classifier by Dong",
+	"description": "A schema, for CAEP classifier by Dong",
+	"allOf":[{
+		"description": "It is a Classifier Module",
+		"$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/ClassifierModules/ClassifierModule.json"
+	},{
+		"type": "object",
+		"properties": {
+			"Name": {
+				"type": "string",
+				"enum": [ "CAEPByDongClassifierModule" ]
+			},
+			"Params": {
+				"type": "object",
+				"title": "Params of CAEP Classifier",
+				"properties": {
+					"ClassesPath": {
+						"title": "Path to Classes File",
+						"description": "Path to file containing the correspondance between objectnames and classes. File should satisfy https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/Other/ClassifierClasses.json",
+						"type": "string"
+					},
+					"TrainPath": {
+						"title": "Path to File with Train Data",
+						"description": "Path to file containing a lattice with train concepts. File should satisfy https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/lattice.json",
+						"type": "string"
+					},
+					"PatternManager": {
+						"title": "Pattern Manager for Descriptions",
+						"description": "Pattern manager used to process (intersection, checking subsumption) patterns and objects in the lattice and input objet descriptions",
+						"$ref": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/PatternManagerModules/PatternManagerModule.json"
+					},
+					"EmergencyThld": {
+						"title": "Emergency Threshold for Patterns",
+						"description": "Emergency threshold for patterns that is used  for selecting concepts that are used within the classifier",
+						"type": "number",
+						"minimum": 1.01
+					}
+				},
+				"required": ["ClassesPath","TrainPath","PatternManager"]
+			}
+		},
+		"required": [ "Type", "Name", "Params" ]
+	}]
+}

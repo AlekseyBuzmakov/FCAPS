@@ -1,0 +1,26 @@
+{
+	"Type": "ContextProcessorModules",
+	"Name": "ClassifierContextProcessorModule",
+	"Params": {
+		"Classifier": {
+			"Type" : "ClassifierModules",
+			"Name" : "CAEPByDongClassifierModule",
+			"Params" : {
+				"TrainPath": "{PATH}",
+				"ClassesPath": "{PATH}",
+				"PatternManager": {
+					"Type" : "PatternManagerModules",
+					"Name" : "IntervalPatternManagerModule",
+					"Params" : {}
+				},
+				"EmergencyThld":1
+			}
+		},
+		"ClassesPath": "{PATH}",
+		"OutputParams": {
+			"OutAccuracy": true,
+			"OutConfusion": true,
+			"OutObjectClassification": true
+		}
+	}
+}

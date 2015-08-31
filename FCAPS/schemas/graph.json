@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/graph.json",
+  "title": "Directed Graph JSON",
+  "description": "Json file gives a description of a directed graph",
+  "type": "array",
+  "items": [
+  	{
+		"type": "object",
+		"title": "General Grap Info",
+		"description": "An object contains general info about the graph",
+		"properties": {
+			"NodesCount": {
+				"title": "Number of Nodes",
+				"description": "The total number of nodes in the graph",
+				"type": "integer",
+				"minimum": 0
+			},
+			"ArcsCount": {
+				"title": "Number of Arcs",
+				"description": "The total number of arcs in the graph",
+				"type": "integer",
+				"minimum": 0
+			}
+		}
+	},
+  	{
+		"title": "Nodes Info",
+		"description": "All nodes are enumerated in this object",
+		"type": "object",
+		"properties": {
+			"Nodes": {
+				"title": "List of Nodes",
+				"description": "The nodes of the graph are given within this array",
+				"type": "array",
+				"items": {}
+			}
+		},
+		"required":["Nodes"]
+	},
+  	{
+		"title": "Arcs Info",
+		"description": "All arcs are enumerated in this object",
+		"type": "object",
+		"properties": {
+			"Arcs": {
+				"title": "List of Arcs",
+				"description": "The arcs of the graph are given within this array",
+				"type": "array",
+				"items": {
+					"title": "Graph Arc",
+					"description": "A description of an arc of this graph",
+					"type": "object",
+					"properties":{
+						"S": {
+							"title": "Source Node",
+							"description": "The source node of this arc given as an index in 'Nodes' array",
+							"type": "integer",
+							"minimum": 0
+						},
+						"D": {
+							"title": "Destination Node",
+							"description": "The destination node of this arc given as an index in 'Nodes' array",
+							"type": "integer",
+							"minimum": 0
+						}
+					},
+					"required": ["S","D"]
+				}
+			}
+		},
+		"required":["Arcs"]
+	},
+	{
+		"title": "Visualisation Info",
+		"description": "All info that is related to graph visualisation is given here, such as vertices positions or level in concept lattices"
+	}
+  ],
+  "minItems": 3
+}

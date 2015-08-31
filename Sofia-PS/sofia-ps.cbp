@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="sofia-ps" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/sofia-ps" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option parameters="-data:/home/leshyk/PhD/data/FIMI/mushroom/dataset.json -CP://home/leshyk/PhD/data/FIMI/mushroom/sofia-stabFixedThld.json -out" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-D_DEBUG" />
+					<Add directory="FCAPS/inc" />
+					<Add directory="Tools/inc" />
+					<Add directory="FCAPS/src/fcaps/modules" />
+					<Add directory="FCAPS/src/fcaps/modules/details" />
+					<Add directory="Tools" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/sofia-ps" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option parameters="-data:/home/leshyk/PhD/data/FIMI/mushroom/dataset.json -CP://home/leshyk/PhD/data/FIMI/mushroom/sofia-stabFixedThld.json -out" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-Wno-unused-variable" />
+					<Add option="-DBOOST_DISABLE_ASSERTS" />
+					<Add option="-DNDEBUG" />
+					<Add directory="FCAPS/inc" />
+					<Add directory="Tools/inc" />
+					<Add directory="FCAPS/src/fcaps/modules" />
+					<Add directory="FCAPS/src/fcaps/modules/details" />
+					<Add directory="Tools" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+			<Target title="Release_Profiler">
+				<Option output="bin/Release-profiler/sofia-ps" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release-profiler/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option parameters="-o:/home/leshyk/PhD/data/victor/full_cisi_context.ctx -all -pc -ol" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-pg" />
+					<Add option="-g" />
+					<Add option="-Wno-unused-variable" />
+					<Add option="-DBOOST_DISABLE_ASSERTS" />
+					<Add option="-DNDEBUG" />
+					<Add directory="FCAPS/inc" />
+					<Add directory="Tools/inc" />
+					<Add directory="FCAPS/src/fcaps/modules" />
+					<Add directory="FCAPS/src/fcaps/modules/details" />
+					<Add directory="Tools" />
+				</Compiler>
+				<Linker>
+					<Add option="-pg" />
+				</Linker>
+			</Target>
+			<Target title="Release_Win">
+				<Option output="bin/Release_Win/sofia-ps.exe" prefix_auto="1" extension_auto="0" />
+				<Option object_output="obj/Release_Win/" />
+				<Option type="1" />
+				<Option compiler="mingw32_compiler" />
+				<Option parameters="-data:/home/leshyk/PhD/data/uci-yeast/ClBySOFIA/train.json -CB:/home/leshyk/PhD/data/uci-yeast/ClBySOFIA/sofia-stab1000.json -out:/home/leshyk/PhD/data/uci-yeast/ClBySOFIA/result.json -out" />
+				<Option projectCompilerOptionsRelation="1" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-fexceptions" />
+					<Add option="-Wno-parentheses" />
+					<Add option="-Wno-sign-compare" />
+					<Add option="-Wno-unused-variable" />
+					<Add option="-DBOOST_DISABLE_ASSERTS" />
+					<Add option="-DNDEBUG" />
+					<Add directory="FCAPS/inc" />
+					<Add directory="Tools/inc" />
+					<Add directory="FCAPS/src/fcaps/modules" />
+					<Add directory="FCAPS/src/fcaps/modules/details" />
+					<Add directory="Tools" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+			<Target title="Release_O3">
+				<Option output="bin/Release_O3/sofia-ps" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release_O3/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option parameters="-data:/home/leshyk/PhD/data/uci-mushroom/data.fimi.json -CB:/home/leshyk/PhD/data/uci-mushroom/CB.json -out" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-Wno-unused-variable" />
+					<Add option="-DBOOST_DISABLE_ASSERTS" />
+					<Add option="-DNDEBUG" />
+					<Add directory="FCAPS/inc" />
+					<Add directory="Tools/inc" />
+					<Add directory="FCAPS/src/fcaps/modules" />
+					<Add directory="FCAPS/src/fcaps/modules/details" />
+					<Add directory="Tools" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+			<Add option="-Wno-unused-local-typedefs" />
+			<Add option="-Wno-parentheses" />
+			<Add option="-Wno-sign-compare" />
+			<Add directory="inc" />
+			<Add directory="src" />
+			<Add directory="../FCAPS/include" />
+			<Add directory="../FCAPS/src" />
+			<Add directory="../Tools" />
+			<Add directory="../boost" />
+			<Add directory="../rapidjson/include" />
+		</Compiler>
+		<Unit filename="../FCAPS/include/fcaps/BasicTypes.h" />
+		<Unit filename="../FCAPS/include/fcaps/Classifier.h" />
+		<Unit filename="../FCAPS/include/fcaps/CompareResults.h" />
+		<Unit filename="../FCAPS/include/fcaps/ContextProcessor.h" />
+		<Unit filename="../FCAPS/include/fcaps/Filter.h" />
+		<Unit filename="../FCAPS/include/fcaps/Module.h" />
+		<Unit filename="../FCAPS/include/fcaps/ModuleJSONTools.cpp" />
+		<Unit filename="../FCAPS/include/fcaps/ModuleJSONTools.h" />
+		<Unit filename="../FCAPS/include/fcaps/ModuleTools.cpp" />
+		<Unit filename="../FCAPS/include/fcaps/ModuleTools.h" />
+		<Unit filename="../FCAPS/include/fcaps/PatternManager.h" />
+		<Unit filename="../FCAPS/include/fcaps/ProjectionChain.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/AddIntentContextProcessor.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/AddIntentContextProcessor.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/BinarySetPatternManager.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/BinarySetPatternManager.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/BinarySetWithDependenciesPatternManager.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/BinarySetWithDependenciesPatternManager.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/CAEPByDongClassifier.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/CAEPByDongClassifier.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/ClassifierContextProcessor.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/ClassifierContextProcessor.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/CompositPatternManager.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/CompositPatternManager.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/CosineBinClsPatternsProjectionChain.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/CosineBinClsPatternsProjectionChain.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/IntervalPatternManager.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/IntervalPatternManager.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/SofiaContextProcessor.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/SofiaContextProcessor.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/StabBinClsPatternsProjectionChain.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/StabBinClsPatternsProjectionChain.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/StabIntervalClsPatternsProjectionChain.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/StabIntervalClsPatternsProjectionChain.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/StabilityEstimatorContextProcessor.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/StabilityEstimatorContextProcessor.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/SuppBinClsPatternsProjectionChain.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/SuppBinClsPatternsProjectionChain.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/SuppIntervalClsPatternsProjectionChain.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/SuppIntervalClsPatternsProjectionChain.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/TaxonomyPatternManager.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/TaxonomyPatternManager.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/TrainTestContextSplitter.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/TrainTestContextSplitter.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/TreeSetPatternManager.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/TreeSetPatternManager.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/AddIntentLatticeBuilder.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/AddIntentLatticeBuilder.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/BinClsPatternsProjectionChain.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/BinClsPatternsProjectionChain.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/Extent.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/ExtentImpl.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/ExtentImpl.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/FCAUtils.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/FCAUtils.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/IntervalClsPatternsProjectionChain.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/IntervalClsPatternsProjectionChain.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/JsonBinaryPattern.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/JsonBinaryPattern.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/JsonClassifierClasses.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/JsonClassifierClasses.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/JsonIntervalPattern.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/JsonIntervalPattern.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/Lattice.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/LatticeBuilder.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/TaxonomyJsonReader.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/details/TaxonomyJsonReader.h" />
+		<Unit filename="../FCAPS/src/fcaps/storages/CachedIntentStorage.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/storages/CachedIntentStorage.h" />
+		<Unit filename="../FCAPS/src/fcaps/storages/CachedPatternStorage.h" />
+		<Unit filename="../FCAPS/src/fcaps/storages/IntentStorage.h" />
+		<Unit filename="../FCAPS/src/fcaps/storages/VectorIntentStorage.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/storages/VectorIntentStorage.h" />
+		<Unit filename="../FCAPS/src/fcaps/tools/FindConceptOrder.h" />
+		<Unit filename="../FCAPS/src/fcaps/tools/StabilityCalculation.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/tools/StabilityCalculation.h" />
+		<Unit filename="../FCAPS/src/fcaps/tools/StabilityChildrenApproximation.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/tools/StabilityChildrenApproximation.h" />
+		<Unit filename="../Tools/ConsoleApplication.cpp" />
+		<Unit filename="../Tools/ConsoleApplication.h" />
+		<Unit filename="../Tools/Exception.cpp" />
+		<Unit filename="../Tools/Exception.h" />
+		<Unit filename="../Tools/JSONTools.cpp" />
+		<Unit filename="../Tools/JSONTools.h" />
+		<Unit filename="../Tools/Lca.cpp" />
+		<Unit filename="../Tools/Lca.h" />
+		<Unit filename="../Tools/ListWrapper.h" />
+		<Unit filename="../Tools/PowerfulSaxJson.h" />
+		<Unit filename="../Tools/RelativePathes.cpp" />
+		<Unit filename="../Tools/RelativePathes.h" />
+		<Unit filename="../Tools/Rmq.cpp" />
+		<Unit filename="../Tools/Rmq.h" />
+		<Unit filename="../Tools/StaticTree.h" />
+		<Unit filename="../Tools/StdIteratorWrapper.h" />
+		<Unit filename="../Tools/StdTools.h" />
+		<Unit filename="../Tools/TopologicalSorting.cpp" />
+		<Unit filename="../Tools/TopologicalSorting.h" />
+		<Unit filename="../Tools/common.h" />
+		<Unit filename="src/main.cpp" />
+		<Extensions>
+			<code_completion>
+				<search_path add="inc" />
+				<search_path add="src" />
+				<search_path add="/home/leshyk/Soft/CppLibraries/boost_1_48_0" />
+			</code_completion>
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+			<DoxyBlocks>
+				<comment_style block="0" line="0" />
+				<doxyfile_project />
+				<doxyfile_build />
+				<doxyfile_warnings />
+				<doxyfile_output />
+				<doxyfile_dot />
+				<general />
+			</DoxyBlocks>
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
