@@ -23,6 +23,14 @@ const char UnionBinarySetDescriptorsComparator[] = "BinarySetUnionPatternManager
 
 ////////////////////////////////////////////////////////////////////
 
+// Flags on modes of writing intents
+// Use indices
+const DWORD BSDC_UseInds = 1;
+// Use string names
+const DWORD BSDC_UseNames = 2;
+
+////////////////////////////////////////////////////////////////////
+
 class CBinarySetDescriptorsComparator;
 
 class CBinarySetPatternDescriptor : public IPatternDescriptor {
@@ -118,6 +126,11 @@ public:
 	void SetNames( const std::vector<std::string>& newNames )
 		{ names = newNames; }
 
+    // Set or gets flags
+    DWORD GetFlags() const
+        { return flags;}
+    void SetFlags(DWORD f)
+        {flags=f;}
 
 protected:
 	// Build Set as union of sets

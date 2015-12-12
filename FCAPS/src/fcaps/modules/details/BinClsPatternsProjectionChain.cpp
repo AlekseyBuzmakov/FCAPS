@@ -4,10 +4,13 @@
 
 #include <fcaps/modules/BinarySetPatternManager.h>
 
+#include <JSONTools.h>
+
+#include <rapidjson/document.h>
+
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////
-
 CBinClsPatternsProjectionChain::CBinClsPatternsProjectionChain() :
 	extCmp(new CVectorBinarySetJoinComparator),
 	extDeleter(extCmp),
@@ -18,7 +21,8 @@ CBinClsPatternsProjectionChain::CBinClsPatternsProjectionChain() :
 	order( AO_None ),
 	useConditionalDB( false ),
 	turnOnConditionalDB( false ),
-	hasNewConcept( true )
+	hasNewConcept( true ),
+	noNewConceptProjectionCount(0)
 {
 	//ctor
 }
@@ -83,7 +87,12 @@ bool CBinClsPatternsProjectionChain::NextProjection()
 	if( turnOnConditionalDB ) {
 		turnOnConditionalDB = false;
 	}
-	if( !hasNewConcept && !useConditionalDB ) {
+	if(!hasNewConcept ) {
+        ++noNewConceptProjectionCount;
+	} else {
+        noNewConceptProjectionCount = 0;
+	}
+	if( noNewConceptProjectionCount > attrOrder.size() / 10 && !useConditionalDB && false ) { // No conditional DB
 		useConditionalDB = true;
 		turnOnConditionalDB = true;
 		cout << "\nTurning on conditional DB after Attr="<< currAttr << "\n";
@@ -121,6 +130,67 @@ JSON CBinClsPatternsProjectionChain::SaveIntent( const IPatternDescriptor* d ) c
 	CBinarySetPatternDescriptor intentDescr;
 	intentDescr.AddList( intent );
 	return intCmp->SavePattern( &intentDescr );
+}
+
+void CBinClsPatternsProjectionChain::LoadCommonParams( const JSON& json )
+{
+	CJsonError errorText;
+	rapidjson::Document params;
+	const bool res = ReadJsonString( json, params, errorText );
+	assert( res );
+
+	if( params.HasMember("IntentWritingMode") && params["IntentWritingMode"].IsString() ) {
+        const string mode( params["IntentWritingMode"].GetString() );
+        if( mode == "Indices" ) {
+            intCmp->SetFlags( BSDC_UseInds );
+        } else if( mode == "Names" ) {
+            intCmp->SetFlags( BSDC_UseNames );
+        } else if( mode == "Both" ) {
+            intCmp->SetFlags( BSDC_UseNames | BSDC_UseInds );
+        }
+	}
+	if( params.HasMember( "AttrNames" ) && params["AttrNames"].IsArray() ) {
+		const rapidjson::Value& namesJson = params["AttrNames"];
+		DWORD indsSize = namesJson.Size();
+
+		vector<string> names;
+		names.resize( indsSize );
+		for( size_t i = 0; i < indsSize; ++i ) {
+			if( namesJson[i].IsString() ) {
+				names[i] = namesJson[i].GetString();
+			}
+		}
+		intCmp->SetNames(names);
+	}
+
+}
+JSON CBinClsPatternsProjectionChain::SaveCommonParams() const
+{
+	rapidjson::Document params;
+	rapidjson::MemoryPoolAllocator<>& alloc = params.GetAllocator();
+	params.SetObject();
+
+	const DWORD f = intCmp->GetFlags();
+	if( HasAllFlags( f, BSDC_UseInds|BSDC_UseNames ) ) {
+        params.AddMember( "IntentWritingMode", "Both", alloc );
+	} else if( HasAllFlags( f, BSDC_UseInds ) ) {
+        params.AddMember( "IntentWritingMode", "Indices", alloc );
+	} else if( HasAllFlags( f, BSDC_UseNames ) ) {
+        params.AddMember( "IntentWritingMode", "Names", alloc );
+	}
+    const vector<string>& names=intCmp->GetNames();
+	if( !names.empty() ) {
+		params.AddMember( "AttrNames", rapidjson::Value().SetArray(), alloc );
+		rapidjson::Value& namesJson = params["AttrNames"];
+		namesJson.Reserve( names.size(), alloc );
+		for( size_t i = 0; i < names.size(); ++i ) {
+            namesJson.PushBack( rapidjson::Value().SetString( rapidjson::StringRef( names[i].c_str() ) ), alloc );
+		}
+	}
+
+	JSON result;
+	CreateStringFromJSON( params, result );
+	return result;
 }
 
 CBinClsPatternsProjectionChain::CPatternDescription* CBinClsPatternsProjectionChain::NewPattern(const CSharedPtr<const CVectorBinarySetDescriptor>& ext)

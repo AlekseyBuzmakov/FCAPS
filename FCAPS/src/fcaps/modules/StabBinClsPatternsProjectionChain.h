@@ -14,8 +14,9 @@
 const char StabBinClsPatternsProjectionChain[] = "StabBinClsPatternsProjectionChainModule";
 
 class CStabBinClsPatternsProjectionChain : public CBinClsPatternsProjectionChain, public IModule {
-	public:
-		CStabBinClsPatternsProjectionChain();
+public:
+    CStabBinClsPatternsProjectionChain();
+
 	// Methods of IProjectionChain
 	virtual void UpdateInterestThreshold( const double& thld );
 	virtual double GetPatternInterest( const IPatternDescriptor* p );

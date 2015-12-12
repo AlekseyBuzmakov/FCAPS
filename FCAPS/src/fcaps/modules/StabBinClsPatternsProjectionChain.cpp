@@ -115,6 +115,10 @@ void CStabBinClsPatternsProjectionChain::LoadParams( const JSON& json)
 		return;
 	}
 	const rapidjson::Value& paramsObj = params["Params"];
+	JSON paramsObjStr;
+	CreateStringFromJSON( paramsObj, paramsObjStr );
+	LoadCommonParams( paramsObjStr );
+
 	if( paramsObj.HasMember("alpha") && paramsObj["alpha"].IsNumber() ) {
 		const double alpha = paramsObj["alpha"].GetDouble();
 		stabApprox.SetBase( 1.0 / (1-alpha) ); // Robustness Tatti2014
@@ -124,14 +128,22 @@ void CStabBinClsPatternsProjectionChain::LoadParams( const JSON& json)
 }
 JSON CStabBinClsPatternsProjectionChain::SaveParams() const
 {
+
+	CJsonError errorText;
+	rapidjson::Document commonParams;
+	const bool res = ReadJsonString( SaveCommonParams(), commonParams, errorText );
+    assert( res );
+	assert(commonParams.IsObject() );
+
 	rapidjson::Document params;
 	rapidjson::MemoryPoolAllocator<>& alloc = params.GetAllocator();
 	params.SetObject()
 		.AddMember( "Type", ProjectionChainModuleType, alloc )
 		.AddMember( "Name", StabBinClsPatternsProjectionChain, alloc )
-		.AddMember( "Params", rapidjson::Value().SetObject(), alloc );
+		.AddMember( "Params", commonParams, alloc );
 	rapidjson::Value& p = params["Params"];
-	p.AddMember( "alpha", rapidjson::Value().SetDouble( 1 / (1-stabApprox.GetBase())) , alloc );
+
+	p.AddMember( "alpha", rapidjson::Value().SetDouble( 1 - 1 / stabApprox.GetBase() ), alloc );
 
 	JSON result;
 	CreateStringFromJSON( params, result );

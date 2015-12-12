@@ -100,6 +100,10 @@ protected:
 	TAttributeOrder& OrderType() { return order; }
 	TAttributeOrder OrderType() const { return order; }
 
+    // Load saves common params from json
+	void LoadCommonParams( const JSON& );
+	JSON SaveCommonParams() const;
+
 	static const CPatternDescription& Pattern( const IPatternDescriptor* d )
 		{ assert( d!= 0 ); return debug_cast<const CPatternDescription&>(*d); }
 
@@ -158,6 +162,8 @@ private:
 	bool turnOnConditionalDB;
 	// A flag checks if in current attrs there is a new concept added.
 	bool hasNewConcept;
+	// Counts the consequent number of projections without new concepts
+	DWORD noNewConceptProjectionCount;
 
 	void convertContext();
 	void addColumnToTable(

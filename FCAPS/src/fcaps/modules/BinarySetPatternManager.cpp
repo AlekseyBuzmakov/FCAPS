@@ -84,9 +84,6 @@ void CBinarySetPatternDescriptor::AddList( const CAttrsList& listToAdd )
 
 ////////////////////////////////////////////////////////////////////
 
-const DWORD BSDC_UseInds = 1;
-const DWORD BSDC_UseNames = 2;
-
 const char CBinarySetDescriptorsComparatorBase::jsonAttrNames[] = "AttrNames";
 const char CBinarySetDescriptorsComparatorBase::jsonUseInds[] = "UseInds";
 const char CBinarySetDescriptorsComparatorBase::jsonUseNames[] = "UseNames";

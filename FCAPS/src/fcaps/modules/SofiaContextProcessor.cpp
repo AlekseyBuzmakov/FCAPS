@@ -113,10 +113,12 @@ JSON CSofiaContextProcessor::SaveParams() const
 			alloc ),
 		alloc );
 	IModule* m = dynamic_cast<IModule*>(pChain.get());
-	assert( m!=0);
+
+	JSON pChainParams;
+	rapidjson::Document pChainParamsDoc;
+    assert( m!=0);
 	if( m != 0 ) {
-		JSON pChainParams = m->SaveParams();
-		rapidjson::Document pChainParamsDoc;
+		pChainParams = m->SaveParams();
 		CJsonError error;
 		const bool rslt = ReadJsonString( pChainParams, pChainParamsDoc, error );
 		assert(rslt);
@@ -325,30 +327,32 @@ void CSofiaContextProcessor::saveToFile(
 		dst << "\"NodesCount\":" << concepts.size() << ",";
 		dst << "\"ArcsCount\":" << arcsCount << ",";
 
-		dst << "\"Top\":[";
-		CStdIterator<CList<DWORD>::CConstIterator, false> top(tops);
-		for( ;!top.IsEnd(); ++top ) {
-			if(!isFirst) {
-				dst << ",";
-			}
-			isFirst = false;
-			dst << *top;
-		}
-		dst << "],";
+        if( shouldFindPartialOrder ) {
+            dst << "\"Top\":[";
+            CStdIterator<CList<DWORD>::CConstIterator, false> top(tops);
+            for( ;!top.IsEnd(); ++top ) {
+                if(!isFirst) {
+                    dst << ",";
+                }
+                isFirst = false;
+                dst << *top;
+            }
+            dst << "],";
 
-		dst << "\"Bottom\":[";
-		isFirst=true;
-		for( DWORD i = 0; i < bottoms.size(); ++i ) {
-			if(!bottoms[i]) {
-				continue;
-			}
-			if(!isFirst) {
-				dst << ",";
-			}
-			isFirst=false;
-			dst << i;
+            dst << "\"Bottom\":[";
+            isFirst=true;
+            for( DWORD i = 0; i < bottoms.size(); ++i ) {
+                if(!bottoms[i]) {
+                    continue;
+                }
+                if(!isFirst) {
+                    dst << ",";
+                }
+                isFirst=false;
+                dst << i;
+            }
+            dst << "],";
 		}
-		dst << "],";
 		dst << "\"Params\":" << SaveParams();
 	dst << "},";
 
