@@ -216,8 +216,6 @@ void CStabilityEstimatorContextProcessor::computeExtent(
 {
 	assert( attrs.Size() > 0 );
 
-	const CVectorBinarySetDescriptor* last = 0;
-
 	CStdIterator<CList<DWORD>::CConstIterator, false > attr( attrs );
 	result = attrToTidsetMap[*attr];
 	++attr;

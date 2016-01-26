@@ -1,0 +1,19 @@
+{
+	"Type" : "ContextProcessorModules",
+	"Name" : "SofiaContextProcessorModule",
+	"Params" : {
+		"ProjectionChain" : {	
+			"Type" : "ProjectionChainModules",
+			"Name" : "StabBinClsPatternsProjectionChainModule",
+			"Params": {
+			}
+		},
+		"DefualtThld": 5,
+		"MaxPatternNumber": 1000,
+		"FindPartialOrder": false,
+		"OutputParams" : {
+			"OutExtent": false,
+			"OutIntent": true
+		}
+	}
+}

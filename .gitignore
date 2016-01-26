@@ -21,3 +21,9 @@ ValgrindOut.xml
 # Vim stuff
 .*.swp
 *.swo
+
+# Stuf of GTAGS
+GPATH
+GRTAGS
+GSYMS
+GTAGS

@@ -126,7 +126,15 @@
 			<Add directory="../Tools" />
 			<Add directory="../boost" />
 			<Add directory="../rapidjson/include" />
+			<Add directory="../../LibGastonForSofia/inc" />
 		</Compiler>
+		<Linker>
+			<Add library="/home/leshyk/Soft/CppLibraries/boost/bin.v2/libs/filesystem/build/gcc-4.8/release/link-static/threading-multi/libboost_filesystem.a" />
+			<Add library="/home/leshyk/Soft/CppLibraries/boost/bin.v2/libs/system/build/gcc-4.8/release/link-static/threading-multi/libboost_system.a" />
+			<Add library="dl" />
+			<Add library="/home/leshyk/Soft/CppLibraries/boost/bin.v2/libs/thread/build/gcc-4.8/release/link-static/threading-multi/libboost_thread.a" />
+			<Add library="pthread" />
+		</Linker>
 		<Unit filename="../FCAPS/include/fcaps/BasicTypes.h" />
 		<Unit filename="../FCAPS/include/fcaps/Classifier.h" />
 		<Unit filename="../FCAPS/include/fcaps/CompareResults.h" />
@@ -153,12 +161,16 @@
 		<Unit filename="../FCAPS/src/fcaps/modules/CompositPatternManager.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/CosineBinClsPatternsProjectionChain.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/CosineBinClsPatternsProjectionChain.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/GastonGraphPatternEnumerator.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/GastonGraphPatternEnumerator.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/IntervalPatternManager.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/IntervalPatternManager.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/SofiaContextProcessor.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/SofiaContextProcessor.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/StabBinClsPatternsProjectionChain.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/StabBinClsPatternsProjectionChain.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/StabClsPatternProjectionChain.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/StabClsPatternProjectionChain.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/StabIntervalClsPatternsProjectionChain.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/StabIntervalClsPatternsProjectionChain.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/StabilityEstimatorContextProcessor.cpp" />
@@ -215,6 +227,8 @@
 		<Unit filename="../Tools/JSONTools.h" />
 		<Unit filename="../Tools/Lca.cpp" />
 		<Unit filename="../Tools/Lca.h" />
+		<Unit filename="../Tools/Library.cpp" />
+		<Unit filename="../Tools/Library.h" />
 		<Unit filename="../Tools/ListWrapper.h" />
 		<Unit filename="../Tools/PowerfulSaxJson.h" />
 		<Unit filename="../Tools/RelativePathes.cpp" />

@@ -78,10 +78,7 @@ void CStabBinClsPatternsProjectionChain::Preimages( const IPatternDescriptor* d,
 		}
 		return;
 	}
-	if( preimage->Extent().Size() == 2312 ) {
-		int i = 0;
-		++i;
-	}
+
 	std::auto_ptr<const CStabPatternDescription> newPtrn(
 		&StabPattern( *preimage ) );
 	assert(newPtrn.get() != 0 );
