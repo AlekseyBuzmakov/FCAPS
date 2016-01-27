@@ -21,7 +21,7 @@
 
 ////////////////////////////////////////////////////////////////////////
 
-const char GastonGraphPatternEnumeratorModule [] = "GastonGraphPatternEnumeratorModule ";
+const char GastonGraphPatternEnumeratorModule [] = "GastonGraphPatternEnumeratorModule";
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -31,7 +31,7 @@ public:
 
 	// Methods of IPatternEnumerator
 	virtual void AddObject( DWORD objectNum, const JSON& intent );
-    virtual void GetNextPattern( TCurrentPatternUsage usage, CPatternImage& pattern );
+    virtual bool GetNextPattern( TCurrentPatternUsage usage, CPatternImage& pattern );
     virtual void ClearMemory( CPatternImage& pattern );
 
 	// Methods of IModule
@@ -61,7 +61,7 @@ private:
 	struct CSyncData;
 private:
 	static CModuleRegistrar<CGastonGraphPatternEnumerator> registar;
-	
+
 	// Path to library with Gaston algorithm
 	std::string libraryPath;
 	// Library with Gaston algo.
@@ -84,6 +84,8 @@ private:
 	RunGastonFunc runGaston;
 	// All data for syncronization
 	CPtrOwner<CSyncData> syncData;
+	// A flag to mark the fact the gaston is started.
+	bool isGastonRun;
 	// Min support to be passed to Gaston
 	int gastonMinSupport;
 	// Max size of a pattern to be passed to Gaston
@@ -96,7 +98,7 @@ private:
 	void loadLibrary();
 	void createGastonThread();
 	bool registerGraph( const LibGastonGraph* graph );
-    void getNextPattern( TCurrentPatternUsage usage, CPatternImage& pattern );
+    bool getNextPattern( TCurrentPatternUsage usage, CPatternImage& pattern );
 
 	void writePattern( const LibGastonGraph* graph );
 };

@@ -40,7 +40,7 @@ interface IPatternEnumerator : public virtual IObject {
     // // Returns an empty pattern, i.e., a pattern that is covered by any other pattern
     // virtual void GetEmptyPattern( CPatternImage& pattern ) = 0;
     // Returns the next pattern.
-    virtual void GetNextPattern( TCurrentPatternUsage usage, CPatternImage& pattern ) = 0;
+    virtual bool GetNextPattern( TCurrentPatternUsage usage, CPatternImage& pattern ) = 0;
     // Clear memory in the pattern
     virtual void ClearMemory( CPatternImage& pattern ) = 0;
 };

@@ -9,6 +9,7 @@
 #include "GastonGraphPatternEnumerator.h"
 
 #include <JSONTools.h>
+#include <RelativePathes.h>
 
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
@@ -50,7 +51,13 @@ struct CGastonGraphPatternEnumerator::CSyncData{
 	boost::condition_variable NewGraphRequested;
 
 	// DATA
-	bool IsDataReady;
+	enum TDataState{
+		DS_Ready = 0,
+		DS_InPreparation,
+		DS_End,
+
+		DS_EnumCount
+	} DataState;
 	bool IsGraphRequested;
 
 	// A number of found patterns
@@ -61,7 +68,7 @@ struct CGastonGraphPatternEnumerator::CSyncData{
 	TCurrentPatternUsage currPatternUsage;
 
 	CSyncData() :
-		IsDataReady( false ), IsGraphRequested( false ), CurrPatternID( -1 ), currPatternUsage( CPU_EnumCount ) {}
+		DataState( DS_InPreparation ), IsGraphRequested( false ), CurrPatternID( -1 ), currPatternUsage( CPU_EnumCount ) {}
 };
 
 ////////////////////////////////////////////////////////////////////////
@@ -73,6 +80,7 @@ CGastonGraphPatternEnumerator::CGastonGraphPatternEnumerator::CGastonGraphPatter
 	inputPath( boost::filesystem::unique_path().native() ),
 	removeInput( true ),
 	syncData( new CSyncData ),
+	isGastonRun( false ),
 	gastonMinSupport( 0 ),
 	gastonMaxPtrnSize( -1 ),
 	gastonMode( GRM_All )
@@ -80,8 +88,19 @@ CGastonGraphPatternEnumerator::CGastonGraphPatternEnumerator::CGastonGraphPatter
     //ctor
 }
 
+CGastonGraphPatternEnumerator::~CGastonGraphPatternEnumerator()
+{
+    inputStream.close();
+    if( removeInput ) {
+        boost::filesystem::remove(inputPath);
+    }
+}
+
 void CGastonGraphPatternEnumerator::AddObject( DWORD objectNum, const JSON& intent )
 {
+    if( !inputStream.is_open() ) {
+        inputStream.open( inputPath );
+    }
 	CJsonError errorText;
 	rapidjson::Document graph;
 	if( !ReadJsonString( intent, graph, errorText ) ) {
@@ -135,9 +154,14 @@ void CGastonGraphPatternEnumerator::AddObject( DWORD objectNum, const JSON& inte
 		inputStream << "e " << arc["S"].GetUint() << " " << arc["D"].GetUint() << " " << edgeLabelMap.GetId( arc["L"].GetString() ) << "\n";
 	}
 }
-void CGastonGraphPatternEnumerator::GetNextPattern( TCurrentPatternUsage usage, CPatternImage& pattern )
+bool CGastonGraphPatternEnumerator::GetNextPattern( TCurrentPatternUsage usage, CPatternImage& pattern )
 {
-	getNextPattern( usage, pattern );
+    if( !isGastonRun ) {
+        createGastonThread();
+        isGastonRun = true;
+    }
+
+	return getNextPattern( usage, pattern );
 }
 void CGastonGraphPatternEnumerator::ClearMemory( CPatternImage& pattern )
 {
@@ -154,20 +178,20 @@ void CGastonGraphPatternEnumerator::LoadParams( const JSON& json )
 	assert( string( params["Type"].GetString() ) == GetType() );
 	assert( string( params["Name"].GetString() ) == GetName());
 
-	if( !(params.HasMember( "Params" ) && params["Params"].IsObject() ) ) {
+	if( params.HasMember( "Params" ) && params["Params"].IsObject() ) {
 		const rapidjson::Value& paramsObj = params["Params"];
 
 		if( paramsObj.HasMember("LibPath") && paramsObj["LibPath"].IsString() ) {
-			libraryPath = paramsObj["LibPath"].GetString();
+			RelativePathes::GetFullPath( paramsObj["LibPath"].GetString(), libraryPath);
 		}
 		if( paramsObj.HasMember("InputPath") && paramsObj["InputPath"].IsString() ) {
-			inputPath = paramsObj["InputPath"].GetString();
+			RelativePathes::GetFullPath( paramsObj["InputPath"].GetString(), inputPath);
 		}
 		if( paramsObj.HasMember( "RemoveInput" ) && paramsObj["RemoveInput"].IsBool() ) {
 			removeInput = paramsObj["RemoveInput"].GetBool();
 		}
 		if( paramsObj.HasMember("PatternPath") && paramsObj["PatternPath"].IsString() ) {
-			patternPath = paramsObj["PatternPath"].GetString();
+			RelativePathes::GetFullPath( paramsObj["PatternPath"].GetString(), patternPath);
 		}
 		if( paramsObj.HasMember("MinSupport") && paramsObj["MinSupport"].IsInt() ) {
 			gastonMinSupport = paramsObj["MinSupport"].GetInt();
@@ -228,7 +252,7 @@ JSON CGastonGraphPatternEnumerator::SaveParams() const
 void CGastonGraphPatternEnumerator::RunGastonThread()
 {
 	boost::unique_lock<boost::mutex> lock( syncData->Access );
-	std::cout << "Gaston: Waiting until first graph requested\n";
+	std::cout << "(!) Gaston: Waiting until first graph requested\n";
 
 	// Waiting until the first graph is requested
 	while(!syncData->IsGraphRequested) {
@@ -236,8 +260,12 @@ void CGastonGraphPatternEnumerator::RunGastonThread()
 	}
 
 	// Just run Gaston
+	std::cout << "(!) Gaston: Starting\n";
 	const bool res = runGaston( this, inputPath.c_str(), gastonMinSupport, &gastonCallback, gastonMaxPtrnSize, gastonMode );
 	assert(res);
+
+	syncData->DataState = CSyncData::DS_End;
+	syncData->HasNewGraph.notify_one();
 }
 
 // A function used as a callback for Gaston algo.
@@ -250,14 +278,12 @@ bool CGastonGraphPatternEnumerator::gastonCallback( LibGastonDataRef data, const
 // Loads libraries and initiate the procedure.
 void CGastonGraphPatternEnumerator::loadLibrary()
 {
-	inputStream.open( inputPath );
 	gastonLib.Open(libraryPath);
 	if( !patternPath.empty() ) {
 		patternStream.open( patternPath );
 	}
 	runGaston = reinterpret_cast<RunGastonFunc>(gastonLib.GetFunc( "RunGaston" ));
 	assert( runGaston != 0 );
-	createGastonThread();
 }
 
 // A simple wrapper to avoid copy of the class
@@ -266,7 +292,7 @@ public:
     CThreadStarter( CGastonGraphPatternEnumerator& _e ) : e(_e) {}
 
     void operator() ()
-	{ e.RunGastonThread(); }
+	{ e.RunGastonThread(); std::cout << "(!) Finishing gaston thread\n"; }
 private:
     CGastonGraphPatternEnumerator& e;
 };
@@ -275,6 +301,7 @@ private:
 void CGastonGraphPatternEnumerator::createGastonThread()
 {
 	assert( runGaston != 0 );
+	std::cout << "(!) Starting gaston thread\n";
 	boost::thread( CThreadStarter( *this ) );
 }
 // Registers a graph found by Gaston.
@@ -284,7 +311,7 @@ bool CGastonGraphPatternEnumerator::registerGraph( const LibGastonGraph* graph )
 	boost::unique_lock<boost::mutex> lock( syncData->Access );
 	//Updating currGraphNumber
 	++syncData->CurrPatternID;
-	std::cout << "Gaston: Registering graph " << syncData->CurrPatternID << "\n";
+	std::cout << "(!) Gaston: Registering graph " << syncData->CurrPatternID << "\n";
 
 
 	// Updating graph info
@@ -297,44 +324,51 @@ bool CGastonGraphPatternEnumerator::registerGraph( const LibGastonGraph* graph )
 	pi.Objects = new int[pi.ImageSize];
 	memcpy(pi.Objects, graph->Objects, pi.ImageSize );
 
-	syncData->IsDataReady = true;
+	syncData->DataState = CSyncData::DS_Ready;
 	syncData->HasNewGraph.notify_one();
 
 	// Writing graph info
 	writePattern( graph );
 
-	std::cout << "Gaston: Registered graph " << syncData->CurrPatternID << "\n";
+	std::cout << "(!) Gaston: Registered graph " << syncData->CurrPatternID << "\n";
 
 	// Waiting untill the next graph is requested
 	while(!syncData->IsGraphRequested) {
 		syncData->NewGraphRequested.wait(lock);
 	}
 	syncData->IsGraphRequested = false;
-	std::cout << "Gaston: Return from callback for graph " << syncData->CurrPatternID << "\n";
+	std::cout << "(!) Gaston: Return from callback for graph " << syncData->CurrPatternID << "\n";
 	return syncData->currPatternUsage == CPU_Expand;
 }
 // Takes the next pattern. Function is used to put together with registerGraph.
-inline void CGastonGraphPatternEnumerator::getNextPattern( TCurrentPatternUsage usage, CPatternImage& pattern )
+inline bool CGastonGraphPatternEnumerator::getNextPattern( TCurrentPatternUsage usage, CPatternImage& pattern )
 {
 	boost::unique_lock<boost::mutex> lock( syncData->Access );
 
 	// Requesting next graph
-	std::cout << "SOFIA: requesting next graph (curr is " << syncData->CurrPatternID << ")\n";
+	std::cout << "(!) SOFIA: requesting next graph (curr is " << syncData->CurrPatternID << ")\n";
 	syncData->currPatternUsage = usage;
 	syncData->IsGraphRequested = true;
 	syncData->NewGraphRequested.notify_one();
 
 	// Waiting while the next graph is ready
-	while( !syncData->IsDataReady ) {
+	while( syncData->DataState == CSyncData::DS_InPreparation ) {
 		syncData->HasNewGraph.wait(lock);
 	}
-	syncData->IsDataReady = false;
-	std::cout << "SOFIA: graph " << syncData->CurrPatternID << " is ready\n";
+	if( syncData->DataState == CSyncData::DS_End ) {
+		return false;
+	}
+	assert( syncData->DataState == CSyncData::DS_Ready );
+
+	syncData->DataState = CSyncData::DS_InPreparation;
+	std::cout << "(!) SOFIA: graph " << syncData->CurrPatternID << " is ready\n";
 
 	ClearMemory( pattern );
 	pattern.ImageSize = syncData->PatternImage.ImageSize;
 	pattern.Objects = new int[pattern.ImageSize];
 	memcpy(pattern.Objects, syncData->PatternImage.Objects, pattern.ImageSize );
+
+	return true;
 }
 
 void CGastonGraphPatternEnumerator::writePattern( const LibGastonGraph* graph )

@@ -83,6 +83,8 @@ void CStabClsPatternProjectionChain::ComputeZeroProjection( CPatternList& ptrns 
 }
 bool CStabClsPatternProjectionChain::NextProjection()
 {
+    assert( enumerator != 0 );
+
 	CPatternImage img;
 	enumerator->GetNextPattern( CPU_Expand, img );
 	enumerator->ClearMemory( img );
@@ -94,6 +96,10 @@ double CStabClsPatternProjectionChain::GetProgress() const
 }
 void CStabClsPatternProjectionChain::Preimages( const IPatternDescriptor* d, CPatternList& preimages )
 {
+    if( enumerator == 0 ) {
+        throw new CTextException( "CStabClsPatternProjectionChain::Preimages", "Params object not found. Necessary for pattern enumerator." );
+    }
+
 	// TODO
 	return;
 }
@@ -121,9 +127,8 @@ void CStabClsPatternProjectionChain::LoadParams( const JSON& json )
 	if( !(params.HasMember( "Params" ) && params["Params"].IsObject()
 		  && params["Params"].HasMember("Enumerator") && params["Params"]["Enumerator"].IsObject() ) )
 	{
-		errorText.Data = json;
-		errorText.Error = "Params object not found. Necessary for pattern enumerator.";
-		throw new CJsonException( "CStabClsPatternProjectionChain::LoadParams", errorText );
+        // Do not throw an exception since this method can be called to pass some params from a context
+        return;
 	}
 
 	const rapidjson::Value& paramsObj = params["Params"];
