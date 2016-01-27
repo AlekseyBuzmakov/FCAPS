@@ -90,7 +90,6 @@ CGastonGraphPatternEnumerator::CGastonGraphPatternEnumerator::CGastonGraphPatter
 
 CGastonGraphPatternEnumerator::~CGastonGraphPatternEnumerator()
 {
-    inputStream.close();
     if( removeInput ) {
         boost::filesystem::remove(inputPath);
     }
@@ -157,6 +156,10 @@ void CGastonGraphPatternEnumerator::AddObject( DWORD objectNum, const JSON& inte
 bool CGastonGraphPatternEnumerator::GetNextPattern( TCurrentPatternUsage usage, CPatternImage& pattern )
 {
     if( !isGastonRun ) {
+        // Does not allow for modification of the input data anymore
+        if( inputStream.is_open() ) {
+            inputStream.close();
+        }
         createGastonThread();
         isGastonRun = true;
     }
@@ -251,21 +254,31 @@ JSON CGastonGraphPatternEnumerator::SaveParams() const
 
 void CGastonGraphPatternEnumerator::RunGastonThread()
 {
-	boost::unique_lock<boost::mutex> lock( syncData->Access );
-	std::cout << "(!) Gaston: Waiting until first graph requested\n";
+    {
+        // It should be unlocked before running Gasotn in order to lock it later in callback when we are going to report a graph
+        boost::unique_lock<boost::mutex> lock( syncData->Access );
+        std::cout << "(!) Gaston: Waiting until first graph requested\n";
 
-	// Waiting until the first graph is requested
-	while(!syncData->IsGraphRequested) {
-		syncData->NewGraphRequested.wait(lock);
-	}
+        // Waiting until the first graph is requested
+        while(!syncData->IsGraphRequested) {
+            syncData->NewGraphRequested.wait(lock);
+        }
+
+        // We are not accessing syncData now
+    }
 
 	// Just run Gaston
 	std::cout << "(!) Gaston: Starting\n";
 	const bool res = runGaston( this, inputPath.c_str(), gastonMinSupport, &gastonCallback, gastonMaxPtrnSize, gastonMode );
 	assert(res);
 
-	syncData->DataState = CSyncData::DS_End;
-	syncData->HasNewGraph.notify_one();
+    {
+        // But now we need a new access to syncData.
+        boost::unique_lock<boost::mutex> lock( syncData->Access );
+
+        syncData->DataState = CSyncData::DS_End;
+        syncData->HasNewGraph.notify_one();
+    }
 }
 
 // A function used as a callback for Gaston algo.
@@ -279,11 +292,12 @@ bool CGastonGraphPatternEnumerator::gastonCallback( LibGastonDataRef data, const
 void CGastonGraphPatternEnumerator::loadLibrary()
 {
 	gastonLib.Open(libraryPath);
+	runGaston = reinterpret_cast<RunGastonFunc>(gastonLib.GetFunc( "RunGaston" ));
+	assert( runGaston != 0 );
+
 	if( !patternPath.empty() ) {
 		patternStream.open( patternPath );
 	}
-	runGaston = reinterpret_cast<RunGastonFunc>(gastonLib.GetFunc( "RunGaston" ));
-	assert( runGaston != 0 );
 }
 
 // A simple wrapper to avoid copy of the class
@@ -307,6 +321,8 @@ void CGastonGraphPatternEnumerator::createGastonThread()
 // Registers a graph found by Gaston.
 bool CGastonGraphPatternEnumerator::registerGraph( const LibGastonGraph* graph )
 {
+	std::cout << "(!) Gaston: callback entry for graph " << syncData->CurrPatternID+1 << "\n";
+
 	assert( graph != 0 );
 	boost::unique_lock<boost::mutex> lock( syncData->Access );
 	//Updating currGraphNumber
@@ -346,7 +362,7 @@ inline bool CGastonGraphPatternEnumerator::getNextPattern( TCurrentPatternUsage 
 	boost::unique_lock<boost::mutex> lock( syncData->Access );
 
 	// Requesting next graph
-	std::cout << "(!) SOFIA: requesting next graph (curr is " << syncData->CurrPatternID << ")\n";
+	std::cout << "(!) SOFIA: requesting next graph (curr is " << syncData->CurrPatternID << ") \n";
 	syncData->currPatternUsage = usage;
 	syncData->IsGraphRequested = true;
 	syncData->NewGraphRequested.notify_one();
@@ -382,11 +398,11 @@ void CGastonGraphPatternEnumerator::writePattern( const LibGastonGraph* graph )
 	patternStream << "t # " << syncData->CurrPatternID << "\n";
 
 	for (DWORD i = 0; i < graph->VertexCount; i++) {
-		patternStream << "v " << i << " " << graph->Vertices[i] << " # " << vertexLabelMap.GetLabel(graph->Vertices[i]) << "\n";
+		patternStream << "v " << i << " " << graph->Vertices[i] /*<< " # " << vertexLabelMap.GetLabel(graph->Vertices[i])*/ << "\n";
 	}
 	for (DWORD i = 0; i < graph->EdgeCount; i++) {
 		patternStream << "e " << i
 		              << " " << graph->Edges[i].From << " " << graph->Edges[i].To
-		              << " # " << edgeLabelMap.GetLabel(graph->Edges[i].Label) << "\n";
+		              /*<< " # " << edgeLabelMap.GetLabel(graph->Edges[i].Label)*/ << "\n";
 	}
 }

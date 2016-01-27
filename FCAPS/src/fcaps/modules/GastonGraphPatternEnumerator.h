@@ -28,6 +28,7 @@ const char GastonGraphPatternEnumeratorModule [] = "GastonGraphPatternEnumerator
 class CGastonGraphPatternEnumerator : public IPatternEnumerator, public IModule {
 public:
     CGastonGraphPatternEnumerator();
+    ~CGastonGraphPatternEnumerator();
 
 	// Methods of IPatternEnumerator
 	virtual void AddObject( DWORD objectNum, const JSON& intent );

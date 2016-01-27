@@ -86,9 +86,9 @@ bool CStabClsPatternProjectionChain::NextProjection()
     assert( enumerator != 0 );
 
 	CPatternImage img;
-	enumerator->GetNextPattern( CPU_Expand, img );
+	const bool res = enumerator->GetNextPattern( CPU_Expand, img );
 	enumerator->ClearMemory( img );
-	return false;
+	return res;
 }
 double CStabClsPatternProjectionChain::GetProgress() const
 {

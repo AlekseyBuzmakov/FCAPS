@@ -67,8 +67,16 @@ inline bool fileExists (const std::string& name) {
 	}
 }
 
+inline bool isAbsolutePath( const std::string& path )
+{
+    return path[0] == '/'; // TODO what about crosplatform?
+}
 void GetFullPath( const std::string& path, std::string& fullPath )
 {
+    if( isAbsolutePath(path) ) {
+        fullPath = path;
+        return;
+    }
 	DWORD id = TOP_SEARCH_PATH;
 	string sPath;
 	while( id != END_SEARCH_PATH ) {
@@ -81,7 +89,9 @@ void GetFullPath( const std::string& path, std::string& fullPath )
 	if( fileExists( path ) ) {
 		fullPath = path;
 	} else {
-		// We hope that the most general path is working.
+		// We return the first path
+		GetSearchPath( TOP_SEARCH_PATH, fullPath );
+		fullPath += path;
 	}
 }
 
