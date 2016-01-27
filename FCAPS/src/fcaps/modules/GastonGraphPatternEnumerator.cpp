@@ -14,8 +14,24 @@
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
 
+//#define DEBUG_OUTPUT
+
+class CThumbCOUT {
+public:
+    template<typename T>
+    CThumbCOUT& operator << ( T )
+    { return *this; }
+} thumbCOUT;
+
+#ifdef DEBUG_OUTPUT
+#define COUT std::cout
+#else
+#define COUT thumbCOUT
+#endif // DEBUG_OUTPUT
+
 using namespace std;
 using namespace boost;
+
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -257,7 +273,7 @@ void CGastonGraphPatternEnumerator::RunGastonThread()
     {
         // It should be unlocked before running Gasotn in order to lock it later in callback when we are going to report a graph
         boost::unique_lock<boost::mutex> lock( syncData->Access );
-        std::cout << "(!) Gaston: Waiting until first graph requested\n";
+        COUT << "(!) Gaston: Waiting until first graph requested\n";
 
         // Waiting until the first graph is requested
         while(!syncData->IsGraphRequested) {
@@ -268,7 +284,7 @@ void CGastonGraphPatternEnumerator::RunGastonThread()
     }
 
 	// Just run Gaston
-	std::cout << "(!) Gaston: Starting\n";
+	COUT << "(!) Gaston: Starting\n";
 	const bool res = runGaston( this, inputPath.c_str(), gastonMinSupport, &gastonCallback, gastonMaxPtrnSize, gastonMode );
 	assert(res);
 
@@ -291,6 +307,7 @@ bool CGastonGraphPatternEnumerator::gastonCallback( LibGastonDataRef data, const
 // Loads libraries and initiate the procedure.
 void CGastonGraphPatternEnumerator::loadLibrary()
 {
+    COUT << "Openning library '" << libraryPath << "' with Gaston algo.\n";
 	gastonLib.Open(libraryPath);
 	runGaston = reinterpret_cast<RunGastonFunc>(gastonLib.GetFunc( "RunGaston" ));
 	assert( runGaston != 0 );
@@ -306,7 +323,7 @@ public:
     CThreadStarter( CGastonGraphPatternEnumerator& _e ) : e(_e) {}
 
     void operator() ()
-	{ e.RunGastonThread(); std::cout << "(!) Finishing gaston thread\n"; }
+	{ e.RunGastonThread(); COUT << "(!) Finishing gaston thread\n"; }
 private:
     CGastonGraphPatternEnumerator& e;
 };
@@ -315,19 +332,19 @@ private:
 void CGastonGraphPatternEnumerator::createGastonThread()
 {
 	assert( runGaston != 0 );
-	std::cout << "(!) Starting gaston thread\n";
+	COUT << "(!) Starting gaston thread\n";
 	boost::thread( CThreadStarter( *this ) );
 }
 // Registers a graph found by Gaston.
 bool CGastonGraphPatternEnumerator::registerGraph( const LibGastonGraph* graph )
 {
-	std::cout << "(!) Gaston: callback entry for graph " << syncData->CurrPatternID+1 << "\n";
+	COUT << "(!) Gaston: callback entry for graph " << syncData->CurrPatternID+1 << "\n";
 
 	assert( graph != 0 );
 	boost::unique_lock<boost::mutex> lock( syncData->Access );
 	//Updating currGraphNumber
 	++syncData->CurrPatternID;
-	std::cout << "(!) Gaston: Registering graph " << syncData->CurrPatternID << "\n";
+	COUT << "(!) Gaston: Registering graph " << syncData->CurrPatternID << "\n";
 
 
 	// Updating graph info
@@ -346,14 +363,14 @@ bool CGastonGraphPatternEnumerator::registerGraph( const LibGastonGraph* graph )
 	// Writing graph info
 	writePattern( graph );
 
-	std::cout << "(!) Gaston: Registered graph " << syncData->CurrPatternID << "\n";
+	COUT << "(!) Gaston: Registered graph " << syncData->CurrPatternID << "\n";
 
 	// Waiting untill the next graph is requested
 	while(!syncData->IsGraphRequested) {
 		syncData->NewGraphRequested.wait(lock);
 	}
 	syncData->IsGraphRequested = false;
-	std::cout << "(!) Gaston: Return from callback for graph " << syncData->CurrPatternID << "\n";
+	COUT << "(!) Gaston: Return from callback for graph " << syncData->CurrPatternID << "\n";
 	return syncData->currPatternUsage == CPU_Expand;
 }
 // Takes the next pattern. Function is used to put together with registerGraph.
@@ -362,7 +379,7 @@ inline bool CGastonGraphPatternEnumerator::getNextPattern( TCurrentPatternUsage 
 	boost::unique_lock<boost::mutex> lock( syncData->Access );
 
 	// Requesting next graph
-	std::cout << "(!) SOFIA: requesting next graph (curr is " << syncData->CurrPatternID << ") \n";
+	COUT << "(!) SOFIA: requesting next graph (curr is " << syncData->CurrPatternID << ") \n";
 	syncData->currPatternUsage = usage;
 	syncData->IsGraphRequested = true;
 	syncData->NewGraphRequested.notify_one();
@@ -377,7 +394,7 @@ inline bool CGastonGraphPatternEnumerator::getNextPattern( TCurrentPatternUsage 
 	assert( syncData->DataState == CSyncData::DS_Ready );
 
 	syncData->DataState = CSyncData::DS_InPreparation;
-	std::cout << "(!) SOFIA: graph " << syncData->CurrPatternID << " is ready\n";
+	COUT << "(!) SOFIA: graph " << syncData->CurrPatternID << " is ready\n";
 
 	ClearMemory( pattern );
 	pattern.ImageSize = syncData->PatternImage.ImageSize;

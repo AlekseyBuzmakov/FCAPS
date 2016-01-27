@@ -22,6 +22,9 @@ void BaseName( const std::string& path, std::string& dirName )
 	} else {
 		dirName = path.substr( 0, pos + 1 );
 	}
+	if( dirName.empty() ) {
+        dirName = "./";
+	}
 }
 
 deque<string>& getSPathes()
@@ -31,6 +34,8 @@ deque<string>& getSPathes()
 }
 void PushSearchPath( const std::string& path )
 {
+    assert( !path.empty() );
+
 	const size_t pos = path.find_last_of( "/\\");
 	assert( pos == path.size() - 1 );
 	getSPathes().push_back( path );
@@ -87,6 +92,7 @@ void GetFullPath( const std::string& path, std::string& fullPath )
 		}
 	}
 	if( fileExists( path ) ) {
+        assert( false );
 		fullPath = path;
 	} else {
 		// We return the first path
