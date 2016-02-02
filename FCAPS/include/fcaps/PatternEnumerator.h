@@ -25,10 +25,17 @@ enum TCurrentPatternUsage {
 
 // A structure for encoding the image of a pattern
 struct CPatternImage {
+    typedef unsigned int TPatternId;
+
+	// Unique id of the pattern
+	TPatternId PatternId;
+	// The cardinality of the image, known as support.
     int ImageSize;
+	// The image (the set of objects) of the pattern.
     int* Objects;
 
 	CPatternImage() :
+		PatternId( -1 ),
 		ImageSize( 0 ),
 		Objects( 0 ) {}
 };

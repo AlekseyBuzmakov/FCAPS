@@ -27,10 +27,9 @@ public:
 	CStabClsPatternProjectionChain();
 
 	// Methods of IProjectionChain
-	virtual const std::vector<std::string>& GetObjNames() const
-	{ return objNames; }
-	virtual void SetObjNames( const std::vector<std::string>& names )
-	{ objNames = names; };
+	virtual const std::vector<std::string>& GetObjNames() const;
+	virtual void SetObjNames( const std::vector<std::string>& names );
+
 	virtual void AddObject( DWORD objectNum, const JSON& intent );
 	virtual void UpdateInterestThreshold( const double& thld );
 	virtual double GetPatternInterest( const IPatternDescriptor* p );
@@ -58,16 +57,20 @@ protected:
 
 private:
 	static CModuleRegistrar<CStabClsPatternProjectionChain> registar;
-	// Names of objects
-	std::vector<std::string> objNames;
+	// Number of added objects
+	DWORD objectCount;
 	// Number of enumerated patterns
 	DWORD patternCount;
 	CSharedPtr<IPatternEnumerator> enumerator;
 	// Comparator for extents
 	CSharedPtr<CVectorBinarySetJoinComparator> extCmp;
 	CPatternDeleter extDeleter;
+	DWORD thld;
+	CSharedPtr<CVectorBinarySetDescriptor> nextImage;
 
 	const CStabClsPatternDescription& Ptrn( const IPatternDescriptor* p ) const;
+	bool initializeNewPattern( const CStabClsPatternDescription& parent, CStabClsPatternDescription& newPtrn);
+	void addChild( const CSharedPtr<const CVectorBinarySetDescriptor>& child, const CStabClsPatternDescription& ptrn );
 };
 
 #endif // STABCLSPATTERNPROJECTIONCHAIN_H

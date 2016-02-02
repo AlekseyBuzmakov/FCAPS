@@ -76,15 +76,13 @@ struct CGastonGraphPatternEnumerator::CSyncData{
 	} DataState;
 	bool IsGraphRequested;
 
-	// A number of found patterns
-	DWORD CurrPatternID;
 	// The curr graph pattern
 	CPatternImage PatternImage;
 	// Was the found graph usefull
 	TCurrentPatternUsage currPatternUsage;
 
 	CSyncData() :
-		DataState( DS_InPreparation ), IsGraphRequested( false ), CurrPatternID( -1 ), currPatternUsage( CPU_EnumCount ) {}
+		DataState( DS_InPreparation ), IsGraphRequested( false ), currPatternUsage( CPU_EnumCount ) {}
 };
 
 ////////////////////////////////////////////////////////////////////////
@@ -338,13 +336,13 @@ void CGastonGraphPatternEnumerator::createGastonThread()
 // Registers a graph found by Gaston.
 bool CGastonGraphPatternEnumerator::registerGraph( const LibGastonGraph* graph )
 {
-	COUT << "(!) Gaston: callback entry for graph " << syncData->CurrPatternID+1 << "\n";
+	COUT << "(!) Gaston: callback entry for graph " << syncData->PatternImage.PatternId+1 << "\n";
 
 	assert( graph != 0 );
 	boost::unique_lock<boost::mutex> lock( syncData->Access );
 	//Updating currGraphNumber
-	++syncData->CurrPatternID;
-	COUT << "(!) Gaston: Registering graph " << syncData->CurrPatternID << "\n";
+	++syncData->PatternImage.PatternId;
+	COUT << "(!) Gaston: Registering graph " << syncData->PatternImage.PatternId << "\n";
 
 
 	// Updating graph info
@@ -363,14 +361,14 @@ bool CGastonGraphPatternEnumerator::registerGraph( const LibGastonGraph* graph )
 	// Writing graph info
 	writePattern( graph );
 
-	COUT << "(!) Gaston: Registered graph " << syncData->CurrPatternID << "\n";
+	COUT << "(!) Gaston: Registered graph " << syncData->PatternImage.PatternId << "\n";
 
 	// Waiting untill the next graph is requested
 	while(!syncData->IsGraphRequested) {
 		syncData->NewGraphRequested.wait(lock);
 	}
 	syncData->IsGraphRequested = false;
-	COUT << "(!) Gaston: Return from callback for graph " << syncData->CurrPatternID << "\n";
+	COUT << "(!) Gaston: Return from callback for graph " << syncData->PatternImage.PatternId << "\n";
 	return syncData->currPatternUsage == CPU_Expand;
 }
 // Takes the next pattern. Function is used to put together with registerGraph.
@@ -379,7 +377,7 @@ inline bool CGastonGraphPatternEnumerator::getNextPattern( TCurrentPatternUsage 
 	boost::unique_lock<boost::mutex> lock( syncData->Access );
 
 	// Requesting next graph
-	COUT << "(!) SOFIA: requesting next graph (curr is " << syncData->CurrPatternID << ") \n";
+	COUT << "(!) SOFIA: requesting next graph (curr is " << syncData->PatternImage.PatternId << ") \n";
 	syncData->currPatternUsage = usage;
 	syncData->IsGraphRequested = true;
 	syncData->NewGraphRequested.notify_one();
@@ -394,9 +392,10 @@ inline bool CGastonGraphPatternEnumerator::getNextPattern( TCurrentPatternUsage 
 	assert( syncData->DataState == CSyncData::DS_Ready );
 
 	syncData->DataState = CSyncData::DS_InPreparation;
-	COUT << "(!) SOFIA: graph " << syncData->CurrPatternID << " is ready\n";
+	COUT << "(!) SOFIA: graph " << syncData->PatternImage.PatternId << " is ready\n";
 
 	ClearMemory( pattern );
+	pattern.PatternId = syncData->PatternImage.PatternId;
 	pattern.ImageSize = syncData->PatternImage.ImageSize;
 	pattern.Objects = new int[pattern.ImageSize];
 	memcpy(pattern.Objects, syncData->PatternImage.Objects, pattern.ImageSize );
@@ -412,7 +411,7 @@ void CGastonGraphPatternEnumerator::writePattern( const LibGastonGraph* graph )
 	}
 
 	patternStream << "# " << graph->Support << "\n";
-	patternStream << "t # " << syncData->CurrPatternID << "\n";
+	patternStream << "t # " << syncData->PatternImage.PatternId << "\n";
 
 	for (DWORD i = 0; i < graph->VertexCount; i++) {
 		patternStream << "v " << i << " " << graph->Vertices[i] /*<< " # " << vertexLabelMap.GetLabel(graph->Vertices[i])*/ << "\n";

@@ -27,7 +27,7 @@
 				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters="-data:/home/leshyk/PhD/data/FIMI/mushroom/dataset.json -CP://home/leshyk/PhD/data/FIMI/mushroom/sofia-stabFixedThld.json -out" />
+				<Option parameters="-data:/home/leshyk/Science/Data/gaston-debug/context.json  -CP:/home/leshyk/Science/Data/gaston-debug/sofia.json -out -n:0" />
 				<Compiler>
 					<Add option="-O2" />
 					<Add option="-Wno-unused-variable" />
