@@ -183,6 +183,8 @@ bool CGastonGraphPatternEnumerator::GetNextPattern( TCurrentPatternUsage usage, 
 void CGastonGraphPatternEnumerator::ClearMemory( CPatternImage& pattern )
 {
 	delete[] pattern.Objects;
+	pattern.Objects=0;
+	pattern.ImageSize=0;
 }
 
 void CGastonGraphPatternEnumerator::LoadParams( const JSON& json )

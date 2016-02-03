@@ -138,22 +138,42 @@ bool CStabClsPatternProjectionChain::NextProjection()
     assert( enumerator != 0 );
 
 	CPatternImage img;
-	const bool res = enumerator->GetNextPattern( isStablePtrnFound ? CPU_Expand : CPU_Reject, img );
-	if( !res ) {
+	CSharedPtr<CVectorBinarySetDescriptor> nextImageCandidate;
+	while( true ) {
+        const bool res = enumerator->GetNextPattern( isStablePtrnFound ? CPU_Expand : CPU_Reject, img );
+        if( !res ) {
+            return false;
+        }
+        if( img.ImageSize < thld ) {
+            // Cannot be stable.
+            // Neither its children
+            isStablePtrnFound=false;
+            enumerator->ClearMemory( img );
+            continue;
+        }
+        isStablePtrnFound = true; // while cycling, we should expand.
+
+        ++patternCount;
+
+        nextImageCandidate.reset( extCmp->NewPattern(), extDeleter );
+        assert( img.ImageSize > 0 );
+        for (DWORD i = 0; i < img.ImageSize; i++) {
+            extCmp->AddValue( static_cast<DWORD>( img.Objects[i]), *nextImageCandidate );
+        }
+
+        if( nextImage == 0 || extCmp->Compare( *nextImageCandidate, *nextImage, CR_Equal, CR_AllResults | CR_Incomparable ) == CR_Incomparable ) {
+            // found a new pattern;
+            nextImage = nextImageCandidate;
+            break;
+        }
+
         enumerator->ClearMemory( img );
-        return false;
 	}
 
-	isStablePtrnFound = false;
-	++patternCount;
+    enumerator->ClearMemory( img );
 
-	nextImage.reset( extCmp->NewPattern(), extDeleter );
-	for (DWORD i = 0; i < img.ImageSize; i++) {
-		extCmp->AddValue( static_cast<DWORD>(img.Objects[i]), *nextImage );
-	}
-
-	enumerator->ClearMemory( img );
-	return true;
+    isStablePtrnFound = false;
+ 	return true;
 }
 double CStabClsPatternProjectionChain::GetProgress() const
 {
