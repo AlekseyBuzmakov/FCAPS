@@ -241,7 +241,13 @@ void CSofiaContextProcessor::addNewPatterns( const IProjectionChain::CPatternLis
 	CStdIterator<IProjectionChain::CPatternList::CConstIterator, false> itr(newPatterns);
 	DWORD i = 0;
 	for( ; !itr.IsEnd(); ++itr, ++i ) {
-		const IPatternDescriptor* p = storage.AddPattern( *itr );
+        const IPatternDescriptor* origP = *itr;
+		const IPatternDescriptor* p = storage.AddPattern( origP );
+		// TOKILL
+		if( pChain->GetPatternInterest(p) - thld < 0) {
+            int a = 0;
+            ++a;
+		}
 		assert( pChain->GetPatternInterest(p) - thld >= -0.00001*thld );
 	}
 }

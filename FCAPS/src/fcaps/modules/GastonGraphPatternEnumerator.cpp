@@ -277,6 +277,7 @@ void CGastonGraphPatternEnumerator::RunGastonThread()
         while(!syncData->IsGraphRequested) {
             syncData->NewGraphRequested.wait(lock);
         }
+        syncData->IsGraphRequested = false;
 
         // We are not accessing syncData now
     }
@@ -353,7 +354,7 @@ bool CGastonGraphPatternEnumerator::registerGraph( const LibGastonGraph* graph )
 
 	pi.ImageSize = graph->Support;
 	pi.Objects = new int[pi.ImageSize];
-	memcpy(pi.Objects, graph->Objects, pi.ImageSize );
+	memcpy(pi.Objects, graph->Objects, pi.ImageSize * sizeof( pi.Objects[0] ));
 
 	syncData->DataState = CSyncData::DS_Ready;
 	syncData->HasNewGraph.notify_one();
@@ -397,8 +398,10 @@ inline bool CGastonGraphPatternEnumerator::getNextPattern( TCurrentPatternUsage 
 	ClearMemory( pattern );
 	pattern.PatternId = syncData->PatternImage.PatternId;
 	pattern.ImageSize = syncData->PatternImage.ImageSize;
-	pattern.Objects = new int[pattern.ImageSize];
-	memcpy(pattern.Objects, syncData->PatternImage.Objects, pattern.ImageSize );
+	pattern.Objects = syncData->PatternImage.Objects;
+
+	syncData->PatternImage.Objects = 0;
+	syncData->PatternImage.ImageSize = 0;
 
 	return true;
 }
@@ -421,4 +424,11 @@ void CGastonGraphPatternEnumerator::writePattern( const LibGastonGraph* graph )
 		              << " " << graph->Edges[i].From << " " << graph->Edges[i].To
 		              /*<< " # " << edgeLabelMap.GetLabel(graph->Edges[i].Label)*/ << "\n";
 	}
+	patternStream << "x";
+	for( DWORD i = 0; i < graph->Support; ++i ) {
+        patternStream << " " << graph->Objects[i];
+	}
+	patternStream << "\n";
+
+	patternStream.flush();
 }

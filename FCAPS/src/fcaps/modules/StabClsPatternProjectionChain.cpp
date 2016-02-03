@@ -54,7 +54,8 @@ CStabClsPatternProjectionChain::CStabClsPatternProjectionChain() :
 	patternCount(0),
 	extCmp( new CVectorBinarySetJoinComparator() ),
 	extDeleter( extCmp ),
-	thld( 0 )
+	thld( 0 ),
+	isStablePtrnFound( true )
 {
 }
 const std::vector<std::string>& CStabClsPatternProjectionChain::GetObjNames() const
@@ -73,7 +74,7 @@ void CStabClsPatternProjectionChain::AddObject( DWORD objectNum, const JSON& int
 }
 void CStabClsPatternProjectionChain::UpdateInterestThreshold( const double& t )
 {
-	thld = static_cast<DWORD>( t );
+	thld = static_cast<DWORD>( t + 0.5 );
 }
 double CStabClsPatternProjectionChain::GetPatternInterest( const IPatternDescriptor* p )
 {
@@ -103,11 +104,11 @@ double CStabClsPatternProjectionChain::GetPatternInterest( const IPatternDescrip
 }
 bool CStabClsPatternProjectionChain::AreEqual(const IPatternDescriptor* p, const IPatternDescriptor* q) const
 {
-	return extCmp->Compare( p, q, CR_Equal, CR_AllResults | CR_Incomparable ) == CR_Equal;
+	return extCmp->Compare( Ptrn(p).Extent(), Ptrn(q).Extent(), CR_Equal, CR_AllResults | CR_Incomparable ) == CR_Equal;
 }
 bool CStabClsPatternProjectionChain::IsSmaller(const IPatternDescriptor* p, const IPatternDescriptor* q) const
 {
-	return extCmp->Compare( p, q, CR_LessGeneral, CR_AllResults | CR_Incomparable ) == CR_LessGeneral;
+	return extCmp->Compare( Ptrn(p).Extent(), Ptrn(q).Extent(), CR_LessGeneral, CR_AllResults | CR_Incomparable ) == CR_LessGeneral;
 }
 bool CStabClsPatternProjectionChain::IsTopoSmaller(const IPatternDescriptor* p, const IPatternDescriptor* q) const
 {
@@ -119,10 +120,13 @@ void CStabClsPatternProjectionChain::FreePattern(const IPatternDescriptor* p ) c
 }
 void CStabClsPatternProjectionChain::ComputeZeroProjection( CPatternList& ptrns )
 {
+    // TODO
+    objectCount = 340;
+
 	extCmp->SetMaxAttrNumber( objectCount );
 
 	CSharedPtr<CVectorBinarySetDescriptor> ext(extCmp->NewPattern(), extDeleter );
-	for( DWORD i = 0; i < extCmp->GetMaxAttrNumber(); i++ ) {
+	for( DWORD i = 0; i < objectCount; i++ ) {
 		extCmp->AddValue( i, *ext.get() );
 	}
 	CStabClsPatternDescription* ptrn = new CStabClsPatternDescription( ext );
@@ -134,7 +138,13 @@ bool CStabClsPatternProjectionChain::NextProjection()
     assert( enumerator != 0 );
 
 	CPatternImage img;
-	const bool res = enumerator->GetNextPattern( CPU_Expand, img );
+	const bool res = enumerator->GetNextPattern( isStablePtrnFound ? CPU_Expand : CPU_Reject, img );
+	if( !res ) {
+        enumerator->ClearMemory( img );
+        return false;
+	}
+
+	isStablePtrnFound = false;
 	++patternCount;
 
 	nextImage.reset( extCmp->NewPattern(), extDeleter );
@@ -143,7 +153,7 @@ bool CStabClsPatternProjectionChain::NextProjection()
 	}
 
 	enumerator->ClearMemory( img );
-	return res;
+	return true;
 }
 double CStabClsPatternProjectionChain::GetProgress() const
 {
@@ -159,8 +169,11 @@ void CStabClsPatternProjectionChain::Preimages( const IPatternDescriptor* d, CPa
 	// Computing the only possible preimage
 	CSharedPtr<const CVectorBinarySetDescriptor> res(
 		extCmp->CalculateSimilarity( ptrn.Extent(), *nextImage ), extDeleter );
-	const DWORD extDiff = ptrn.Extent().Size() - res->Size();
+    const DWORD ptrnExtSize = ptrn.Extent().Size();
+    const DWORD resExtSize = res->Size();
+	const DWORD extDiff = ptrnExtSize - resExtSize;
 	if(extDiff == 0 ) {
+		isStablePtrnFound = true;
 		/*  TODO: if we want to save intent */
 		// ptrn.Intent().PushBack( currAttr );
 
@@ -172,6 +185,7 @@ void CStabClsPatternProjectionChain::Preimages( const IPatternDescriptor* d, CPa
 	if( initializeNewPattern( ptrn, *newPtrn ) ) {
 		// The new pattern is stable.
 		//  We should add it to preimages.
+		isStablePtrnFound = true;
 		preimages.PushBack( newPtrn.release() );
 	}
 
@@ -260,9 +274,15 @@ CStabClsPatternProjectionChain::Ptrn( const IPatternDescriptor* p ) const
 bool CStabClsPatternProjectionChain::initializeNewPattern(
 	const CStabClsPatternDescription& parent, CStabClsPatternDescription& newPtrn)
 {
+	const DWORD newPtrnExtSize = newPtrn.Extent().Size();
+	if( newPtrnExtSize < thld ) {
+        // Cannot be stable.
+        return false;
+	}
+    newPtrn.DMeasure() = newPtrnExtSize;
+
 	// Computing intersection of parent's children with the new pattern and verifying that it is still stable.
 	CStdIterator<CStabClsPatternDescription::TChildren::const_iterator> ch( parent.Children() );
-	const DWORD newPtrnExtSize = newPtrn.Extent().Size();
 	for( ; !ch.IsEnd(); ++ch ) {
 		CSharedPtr<const CVectorBinarySetDescriptor> res(
 			extCmp->CalculateSimilarity( **ch, *nextImage ), extDeleter );
@@ -274,8 +294,9 @@ bool CStabClsPatternProjectionChain::initializeNewPattern(
 			// ==> IGNORING
 			return false;
 		}
-
 		addChild( res, newPtrn );
+
+		newPtrn.DMeasure()=min(newPtrn.DMeasure(), extDiff );
 	}
     return true;
 }

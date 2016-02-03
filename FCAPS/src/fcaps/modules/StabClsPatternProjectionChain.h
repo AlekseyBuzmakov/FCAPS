@@ -65,8 +65,12 @@ private:
 	// Comparator for extents
 	CSharedPtr<CVectorBinarySetJoinComparator> extCmp;
 	CPatternDeleter extDeleter;
+	// Threshold for DMeasure
 	DWORD thld;
+	// The image of the next foundto process
 	CSharedPtr<CVectorBinarySetDescriptor> nextImage;
+	// Weather stable patterns were created for current projection
+	bool isStablePtrnFound;
 
 	const CStabClsPatternDescription& Ptrn( const IPatternDescriptor* p ) const;
 	bool initializeNewPattern( const CStabClsPatternDescription& parent, CStabClsPatternDescription& newPtrn);

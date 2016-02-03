@@ -488,7 +488,7 @@ inline uintptr_t CVectorBinarySetJoinComparator::getNextBit( uintptr_t block, ch
 {
 	block >>= (++bit);
 	while( block != 0
-		&& bit < 64 ) // A bug in the compiler (?) after update in my ubuntu (1 >> 64) == 1
+		&& bit < sizeof(uintptr_t) * 8 ) // A bug in the compiler (?) after update in my ubuntu (1 >> 64) == 1
 	{
 		if( (block & 1) != 0 ) {
 			return bit;
