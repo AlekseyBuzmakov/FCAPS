@@ -68,6 +68,7 @@ public:
 
 	// Reserve memory.
 	void Reserve( size_t blockCount );
+	size_t GetAvailableBlockCount() const;
 
 	// Non virtual method for comparison and intersection
 	TCompareResult Compare(

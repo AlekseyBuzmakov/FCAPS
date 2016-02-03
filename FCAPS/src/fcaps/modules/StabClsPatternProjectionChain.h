@@ -71,6 +71,8 @@ private:
 	CSharedPtr<CVectorBinarySetDescriptor> nextImage;
 	// Weather stable patterns were created for current projection
 	bool isStablePtrnFound;
+	// Requested reserve for patterns
+	DWORD requestedReserve;
 
 	const CStabClsPatternDescription& Ptrn( const IPatternDescriptor* p ) const;
 	bool initializeNewPattern( const CStabClsPatternDescription& parent, CStabClsPatternDescription& newPtrn);

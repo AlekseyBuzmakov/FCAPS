@@ -55,7 +55,8 @@ CStabClsPatternProjectionChain::CStabClsPatternProjectionChain() :
 	extCmp( new CVectorBinarySetJoinComparator() ),
 	extDeleter( extCmp ),
 	thld( 0 ),
-	isStablePtrnFound( true )
+	isStablePtrnFound( true ),
+	requestedReserve( NotFound )
 {
 }
 const std::vector<std::string>& CStabClsPatternProjectionChain::GetObjNames() const
@@ -121,9 +122,12 @@ void CStabClsPatternProjectionChain::FreePattern(const IPatternDescriptor* p ) c
 void CStabClsPatternProjectionChain::ComputeZeroProjection( CPatternList& ptrns )
 {
     // TODO
-    objectCount = 340;
+    objectCount = 189771;
 
 	extCmp->SetMaxAttrNumber( objectCount );
+    if( requestedReserve != (DWORD)-1 ) {
+        extCmp->Reserve( requestedReserve );
+    }
 
 	CSharedPtr<CVectorBinarySetDescriptor> ext(extCmp->NewPattern(), extDeleter );
 	for( DWORD i = 0; i < objectCount; i++ ) {
@@ -144,13 +148,14 @@ bool CStabClsPatternProjectionChain::NextProjection()
         if( !res ) {
             return false;
         }
-        if( img.ImageSize < thld ) {
-            // Cannot be stable.
-            // Neither its children
-            isStablePtrnFound=false;
-            enumerator->ClearMemory( img );
-            continue;
-        }
+        /* Cannot ignore unstable results, since it could make unstable existing patterns */
+//        if( img.ImageSize < thld ) {
+//            // Cannot be stable.
+//            // Neither its children
+//            isStablePtrnFound=false;
+//            enumerator->ClearMemory( img );
+//            continue;
+//        }
         isStablePtrnFound = true; // while cycling, we should expand.
 
         ++patternCount;
@@ -249,6 +254,9 @@ void CStabClsPatternProjectionChain::LoadParams( const JSON& json )
 	if( enumerator == 0 ) {
 		throw new CJsonException( "CStabClsPatternProjectionChain::LoadParams", CJsonError( json, errorTextStr ) );
 	}
+	if( paramsObj.HasMember( "ImageReserve" ) && paramsObj["ImageReserve"].IsUint() ) {
+        requestedReserve = paramsObj["ImageReserve"].GetUint();
+	}
 }
 JSON CStabClsPatternProjectionChain::SaveParams() const
 {
@@ -257,7 +265,9 @@ JSON CStabClsPatternProjectionChain::SaveParams() const
 	params.SetObject()
 		.AddMember( "Type", ProjectionChainModuleType, alloc )
 		.AddMember( "Name", StabClsPatternProjectionChainModule, alloc )
-		.AddMember( "Params", rapidjson::Value().SetObject(), alloc );
+		.AddMember( "Params", rapidjson::Value().SetObject()
+            .AddMember("ImageReserve", rapidjson::Value().SetUint( extCmp->GetAvailableBlockCount() ), alloc )
+        , alloc );
 
 	IModule* m = dynamic_cast<IModule*>(enumerator.get());
 

@@ -136,17 +136,23 @@ void CVectorBinarySetJoinComparator::SetMaxAttrNumber( DWORD num )
 
 void CVectorBinarySetJoinComparator::Reserve( size_t blockCount )
 {
-	DWORD totalBlockCount = 0;
+	if( GetAvailableBlockCount() >= blockCount ) {
+		return;
+	}
+	allocate( blockCount );
+}
+
+size_t CVectorBinarySetJoinComparator::GetAvailableBlockCount() const
+{
+	size_t totalBlockCount = 0;
 	CStdIterator<CMemory::CConstIterator, false> itr( memory );
 	for( ; !itr.IsEnd(); ++itr ) {
 		totalBlockCount += (*itr).size();
 		assert( ((*itr).size() % blockSize ) == 0 );
 	}
-	if( totalBlockCount >= blockCount ) {
-		return;
-	}
-	allocate( blockCount );
+	return totalBlockCount / blockSize;
 }
+
 
 TCompareResult CVectorBinarySetJoinComparator::Compare(
 	const CVectorBinarySetDescriptor& first, const CVectorBinarySetDescriptor& second,
