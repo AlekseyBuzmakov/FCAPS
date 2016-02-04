@@ -197,8 +197,12 @@ void CThisConsoleApplication::ReportProgress( const double& p, const std::string
 	if( state == S_AddingObjects ) {
 		return;
 	}
-	GetStatusStream() << std::fixed << std::setprecision(3);
-	GetStatusStream() << "Processing " << p*100 << "%. ";
+    GetStatusStream() << std::fixed << std::setprecision(3);
+	if( 0 <= p && p <= 1 ) {
+        GetStatusStream() << "Processing " << p*100 << "%. ";
+	} else {
+        GetStatusStream() << "Processing " << p << ". ";
+	}
 	GetStatusStream() << info << "   \r";
 	GetStatusStream().flush();
 }

@@ -22,7 +22,7 @@ public:
 	typedef list< CSharedPtr<const CVectorBinarySetDescriptor> > TChildren;
 public:
 	CStabClsPatternDescription(const CSharedPtr<const CVectorBinarySetDescriptor>& ext):
-		extent( ext ), dMeasure(0) {};
+		extent( ext ), dMeasure(0), graphCount( 0 ), minGraphSupport(-1) {};
 	virtual TPatternType GetType() const
 	{return PT_Other;};
 	virtual bool IsMostGeneral() const
@@ -36,6 +36,10 @@ public:
 	{ return dMeasure; }
 	TChildren& Children() const
 	{ return children; }
+	DWORD& GraphCount() const
+	{ return graphCount; }
+	DWORD& MinGraphSupport() const
+    { return minGraphSupport; }
 private:
 	// Extent of the pattern.
 	CSharedPtr<const CVectorBinarySetDescriptor> extent;
@@ -43,6 +47,10 @@ private:
 	mutable TChildren children;
 	// Delta-measure of the pattern.
 	mutable DWORD dMeasure;
+	// Number of graph patterns
+	mutable DWORD graphCount;
+	// Minimal support of graphs in the pattern.
+	mutable DWORD minGraphSupport;
 };
 
 ////////////////////////////////////////////////////////////////////////
@@ -204,6 +212,8 @@ void CStabClsPatternProjectionChain::Preimages( const IPatternDescriptor* d, CPa
 
 		// Stability of 'ptrn' has not been changed.
 		//  (probably we should update the fact that stability is up to date)
+		ptrn.MinGraphSupport() = min( ptrn.MinGraphSupport(), nextImage->Size() );
+		++ptrn.GraphCount();
 		return;
 	}
 	auto_ptr<CStabClsPatternDescription> newPtrn( new CStabClsPatternDescription( res ) );
@@ -211,6 +221,7 @@ void CStabClsPatternProjectionChain::Preimages( const IPatternDescriptor* d, CPa
 		// The new pattern is stable.
 		//  We should add it to preimages.
 		isStablePtrnFound = true;
+
 		preimages.PushBack( newPtrn.release() );
 	}
 
@@ -226,8 +237,17 @@ JSON CStabClsPatternProjectionChain::SaveExtent( const IPatternDescriptor* d ) c
 }
 JSON CStabClsPatternProjectionChain::SaveIntent( const IPatternDescriptor* d ) const
 {
-	// TODO
-	return "{\"Comment\":\"TODO\"}";
+    // TODO
+    const CStabClsPatternDescription& ptrn = Ptrn(d);
+	rapidjson::Document params;
+	rapidjson::MemoryPoolAllocator<>& alloc = params.GetAllocator();
+	params.SetObject()
+		.AddMember( "GraphCount", rapidjson::Value().SetUint(ptrn.GraphCount()), alloc )
+		.AddMember( "MinGraphSupport", rapidjson::Value().SetUint(ptrn.MinGraphSupport()), alloc );
+
+	JSON result;
+	CreateStringFromJSON( params, result );
+	return result;
 }
 
 void CStabClsPatternProjectionChain::LoadParams( const JSON& json )
@@ -328,6 +348,10 @@ bool CStabClsPatternProjectionChain::initializeNewPattern(
 
 		newPtrn.DMeasure()=min(newPtrn.DMeasure(), extDiff );
 	}
+
+    newPtrn.MinGraphSupport() = min( parent.MinGraphSupport(), nextImage->Size() );
+    newPtrn.GraphCount() = parent.GraphCount() + 1;
+
     return true;
 }
 /**
