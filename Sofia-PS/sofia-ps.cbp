@@ -11,7 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters="-data:/home/leshyk/Science/Data/gaston-debug/context.json  -CP:/home/leshyk/Science/Data/gaston-debug/sofia.json -out -n:0" />
+				<Option parameters="-data:/home/leshyk/Science/Data/largeMoleculeDb/context.json  -CP:/home/leshyk/Science/Data/largeMoleculeDb/sofia.json -out -n:0" />
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-D_DEBUG" />
