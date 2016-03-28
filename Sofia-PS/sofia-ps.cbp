@@ -165,6 +165,8 @@
 		<Unit filename="../FCAPS/src/fcaps/modules/GastonGraphPatternEnumerator.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/IntervalPatternManager.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/IntervalPatternManager.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/PartialOrderPatternManager.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/PartialOrderPatternManager.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/SofiaContextProcessor.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/SofiaContextProcessor.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/StabBinClsPatternsProjectionChain.cpp" />
