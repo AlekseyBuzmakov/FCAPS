@@ -1,52 +1,92 @@
 // Initial software, Aleksey Buzmakov, Copyright (c) INRIA and University of Lorraine, GPL v2 license, 2011-2015, v0.7
 
-#include <PartialOrderPatternManager.h>
+#include "PartialOrderPatternManager.h"
+
+#include <fcaps/ModuleJSONTools.h>
+
+#include <JSONTools.h>
+#include <StdTools.h>
+
+#include <rapidjson/document.h>
+
+using namespace std;
 
 //#define OUT_DEBUG_INFO
 
 ////////////////////////////////////////////////////////////////////
 
 void CPartialOrderPatternDescriptor::AddElement(
-	const CSharedPtr<IPartialOrderElement>& el )
+	const IPartialOrderElement* el )
 {
-	elements.PushBack( el );
+    elements.PushBack( el );
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void CPartialOrderPatternManager::PreprocessObjectDescription( const CSharedPtr<IPatternDescriptor>& desc ) const
+const CPartialOrderPatternDescriptor* CPartialOrderPatternManager::LoadObject( const JSON& json )
 {
-	assert( desc != 0 && desc->GetType() == PT_PartialOrder );
-	assert( elemsCmp != 0 );
+    return LoadPattern( json );
+}
+JSON CPartialOrderPatternManager::SavePattern( const IPatternDescriptor* p ) const
+{
+    assert( p != 0 );
+    assert( p->GetType() == PT_PartialOrder );
+    const CPartialOrderPatternDescriptor& d = debug_cast<const CPartialOrderPatternDescriptor&>( *p );
+    JSON result;
+    result += "[";
+    CStdIterator<CElementSet::CConstIterator, false> itr( d.GetElements() );
+    bool isFirst = true;
+    for( ; !itr.IsEnd(); ++itr ) {
+        if( !isFirst) {
+            result += ",";
+        }
+        JSON elJson = elemsCmp->SaveElement( *itr );
+        result += elJson;
 
-	CPartialOrderPatternDescriptor& pattern = debug_cast<CPartialOrderPatternDescriptor&>( *desc );
-	CStdIterator<CElementSet::CIterator, false> el( pattern.GetElements() );
-	CElementSet parts;
-	for( ; !el.IsEnd(); ) {
-		CStdIterator<CElementSet::CIterator, false> curr = el;
-		++el;
-		elemsCmp->PreprocessElement( *curr, parts );
-		if( (**curr).IsMostGeneral() ) {
-			pattern.GetElements().Erase( curr );
-		}
+        isFirst = false;
+    }
+    result += "]";
+    return result;
+}
+const CPartialOrderPatternDescriptor* CPartialOrderPatternManager::LoadPattern( const JSON& json )
+{
+	rapidjson::Document ptrnJSON;
+	ptrnJSON.Parse( json.c_str() );
+	if( !ptrnJSON.IsArray() ) {
+		throw new CTextException( "CPartialOrderPatternManager::LoadPattern",
+			string("The JSON is not an array (\"") + json + "\")" );
 	}
-	for( el.Reset( parts ); !el.IsEnd(); ++el ) {
-		addElementToPattern( *el, pattern );
+
+	auto_ptr<CPartialOrderPatternDescriptor> result( new CPartialOrderPatternDescriptor( elemsCmp ) );
+	for( size_t i = 0; i < ptrnJSON.Size(); ++i ) {
+		JSON elemJson;
+		CreateStringFromJSON( ptrnJSON[i], elemJson );
+		IPartialOrderElementsComparator::CElementSet elems;
+		elemsCmp->LoadElements( elemJson, elems );
+
+        for( int i = 0; i < elems.Count; ++i ) {
+            if( !addElementToPattern( elems.Elements[i], *result ) ) {
+                elemsCmp->FreeElement( elems.Elements[i] );
+            };
+        }
+        elemsCmp->FreeElementSet( elems );
 	}
+
+	return result.release();
 }
 
-CSharedPtr<IPatternDescriptor> CPartialOrderPatternManager::CalculateSimilarity(
-	const CSharedPtr<IPatternDescriptor>& first, const CSharedPtr<IPatternDescriptor>& second ) const
+const CPartialOrderPatternDescriptor* CPartialOrderPatternManager::CalculateSimilarity(
+	const IPatternDescriptor* first, const IPatternDescriptor* second )
 {
 	assert( first != 0 );
 	assert( second != 0 );
 	assert( first->GetType() == PT_PartialOrder );
 	assert( second->GetType() == PT_PartialOrder );
 	assert( elemsCmp != 0 );
-	const CPartialOrderPatternDescriptor& ptrn1 = debug_cast<CPartialOrderPatternDescriptor&>( *first );
-	const CPartialOrderPatternDescriptor& ptrn2 = debug_cast<CPartialOrderPatternDescriptor&>( *second );
+	const CPartialOrderPatternDescriptor& ptrn1 = debug_cast<const CPartialOrderPatternDescriptor&>( *first );
+	const CPartialOrderPatternDescriptor& ptrn2 = debug_cast<const CPartialOrderPatternDescriptor&>( *second );
 
-	CSharedPtr<CPartialOrderPatternDescriptor> result( NewPattern() );
+	auto_ptr<CPartialOrderPatternDescriptor> result( NewPattern() );
 
 	CStdIterator<CElementSet::CConstIterator, false> el1( ptrn1.GetElements() );
 	CStdIterator<CElementSet::CConstIterator, false> el2;
@@ -59,29 +99,28 @@ CSharedPtr<IPatternDescriptor> CPartialOrderPatternManager::CalculateSimilarity(
 	for( ; !el1.IsEnd(); ++el1, ++el1Num ) {
 		el2.Reset( ptrn2.GetElements() );
 		for( ; !el2.IsEnd(); ++el2 ) {
-			CElementSet parents;
+			IPartialOrderElementsComparator::CElementSet parents;
 			elemsCmp->FindAllParents( *el1, *el2, parents );
-			CStdIterator<CElementSet::CConstIterator, false> parentEl( parents );
-			for( ; !parentEl.IsEnd(); ++parentEl ) {
-				addElementToPattern( *parentEl, *result );
+			for( int p = 0; p < parents.Count; ++p ) {
+				addElementToPattern( parents.Elements[p], *result );
 			}
 		}
 	}
 
-	return result;
+	return result.release();
 }
 
 TCompareResult CPartialOrderPatternManager::Compare(
-	const CSharedPtr<IPatternDescriptor>& first, const CSharedPtr<IPatternDescriptor>& second,
-	DWORD interestingResults, DWORD possibleResults ) const
+	const IPatternDescriptor* first, const IPatternDescriptor* second,
+	DWORD interestingResults, DWORD possibleResults )
 {
 	assert( first != 0 );
 	assert( second != 0 );
 	assert( first->GetType() == PT_PartialOrder );
 	assert( second->GetType() == PT_PartialOrder );
 	assert( elemsCmp != 0 );
-	const CPartialOrderPatternDescriptor& ptrn1 = debug_cast<CPartialOrderPatternDescriptor&>( *first );
-	const CPartialOrderPatternDescriptor& ptrn2 = debug_cast<CPartialOrderPatternDescriptor&>( *second );
+	const CPartialOrderPatternDescriptor& ptrn1 = debug_cast<const CPartialOrderPatternDescriptor&>( *first );
+	const CPartialOrderPatternDescriptor& ptrn2 = debug_cast<const CPartialOrderPatternDescriptor&>( *second );
 
 	CElementSet elements1;
 	CStdIterator<CElementSet::CConstIterator, false> ptrn1itr( ptrn1.GetElements() );
@@ -163,19 +202,14 @@ TCompareResult CPartialOrderPatternManager::Compare(
 	return static_cast<TCompareResult>( possibleAnswers );
 }
 
-void CPartialOrderPatternManager::Write( const CSharedPtr<IPatternDescriptor>& patternInt, std::ostream& dst ) const
+void CPartialOrderPatternManager::FreePattern( const IPatternDescriptor* p )
 {
-	assert( patternInt != 0 );
-	assert( patternInt->GetType() == PT_PartialOrder );
-	assert( elemsCmp != 0 );
-	const CPartialOrderPatternDescriptor& pattern = debug_cast<CPartialOrderPatternDescriptor&>( *patternInt );
-	CStdIterator<CElementSet::CConstIterator, false> el( pattern.GetElements() );
-	dst << "{\n";
-	for( ; !el.IsEnd(); ++el ) {
-		elemsCmp->Write( *el, dst );
-		dst << "\n";
-	}
-	dst << "}";
+    delete p;
+}
+
+void CPartialOrderPatternManager::Write( const IPatternDescriptor* pattern, std::ostream& dst ) const
+{
+    dst << SavePattern( pattern );
 }
 
 void CPartialOrderPatternManager::Initialize( const CSharedPtr<IPartialOrderElementsComparator>& _elemsCmp )
@@ -186,13 +220,14 @@ void CPartialOrderPatternManager::Initialize( const CSharedPtr<IPartialOrderElem
 
 CPartialOrderPatternDescriptor* CPartialOrderPatternManager::NewPattern() const
 {
-	return new CPartialOrderPatternDescriptor;
+	return new CPartialOrderPatternDescriptor( elemsCmp );
 }
 
-void CPartialOrderPatternManager::addElementToPattern(
-	const CSharedPtr<IPartialOrderElement>& el, CPartialOrderPatternDescriptor& ptrn ) const
+// Returns if pattern was added.
+bool CPartialOrderPatternManager::addElementToPattern(
+	const IPartialOrderElement* el, CPartialOrderPatternDescriptor& ptrn ) const
 {
-	CElementSet::CIterator begin = ptrn.GetElements().Begin();
+CElementSet::CIterator begin = ptrn.GetElements().Begin();
 	CElementSet::CIterator end = ptrn.GetElements().End();
 	bool theEnd = begin == end;
 	--end;
@@ -209,7 +244,7 @@ void CPartialOrderPatternManager::addElementToPattern(
 			case CR_LessGeneral:
 			case CR_Equal:
 				// the pattern already has the eling
-				return;
+				return false;
 			case CR_MoreGeneral:
 				ptrn.GetElements().Erase( patternEl );
 				break;
@@ -218,4 +253,5 @@ void CPartialOrderPatternManager::addElementToPattern(
 		}
 	}
 	ptrn.AddElement( el );
+	return true;
 }
