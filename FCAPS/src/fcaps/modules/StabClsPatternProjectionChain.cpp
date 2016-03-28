@@ -129,9 +129,6 @@ void CStabClsPatternProjectionChain::FreePattern(const IPatternDescriptor* p ) c
 }
 void CStabClsPatternProjectionChain::ComputeZeroProjection( CPatternList& ptrns )
 {
-    // TODO
-    objectCount = 189771;
-
 	extCmp->SetMaxAttrNumber( objectCount );
     if( requestedReserve != (DWORD)-1 ) {
         extCmp->Reserve( requestedReserve );
@@ -276,6 +273,10 @@ void CStabClsPatternProjectionChain::LoadParams( const JSON& json )
 	}
 	if( paramsObj.HasMember( "ImageReserve" ) && paramsObj["ImageReserve"].IsUint() ) {
         requestedReserve = paramsObj["ImageReserve"].GetUint();
+	}
+	// TOKILL(?) (no we cannot read the dataset, when we wil do it should be removed)
+	if( paramsObj.HasMember( "ObjectCount" ) && paramsObj["ObjectCount"].IsUint() ) {
+        objectCount = paramsObj["ObjectCount"].GetUint();
 	}
 }
 JSON CStabClsPatternProjectionChain::SaveParams() const
