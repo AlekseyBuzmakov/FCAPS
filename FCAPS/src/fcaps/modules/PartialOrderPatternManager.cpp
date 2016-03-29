@@ -22,6 +22,7 @@ void CPartialOrderPatternDescriptor::AddElement(
 }
 
 ////////////////////////////////////////////////////////////////////
+const CModuleRegistrar<CPartialOrderPatternManager> CPartialOrderPatternManager::registrar( PatternManagerModuleType, PartialOrderPatternManager );
 
 const CPartialOrderPatternDescriptor* CPartialOrderPatternManager::LoadObject( const JSON& json )
 {
@@ -210,6 +211,51 @@ void CPartialOrderPatternManager::FreePattern( const IPatternDescriptor* p )
 void CPartialOrderPatternManager::Write( const IPatternDescriptor* pattern, std::ostream& dst ) const
 {
     dst << SavePattern( pattern );
+}
+
+void CPartialOrderPatternManager::LoadParams( const JSON& json )
+{
+	CJsonError errorText;
+	rapidjson::Document params;
+	if( !ReadJsonString( json, params, errorText ) ) {
+		throw new CJsonException( "CPartialOrderPatternManager::LoadParams", errorText );
+	}
+	assert( string( params["Type"].GetString() ) == PatternManagerModuleType );
+	assert( string( params["Name"].GetString() ) == PartialOrderPatternManager );
+	if( !(params.HasMember( "Params" ) && params["Params"].IsObject()
+		&& params["Params"].HasMember( "PartialOrder" ) && params["Params"]["PartialOrder"].IsObject() ) )
+    {
+		throw new CTextException( "CPartialOrderPatternManager::LoadParams",
+			"No PartialOrder module found in params <<\n" + json + "\n>>");
+	}
+
+	const rapidjson::Value& po = params["Params"]["PartialOrder"];
+	elemsCmp.reset(dynamic_cast<IPartialOrderElementsComparator*>( CreateModuleFromJSON( po, errorText.Error ) ));
+	if( elemsCmp == 0 ) {
+        errorText.Data = json;
+        errorText.Offset = NotFound;
+        throw new CJsonException("CPartialOrderPatternManager::LoadParams", errorText );
+	}
+}
+JSON CPartialOrderPatternManager::SaveParams() const
+{
+	rapidjson::Document params;
+	rapidjson::MemoryPoolAllocator<>& alloc = params.GetAllocator();
+	params.SetObject()
+		.AddMember( "Type", PatternManagerModuleType, alloc )
+		.AddMember( "Name", PartialOrderPatternManager, alloc )
+		.AddMember( "Params", rapidjson::Value().SetObject(),
+		alloc );
+	rapidjson::Value& paramsDoc = params["Params"];
+
+    const IModule& module = dynamic_cast<const IModule&>( *elemsCmp );
+    rapidjson::Document internalParams;
+    internalParams.Parse( module.SaveParams().c_str() );
+    paramsDoc.AddMember( "PartialOrder", internalParams.Move(), alloc );
+
+	JSON result;
+	CreateStringFromJSON( params, result );
+	return result;
 }
 
 void CPartialOrderPatternManager::Initialize( const CSharedPtr<IPartialOrderElementsComparator>& _elemsCmp )

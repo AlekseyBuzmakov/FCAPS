@@ -61,6 +61,9 @@ interface IPartialOrderElementsComparator : public virtual IObject {
         FreeElementSet( set );
 	}
 };
+////////////////////////////////////////////////////////////////////
+
+const char PartialOrderPatternManager[] = "PartialOrderPatternManagerModule";
 
 ////////////////////////////////////////////////////////////////////
 
@@ -123,6 +126,15 @@ public:
 
 	virtual void Write( const IPatternDescriptor* pattern, std::ostream& dst ) const;
 
+	// Methods of IModule
+	virtual void LoadParams( const JSON& );
+	virtual JSON SaveParams() const;
+	virtual const char* const GetType() const
+        {return PatternManagerModuleType; }
+	virtual const char* const GetName() const
+        { return PartialOrderPatternManager; }
+
+
 	// Initialization
 	//  _strElemenstCmp -- the comparator for string elements.
 	void Initialize( const CSharedPtr<IPartialOrderElementsComparator>& _elemsCmp );
@@ -132,6 +144,8 @@ protected:
 	virtual CPartialOrderPatternDescriptor* NewPattern() const;
 
 private:
+	static const CModuleRegistrar<CPartialOrderPatternManager> registrar;
+
 	CSharedPtr<IPartialOrderElementsComparator> elemsCmp;
 
 	bool addElementToPattern( const IPartialOrderElement* el, CPartialOrderPatternDescriptor& ptrn ) const;
