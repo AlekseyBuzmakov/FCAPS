@@ -145,6 +145,7 @@
 		<Unit filename="../FCAPS/include/fcaps/ModuleJSONTools.h" />
 		<Unit filename="../FCAPS/include/fcaps/ModuleTools.cpp" />
 		<Unit filename="../FCAPS/include/fcaps/ModuleTools.h" />
+		<Unit filename="../FCAPS/include/fcaps/PartialOrderElementsComparator.h" />
 		<Unit filename="../FCAPS/include/fcaps/PatternManager.h" />
 		<Unit filename="../FCAPS/include/fcaps/ProjectionChain.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/AddIntentContextProcessor.cpp" />
