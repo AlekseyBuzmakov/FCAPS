@@ -5,17 +5,17 @@ Simple here mean that the alphabet of involved sequences is not ordered, i.e., t
 
 ## Sequential data
 
-Let us imagine that we have a dataset discribing visits of patients to hospitals. There is 3 patients visiting 3 hospitals all together. This dataset is shown below. For example, the first patient **P1** has three hospitalizations, the first two of them were in hospital 1, while the last one was in hospital 2.
+Let us imagine that we have a dataset describing visits of patients to hospitals. There is 3 patients visiting 3 hospitals all together. This dataset is shown below. For example, the first patient **P1** has three hospitalizations, the first two of them were in hospital 1, while the last one was in hospital 2.
 
 |Patient|Hospitalization Trajectory|
 |---|---|
-|P1|\<H1,H1,H2\>|
-|P2|\<H1,H2,H3\>|
-|P3|\<H3,H1\>|
+|P1|\< H1, H1, H2 \>|
+|P2|\< H1, H2, H3 \>|
+|P3|\< H3, H1 \>|
 
 ## Pattern lattice
 
-Given the aforemention dataset, we are going to construct the following pattern lattice.
+Given the aforementioned dataset, we are going to construct the following pattern lattice.
 
 {FIG:TODO}
 
@@ -25,7 +25,7 @@ In this lattice, the intents are taken from the following semilattice. Every ele
 
 One can construct this lattice by the following command line.
 
-> $sofia-ps -CP:[settings.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/AddIntentContextProcessor-for-StandardFCA.json) -data:[context.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/context-for-StandardFCA.json) -out
+> $sofia-ps -CP:[settings.json]() -data:[context.json]() -out
 
 Where context.json encodes the dataset, and setting.json describes the processing params.
 
@@ -50,7 +50,9 @@ Data is encoded in the following way
 ```
 
 Basically every json dataset is an array, where the first element of the array is an object with metadata, and the second object in the array is the data.
-As metedata we give here the names of patients. The data is encoded as an array under the name "Data". Every element of this array is the description of the corresponding patient. Every hospital is encoded by its number. We should notice here that, "Data" is an array of arrays. Each such an array contains only one subarray, i.e., the sequence itself. This two embedded arrays for every patient is needed, since a description of a patient and the intens can contain several sequences. However, in our particular example every patient is described by only one sequence.
+As metedata we give here the names of patients. The data is encoded as an array under the name "Data". Every element of this array is the description of the corresponding patient. Every hospital is encoded by its number. 
+
+We should notice here that, "Data" is an array of arrays. Each such an array contains only one subarray, i.e., the sequence itself. This two embedded arrays for every patient is needed, since a description of a patient and the intents can contain several sequences. However, in our particular example every patient is described by only one sequence.
 
 ## Settings
 
@@ -89,6 +91,20 @@ Here we have used the following file with settings.
 	}
 }
 ```
+
+This setting file describes which module of the program should process the data.
+Here we state that the module "AddIntentContextProcessorModule" of type "ContextProcessorModules" is used.
+This module can process any pattern structure by algorithm AddIntent.
+
+> [1] D. G. Kourie, S. A. Obiedkov, B. W. Watson, and D. van der Merwe, “An incremental algorithm to construct a lattice of set intersections,” Sci. Comput. Program., vol. 74, no. 3, pp. 128–142, Jan. 2009.
+
+This module has two parameters:
+ "PatternManager" describes the module that is able to compare patterns, that correspond to the type of the data.
+ "Outputparams" are different parameters of the output.
+
+Here we specify that patterns are dealled with module "PartialOrderPatternManagerModule" of type "PatternManagerModules". This module basically transforms a partial order to a lattice. It is needed for such data types as sequences and graphs, since their partial order does not form a semilattice.
+
+The only parameter of this module is the description of the module describing the partial order. Here, we request module "DwordStringPartialOrderComparatorModule" of type "PartialOrderElementsComparatorModules" that describes the partial order of sequences of integer positive numbers smaller than 4*10^9. It has two parameters. One of them is "MinStrLength" the minimal length of sequences that should be present in intents. If it is smaller the sequence is just removed inducing a projection of the original pattern structure. The other, "CutOnEmptySymbs", forbids for artificial all covering node inside a string.
 
 ## The file with the lattice
 
