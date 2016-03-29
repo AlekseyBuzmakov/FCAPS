@@ -25,11 +25,11 @@ In this lattice, the intents are taken from the following semilattice. Every ele
 
 One can construct this lattice by the following command line.
 
-> $sofia-ps -CP:[settings.json]() -data:[context.json]() -out
+> $sofia-ps -CP:[settings.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/AddIntentContextProcessor-for-simple-Sequential-Context.json) -data:[context.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/simple-Sequential-Context.json) -out
 
 Where context.json encodes the dataset, and setting.json describes the processing params.
 
-The resulting lattice can be found [here]().
+The resulting lattice can be found [here](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/Lattice-for-simple-Sequential-Context.json).
 
 ## Data encoding
 
@@ -111,24 +111,30 @@ The only parameter of this module is the description of the module describing th
 The resulting lattice is encoded in the following way.
 
 ```json
-[{"NodesCount":7,"ArcsCount":9,"Bottom":[0],"Top":[4]},{ "Nodes":[
-{"Ext":{"Count":0,"Inds":[]},"Supp":0,"Int":"BOTTOM"},
-{"Ext":{"Count":1,"Inds":[0],"Names":["P1"]},"Supp":1,"Int":[[1,1,2]]},
-{"Ext":{"Count":2,"Inds":[0,1],"Names":["P1","P2"]},"Supp":2,"Int":[[1,2]]},
-{"Ext":{"Count":1,"Inds":[1],"Names":["P2"]},"Supp":1,"Int":[[1,2,3]]},
-{"Ext":{"Count":3,"Inds":[0,1,2],"Names":["P1","P2","P3"]},"Supp":3,"Int":[[1]]},
-{"Ext":{"Count":2,"Inds":[1,2],"Names":["P2","P3"]},"Supp":2,"Int":[[3],[1]]},
-{"Ext":{"Count":1,"Inds":[2],"Names":["P3"]},"Supp":1,"Int":[[3,1]]}
-]},{ "Arcs":[
-{"S":1,"D":0},
-{"S":2,"D":1},
-{"S":2,"D":3},
-{"S":3,"D":0},
-{"S":4,"D":2},
-{"S":4,"D":5},
-{"S":5,"D":3},
-{"S":5,"D":6},
-{"S":6,"D":0}]}]
+[
+	{"NodesCount":7,"ArcsCount":9,"Bottom":[0],"Top":[4]},
+	{ "Nodes":[
+		{"Ext":{"Count":0,"Inds":[]},"Supp":0,"Int":"BOTTOM"},
+		{"Ext":{"Count":1,"Inds":[0],"Names":["P1"]},"Supp":1,"Int":[[1,1,2]]},
+		{"Ext":{"Count":2,"Inds":[0,1],"Names":["P1","P2"]},"Supp":2,"Int":[[1,2]]},
+		{"Ext":{"Count":1,"Inds":[1],"Names":["P2"]},"Supp":1,"Int":[[1,2,3]]},
+		{"Ext":{"Count":3,"Inds":[0,1,2],"Names":["P1","P2","P3"]},"Supp":3,"Int":[[1]]},
+		{"Ext":{"Count":2,"Inds":[1,2],"Names":["P2","P3"]},"Supp":2,"Int":[[3],[1]]},
+		{"Ext":{"Count":1,"Inds":[2],"Names":["P3"]},"Supp":1,"Int":[[3,1]]}
+		]
+	},{ "Arcs":[
+		{"S":1,"D":0},
+		{"S":2,"D":1},
+		{"S":2,"D":3},
+		{"S":3,"D":0},
+		{"S":4,"D":2},
+		{"S":4,"D":5},
+		{"S":5,"D":3},
+		{"S":5,"D":6},
+		{"S":6,"D":0}
+		]
+	}
+]
 ```
 
 Basically, it is an array, where the first element is a metadata, the second element enumerates all nodes of the lattice, and third element enumerates all edges or arcs of the lattice. For every node the extent "Ext" and the intent "Int" are given. For every edges the source and destination zero-based indices of the nodes are given.
