@@ -258,5 +258,3 @@ const CCompositePatternDescriptor* CCompositPatternManager::loadPattern( const J
 
 	return compositPattern.release();
 }
-
-

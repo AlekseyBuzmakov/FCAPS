@@ -6,14 +6,17 @@
 #ifndef PARTIALORDERELEMENTSCOMPARATOR_H_INCLUDED
 #define PARTIALORDERELEMENTSCOMPARATOR_H_INCLUDED
 
+#include <fcaps/BasicTypes.h>
+#include <fcaps/CompareResults.h>
+
 ///////////////////////////////////////////////////////////////////
 
-const char PartialOrderElementsComparator[] = "PartialOrderElementsComparatorModule";
+const char PartialOrderElementsComparatorModuleType[] = "PartialOrderElementsComparatorModules";
 
 ///////////////////////////////////////////////////////////////////
 
 // A unique identifier of this element type. GUID is suggested.
-typedef char* TPartialOrderType;
+typedef const char* TPartialOrderType;
 
 // Object-data for pattern.
 interface IPartialOrderElement : public virtual IObject {
@@ -32,7 +35,7 @@ interface IPartialOrderElementsComparator : public virtual IObject {
 	};
 
 	// Get types of partial order object works with.
-	virtual TPartialOrderType GetType() const = 0;
+	virtual TPartialOrderType GetElementType() const = 0;
 
     // Load/Save elements from/in JSON
 	virtual JSON SaveElement( const IPartialOrderElement* ) const = 0;
