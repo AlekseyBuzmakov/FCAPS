@@ -32,6 +32,9 @@ interface IPartialOrderElementsComparator : public virtual IObject {
 	struct CElementSet {
         int Count;
         const IPartialOrderElement** Elements;
+
+        CElementSet() :
+            Count( 0 ), Elements( 0 ) {}
 	};
 
 	// Get types of partial order object works with.
