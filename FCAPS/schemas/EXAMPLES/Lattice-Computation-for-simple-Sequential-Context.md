@@ -9,9 +9,9 @@ Let us imagine that we have a dataset discribing visits of patients to hospitals
 
 |Patient|Hospitalization Trajectory|
 |---|---|
-|P1|<H1,H1,H2>|
-|P2|<H1,H2,H3>|
-|P3|<H3,H1>|
+|P1|\<H1,H1,H2\>|
+|P2|\<H1,H2,H3\>|
+|P3|\<H3,H1\>|
 
 ## Pattern lattice
 
