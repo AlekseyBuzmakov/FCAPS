@@ -1,0 +1,22 @@
+[{"NodesCount":8,"ArcsCount":12,"Bottom":[0],"Top":[4]},{ "Nodes":[
+{"Ext":{"Count":0,"Inds":[]},"Supp":0,"Int":"BOTTOM"},
+{"Ext":{"Count":1,"Inds":[0],"Names":["P1"]},"Supp":1,"Int":[[["H1",{"Count":1,"Inds":[1]}],["H1",{"Count":2,"Inds":[3,4]}],["H1",{"Count":2,"Inds":[1,2]}],["H1",{"Count":1,"Inds":[4]}]]]},
+{"Ext":{"Count":2,"Inds":[0,1],"Names":["P1","P2"]},"Supp":2,"Int":[[["CH",{"Count":2,"Inds":[3,4]}],["*",{"Count":1,"Inds":[2]}],["*",{"Count":1,"Inds":[4]}]],[["CH",{"Count":0,"Inds":[]}],["*",{"Count":1,"Inds":[4]}],["*",{"Count":1,"Inds":[1]}]]]},
+{"Ext":{"Count":1,"Inds":[1],"Names":["P2"]},"Supp":1,"Int":[[["H2",{"Count":2,"Inds":[3,4]}],["H3",{"Count":2,"Inds":[2,4]}],["H3",{"Count":2,"Inds":[1,4]}]]]},
+{"Ext":{"Count":3,"Inds":[0,1,2],"Names":["P1","P2","P3"]},"Supp":3,"Int":[[["*",{"Count":2,"Inds":[3,4]}],["*",{"Count":1,"Inds":[2]}]],[["*",{"Count":1,"Inds":[1]}]]]},
+{"Ext":{"Count":2,"Inds":[0,2],"Names":["P1","P3"]},"Supp":2,"Int":[[["*",{"Count":2,"Inds":[3,4]}],["*",{"Count":1,"Inds":[2]}]],[["*",{"Count":1,"Inds":[1]}],["*",{"Count":1,"Inds":[4]}]]]},
+{"Ext":{"Count":2,"Inds":[1,2],"Names":["P2","P3"]},"Supp":2,"Int":[[["CL",{"Count":1,"Inds":[4]}],["CL",{"Count":0,"Inds":[]}]],[["*",{"Count":2,"Inds":[3,4]}],["CL",{"Count":1,"Inds":[2]}],["CL",{"Count":1,"Inds":[1]}]],[["CL",{"Count":0,"Inds":[]}],["CL",{"Count":2,"Inds":[1,4]}]]]},
+{"Ext":{"Count":1,"Inds":[2],"Names":["P3"]},"Supp":1,"Int":[[["H4",{"Count":2,"Inds":[3,4]}],["H4",{"Count":1,"Inds":[2]}],["H4",{"Count":1,"Inds":[1]}],["H4",{"Count":2,"Inds":[1,4]}]]]}
+]},{ "Arcs":[
+{"S":1,"D":0},
+{"S":2,"D":1},
+{"S":2,"D":3},
+{"S":3,"D":0},
+{"S":4,"D":2},
+{"S":4,"D":5},
+{"S":4,"D":6},
+{"S":5,"D":1},
+{"S":5,"D":7},
+{"S":6,"D":3},
+{"S":6,"D":7},
+{"S":7,"D":0}]}]

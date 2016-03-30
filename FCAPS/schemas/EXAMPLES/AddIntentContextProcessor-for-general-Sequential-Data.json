@@ -1,0 +1,50 @@
+{
+	"Type": "ContextProcessorModules",
+	"Name": "AddIntentContextProcessorModule",
+	"Params": {
+		"PatternManager": {
+			"Type" : "PatternManagerModules",
+			"Name" : "PartialOrderPatternManagerModule",
+			"Params" : {
+				"PartialOrder" : {
+					"Type": "PartialOrderElementsComparatorModules",
+					"Name": "GeneralStringPartialOrderComparatorModule",
+					"Params": {
+						"SymbolComparator":{
+							"Type": "PatternManagerModules",
+							"Name": "CompositPatternManagerModule",
+							"Params": {
+								"PMs":[{
+									"Type": "PatternManagerModules",
+									"Name": "TaxonomyPatternManagerModule",
+									"Params" : {
+										"TreePath" : "./hospital-taxonomy.json"
+									}
+								},{
+									"Type" : "PatternManagerModules",
+									"Name" : "BinarySetJoinPatternManagerModule",
+									"Params" : {
+										"UseInds" : true
+									}
+								}]
+							}
+						},
+						"MinStrLength":1,
+						"CutOnEmptySymbs":true
+					}
+				}
+			}
+		},
+		"OutputParams": {
+			"MinExtentSize" : 1,
+			"MinLift" : 1,
+			"MinStab" : 1,
+			"OutExtent" : true,
+			"OutSupport" : true,
+			"OutOrder" : true,
+			"OutStability" : false,
+			"OutStabEstimation" : false,
+			"IsStabilityInLog" : true
+		}
+	}
+}

@@ -25,14 +25,13 @@ the table bellow.
 |P2|\< [H2,{c,d}], [H3,{b,d}], [H3,{a,d}] \>|
 |P3|\< [H4,{c,d}], [H4,{b}], [H4,{a}], [H4,{a,d}] \>|
 
-We have a set of procedures P = {a, b, c, d} and a set of hospital names T={H1 , H2 , H3 , H4 , CL, CH, ∗}, where hospital names are hierarchically organized (by the level of
-generality). 
-H1 and H2 are central hospitals (CH), H3 and H4 are clinics (CL) and ∗ denotes
+We have a set of procedures **P = {a, b, c, d}** and a set of hospital names **T={H1 , H2 , H3 , H4 , CL, CH, ∗}**, where hospital names are hierarchically organized (by the level of generality). 
+**H1** and **H2** are central hospitals **CH**, **H3** and **H4** are clinics **CL** and **∗** denotes
 the root of this hierarchy. 
 Every hospitalization is described by one hospital
 name and may contain several procedures. The procedure order in each hospitalization
 is not given in our case. 
-For example, the first hospitalization [H2 , {c, d}] for the patient P2 was a stay in hospital H2 and during this hospitalization, the patient underwent procedures c and d.
+For example, the first hospitalization **[H2,{c, d}]** for the patient **P2** was a stay in hospital **H2** and during this hospitalization, the patient underwent procedures **c** and **d**.
 
 ## Pattern lattice
 
