@@ -1,7 +1,7 @@
 # Computation of the Pattern Lattice for a general Sequential Formal Context
 
 In this example we consider how one can use SOFIA application for building the pattern lattice for a general sequential formal context.
-By general here we mean that the alphabet of sequences is an ordered set, more precisely a lattice. Thus a substring ss of a sequence s in this case be constituted from symbols different from the symbols found in s. However all symbols of ss should be 'more (or equal) general' than the symbols in s. 
+By general here we mean that the alphabet of sequences is an ordered set, more precisely a lattice. Thus a substring **ss** of a sequence **s** in this case is constituted from symbols different from the symbols found in **s**. However all symbols of **ss** should be 'more (or equal) general' than the symbols in **s**. 
 
 Such pattern structures were used for mining patient hospitalisation trajectories in the following works.
 
@@ -10,7 +10,7 @@ Such pattern structures were used for mining patient hospitalisation trajectorie
 > [2] A. Buzmakov, E. Egho, N. Jay, S. O. Kuznetsov, A. Napoli, and C. Raïssi, “On Projections of Sequential Pattern Structures (with an application on care trajectories),” in Proc. 10th International Conference on Concept Lattices and Their Applications, 2013, pp. 199–208.
 
 Here we consider how to compute the lattice for the running example that was introduced in [1] and [2]. 
-For understanding of this example it is essential to understand (the example on pattern structures with simple sequences)[https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/Lattice-Computation-for-simple-Sequential-Context.md]. In this section we do not explain the parts that are the same to the aforementioned example.
+For understanding of this example it is essential to understand [the example on pattern structures with simple sequences](https://github.com/AlekseyBuzmakov/FCAPS/blob/master/FCAPS/schemas/EXAMPLES/Lattice-Computation-for-simple-Sequential-Context.md). In this section we do not explain the parts that are the same to the aforementioned example.
 
 ## Sequential data
 
