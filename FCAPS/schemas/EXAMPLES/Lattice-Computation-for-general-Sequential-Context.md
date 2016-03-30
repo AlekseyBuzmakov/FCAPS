@@ -62,18 +62,21 @@ Data is encoded in the following way
 },{
 	"Count": 3,
 	"Data": [
-		[[1,1,2]],
-		[[1,2,3]],
-		[[3,1]]
+		[[ ["H1",{"Inds":[1]}],["H1",{"Inds":[3,4]}],["H1",{"Inds":[1,2]}],["H1",{"Inds":[4]}] ]],
+		[[ ["H2",{"Inds":[3,4]}],["H3",{"Inds":[2,4]}],["H3",{"Inds":[1,4]}] ]],
+		[[ ["H4",{"Inds":[3,4]}],["H4",{"Inds":[2]}],["H4",{"Inds":[1]}],["H4",{"Inds":[1,4]}] ]]
 	]
 }]
 
 ```
 
 Basically every json dataset is an array, where the first element of the array is an object with metadata, and the second object in the array is the data.
-As metedata we give here the names of patients. The data is encoded as an array under the name "Data". Every element of this array is the description of the corresponding patient. Every hospital is encoded by its number. 
+As metedata we give here the names of patients. The data is encoded as an array under the name "Data". Every element of this array is the description of the corresponding patient. 
+Hospitals are encoded here by their names (the appropriate structure for a taxonomy pattern manager as we will see). The medical procedures are encoded here as sets of procedure identifiers.
 
 We should notice here that, "Data" is an array of arrays. Each such an array contains only one subarray, i.e., the sequence itself. This two embedded arrays for every patient is needed, since a description of a patient and the intents can contain several sequences. However, in our particular example every patient is described by only one sequence.
+
+We have noticed that sequence is an array. Elements of this array are also arrays (the appropriate structure for the composite pattern manager). Every element encode a tuple of two components. The first component is the name of hospital (the reference to the taxonomy is given from the taxonomy pattern manager). The second component is the set of attributes (the appropriate data structure for the standard FCA pattern manager). We will discuss the datatypes in more details in the next section.
 
 ## Settings
 
