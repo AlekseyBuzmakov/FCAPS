@@ -96,7 +96,7 @@ Here we have used the following file with settings.
 					"Name": "GeneralStringPartialOrderComparatorModule",
 					"Params": {
 ```
-_Now the discussing part starts._
+_Now the discussing part starts. Check [simple sequential data](https://github.com/AlekseyBuzmakov/FCAPS/blob/master/FCAPS/schemas/EXAMPLES/Lattice-Computation-for-simple-Sequential-Context.md) for the rest of the settings._
 ```json
 						"SymbolComparator":{
 							"Type": "PatternManagerModules",
