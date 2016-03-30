@@ -93,8 +93,31 @@ Here we have used the following file with settings.
 			"Params" : {
 				"PartialOrder" : {
 					"Type": "PartialOrderElementsComparatorModules",
-					"Name": "DwordStringPartialOrderComparatorModule",
+					"Name": "GeneralStringPartialOrderComparatorModule",
 					"Params": {
+```
+Now the discussing part starts.
+
+```json
+						"SymbolComparator":{
+							"Type": "PatternManagerModules",
+							"Name": "CompositPatternManagerModule",
+							"Params": {
+								"PMs":[{
+									"Type": "PatternManagerModules",
+									"Name": "TaxonomyPatternManagerModule",
+									"Params" : {
+										"TreePath" : "./hospital-taxonomy.json"
+									}
+								},{
+									"Type" : "PatternManagerModules",
+									"Name" : "BinarySetJoinPatternManagerModule",
+									"Params" : {
+										"UseInds" : true
+									}
+								}]
+							}
+						},
 						"MinStrLength":1,
 						"CutOnEmptySymbs":true
 					}
