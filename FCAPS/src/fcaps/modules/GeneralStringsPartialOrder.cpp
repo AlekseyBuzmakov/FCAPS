@@ -25,7 +25,7 @@ void CGeneralStringsPartialOrderComparator::LoadParams( const JSON& json)
 	std::string errorStr;
 	elemsCmp.reset( dynamic_cast<IPatternManager*>(CreateModuleFromJSON( paramsObj["SymbolComparator"], errorStr )) );
     if( elemsCmp.get() == 0 ) {
-        std::string error("Cannot create the ElementComparator module " );
+        std::string error("Cannot create the 'SymbolComparator' module " );
         error += errorStr.empty() ? "" : "('" + errorStr + "')";
         throw new CTextException( "CGeneralStringsPartialOrderComparator::LoadParams", error );
     }
@@ -52,7 +52,7 @@ JSON CGeneralStringsPartialOrderComparator::SaveParams() const
     const IModule& module = dynamic_cast<const IModule&>( *elemsCmp );
     rapidjson::Document internalParams;
     internalParams.Parse( module.SaveParams().c_str() );
-    doc.AddMember( "ElementComparator", internalParams.Move(), alloc );
+    doc.AddMember( "SymbolComparator", internalParams.Move(), alloc );
 
 	JSON result;
 	CreateStringFromJSON( doc, result );
@@ -67,7 +67,7 @@ void CGeneralStringsPartialOrderComparator::SaveSymb( const TSymb& s, rapidjson:
 
 	rapidjson::Document doc( &alloc );
 	doc.Parse( json.c_str() );
-	str.Swap( doc );
+	str.PushBack( doc.Move(), alloc );
 }
 const CGeneralStringsPartialOrderComparator::TSymb CGeneralStringsPartialOrderComparator::LoadSymb( const rapidjson::Value& val )
 {

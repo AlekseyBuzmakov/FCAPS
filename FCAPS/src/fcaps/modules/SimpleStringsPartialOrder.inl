@@ -20,6 +20,8 @@ JSON CStringsPartialOrderComparator<TSymb>::SaveElement( const IPartialOrderElem
         SaveSymb( el.String()[i], patternJSON, patternJSON.GetAllocator() );
 	}
 
+	assert( patternJSON.Size() == el.String().size() );
+
 	JSON result;
 	CreateStringFromJSON( patternJSON, result );
 	return result;
