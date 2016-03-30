@@ -31,6 +31,7 @@ the root of this hierarchy.
 Every hospitalization is described by one hospital
 name and may contain several procedures. The procedure order in each hospitalization
 is not given in our case. 
+
 For example, the first hospitalization **[H2,{c, d}]** for the patient **P2** was a stay in hospital **H2** and during this hospitalization, the patient underwent procedures **c** and **d**.
 
 ## Pattern lattice
@@ -45,11 +46,11 @@ In this lattice, the intents are taken from the following semilattice. Every ele
 
 One can construct this lattice by the following command line.
 
-> $sofia-ps -CP:[settings.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/AddIntentContextProcessor-for-simple-Sequential-Context.json) -data:[context.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/simple-Sequential-Context.json) -out
+> $sofia-ps -CP:[settings.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/AddIntentContextProcessor-for-general-Sequential-Data.json) -data:[context.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/general-Sequential-Context.json) -out
 
 Where context.json encodes the dataset, and setting.json describes the processing params.
 
-The resulting lattice can be found [here](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/Lattice-for-simple-Sequential-Context.json).
+The resulting lattice can be found [here](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/Lattice-for-general-Sequential-Context.json).
 
 ## Data encoding
 
