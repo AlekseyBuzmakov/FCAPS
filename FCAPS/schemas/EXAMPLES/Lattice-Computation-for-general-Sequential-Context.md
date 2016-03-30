@@ -96,7 +96,7 @@ Here we have used the following file with settings.
 					"Name": "GeneralStringPartialOrderComparatorModule",
 					"Params": {
 ```
-_Now the discussing part starts. Check [simple sequential data](https://github.com/AlekseyBuzmakov/FCAPS/blob/master/FCAPS/schemas/EXAMPLES/Lattice-Computation-for-simple-Sequential-Context.md) for the rest of the settings._
+_Here the discussing part starts. Check [simple sequential data](https://github.com/AlekseyBuzmakov/FCAPS/blob/master/FCAPS/schemas/EXAMPLES/Lattice-Computation-for-simple-Sequential-Context.md) for the rest of the settings._
 ```json
 						"SymbolComparator":{
 							"Type": "PatternManagerModules",
@@ -116,10 +116,10 @@ _Now the discussing part starts. Check [simple sequential data](https://github.c
 									}
 								}]
 							}
-						},
 ```
-_Now the discussing part ends._
+_Here the discussing part ends._
 ```json
+						},
 						"MinStrLength":1,
 						"CutOnEmptySymbs":true
 					}
@@ -143,47 +143,36 @@ _Now the discussing part ends._
 
 This setting file describes which module of the program should process the data.
 Here we state that the module "AddIntentContextProcessorModule" of type "ContextProcessorModules" is used.
-This module can process any pattern structure by algorithm AddIntent.
+This module can process any pattern structure by algorithm AddIntent. And as in the simple sequential data define the parameters of this module.
 
-> [1] D. G. Kourie, S. A. Obiedkov, B. W. Watson, and D. van der Merwe, “An incremental algorithm to construct a lattice of set intersections,” Sci. Comput. Program., vol. 74, no. 3, pp. 128–142, Jan. 2009.
+However, the partial order of sequences is given by module "GeneralStringPartialOrderComparatorModule" instead of module "DwordStringPartialOrderComparatorModule".
+This module can deal with general strings with an additional partial order on alphabet symbols. However for this partial order module one should provide additional parameters.
 
-This module has two parameters:
- "PatternManager" describes the module that is able to compare patterns, that correspond to the type of the data.
- "Outputparams" are different parameters of the output.
+Parameter "SymbolComparator" is the description of a module of type pattern manager, since  elements of general sequences in the case of our application form a semilattice. And pattern manager module describes exactly a semilattice.
 
-Here we specify that patterns are dealled with module "PartialOrderPatternManagerModule" of type "PatternManagerModules". This module basically transforms a partial order to a lattice. It is needed for such data types as sequences and graphs, since their partial order does not form a semilattice.
+Here we use module "CompositPatternManagerModule" as the pattern manager. This module describes a semilattice that is just a direct product of other semilattices.
+The multiplied semilattices are given as an array under the key "PMs".
 
-The only parameter of this module is the description of the module describing the partial order. Here, we request module "DwordStringPartialOrderComparatorModule" of type "PartialOrderElementsComparatorModules" that describes the partial order of sequences of integer positive numbers smaller than 4*10^9. It has two parameters. One of them is "MinStrLength" the minimal length of sequences that should be present in intents. If it is smaller the sequence is just removed inducing a projection of the original pattern structure. The other, "CutOnEmptySymbs", forbids for artificial all covering node inside a string.
+The first semilattice is a taxonomy. And the path to the associated taxonomy is given under the key "TreePath". The content of this taxonomy file is as follows.
+
+```json
+{
+	"Root": 0,
+	"Nodes": [
+	{"ID":"*"},
+	{"ID":"CH","Parent":0},
+	{"ID":"CL","Parent":0},
+	{"ID":"H1","Parent":1},
+	{"ID":"H2","Parent":1},
+	{"ID":"H3","Parent":2},
+	{"ID":"H4","Parent":2}
+	]
+}
+```
+
+The second semilattice is a classical semilattice of the powerset of attributes. By providing just this pattern manager to the parameters of AddIntent one obtains the standard FCA scheme.
 
 ## The file with the lattice
 
-The resulting lattice is encoded in the following way.
-
-```json
-[
-	{"NodesCount":7,"ArcsCount":9,"Bottom":[0],"Top":[4]},
-	{ "Nodes":[
-		{"Ext":{"Count":0,"Inds":[]},"Supp":0,"Int":"BOTTOM"},
-		{"Ext":{"Count":1,"Inds":[0],"Names":["P1"]},"Supp":1,"Int":[[1,1,2]]},
-		{"Ext":{"Count":2,"Inds":[0,1],"Names":["P1","P2"]},"Supp":2,"Int":[[1,2]]},
-		{"Ext":{"Count":1,"Inds":[1],"Names":["P2"]},"Supp":1,"Int":[[1,2,3]]},
-		{"Ext":{"Count":3,"Inds":[0,1,2],"Names":["P1","P2","P3"]},"Supp":3,"Int":[[1]]},
-		{"Ext":{"Count":2,"Inds":[1,2],"Names":["P2","P3"]},"Supp":2,"Int":[[3],[1]]},
-		{"Ext":{"Count":1,"Inds":[2],"Names":["P3"]},"Supp":1,"Int":[[3,1]]}
-		]
-	},{ "Arcs":[
-		{"S":1,"D":0},
-		{"S":2,"D":1},
-		{"S":2,"D":3},
-		{"S":3,"D":0},
-		{"S":4,"D":2},
-		{"S":4,"D":5},
-		{"S":5,"D":3},
-		{"S":5,"D":6},
-		{"S":6,"D":0}
-		]
-	}
-]
-```
-
+The resulting lattice can be found [here](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/Lattice-for-general-Sequential-Context.json).
 Basically, it is an array, where the first element is a metadata, the second element enumerates all nodes of the lattice, and third element enumerates all edges or arcs of the lattice. For every node the extent "Ext" and the intent "Int" are given. For every edges the source and destination zero-based indices of the nodes are given.
