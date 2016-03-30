@@ -96,8 +96,7 @@ Here we have used the following file with settings.
 					"Name": "GeneralStringPartialOrderComparatorModule",
 					"Params": {
 ```
-Now the discussing part starts.
-
+_Now the discussing part starts._
 ```json
 						"SymbolComparator":{
 							"Type": "PatternManagerModules",
@@ -118,6 +117,9 @@ Now the discussing part starts.
 								}]
 							}
 						},
+```
+_Now the discussing part ends._
+```json
 						"MinStrLength":1,
 						"CutOnEmptySymbs":true
 					}
