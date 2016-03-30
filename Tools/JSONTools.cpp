@@ -98,7 +98,7 @@ bool ReadJsonString( const std::string& str, rapidjson::Document& doc, CJsonErro
 		// We are in the valid from rapidjson point of view JSON.
 		doc.Parse( str.c_str() );
 	} else {
-		// Making back-door for stupid disicion in rapidjson.
+		// Making back-door for a strange desicion in rapidjson.
 		COneValueReader handler( doc );
 		Reader reader;
 		StringStream ss(str.c_str());

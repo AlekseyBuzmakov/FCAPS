@@ -164,6 +164,8 @@
 		<Unit filename="../FCAPS/src/fcaps/modules/CosineBinClsPatternsProjectionChain.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/GastonGraphPatternEnumerator.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/GastonGraphPatternEnumerator.h" />
+		<Unit filename="../FCAPS/src/fcaps/modules/GeneralStringsPartialOrder.cpp" />
+		<Unit filename="../FCAPS/src/fcaps/modules/GeneralStringsPartialOrder.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/IntervalPatternManager.cpp" />
 		<Unit filename="../FCAPS/src/fcaps/modules/IntervalPatternManager.h" />
 		<Unit filename="../FCAPS/src/fcaps/modules/PartialOrderPatternManager.cpp" />
