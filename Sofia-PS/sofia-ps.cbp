@@ -129,10 +129,10 @@
 			<Add directory="../../LibGastonForSofia/inc" />
 		</Compiler>
 		<Linker>
-			<Add library="/home/leshyk/Soft/CppLibraries/boost/bin.v2/libs/filesystem/build/gcc-4.8/release/link-static/threading-multi/libboost_filesystem.a" />
-			<Add library="/home/leshyk/Soft/CppLibraries/boost/bin.v2/libs/system/build/gcc-4.8/release/link-static/threading-multi/libboost_system.a" />
+			<Add library="../boost/bin.v2/libs/filesystem/build/gcc-4.8/release/link-static/threading-multi/libboost_filesystem.a" />
+			<Add library="../boost/bin.v2/libs/system/build/gcc-4.8/release/link-static/threading-multi/libboost_system.a" />
 			<Add library="dl" />
-			<Add library="/home/leshyk/Soft/CppLibraries/boost/bin.v2/libs/thread/build/gcc-4.8/release/link-static/threading-multi/libboost_thread.a" />
+			<Add library="../boost/bin.v2/libs/thread/build/gcc-4.8/release/link-static/threading-multi/libboost_thread.a" />
 			<Add library="pthread" />
 		</Linker>
 		<Unit filename="../FCAPS/include/fcaps/BasicTypes.h" />

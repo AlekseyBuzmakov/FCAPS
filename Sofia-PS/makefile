@@ -11,11 +11,11 @@ AR = ar
 LD = g++
 WINDRES = windres
 
-INC = -Iinc -Isrc -I../FCAPS/include -I../FCAPS/src -I../Tools -I../boost -I../rapidjson/include
+INC = -Iinc -Isrc -I../FCAPS/include -I../FCAPS/src -I../Tools -I../boost -I../rapidjson/include -I../../LibGastonForSofia/inc
 CFLAGS = -Wall -fexceptions -Wno-unused-local-typedefs -Wno-parentheses -Wno-sign-compare
 RESINC = 
 LIBDIR = 
-LIB = 
+LIB = ../boost/bin.v2/libs/filesystem/build/gcc-4.8/release/link-static/threading-multi/libboost_filesystem.a ../boost/bin.v2/libs/system/build/gcc-4.8/release/link-static/threading-multi/libboost_system.a -ldl ../boost/bin.v2/libs/thread/build/gcc-4.8/release/link-static/threading-multi/libboost_thread.a -lpthread
 LDFLAGS = 
 
 INC_DEBUG = $(INC) -IFCAPS/inc -ITools/inc -IFCAPS/src/fcaps/modules -IFCAPS/src/fcaps/modules/details -ITools
@@ -40,9 +40,9 @@ OBJDIR_RELEASE = obj/Release
 DEP_RELEASE = 
 OUT_RELEASE = bin/Release/sofia-ps
 
-OBJ_DEBUG = $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/JsonIntervalPattern.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/storages/VectorIntentStorage.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/storages/CachedIntentStorage.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/TaxonomyJsonReader.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/tools/StabilityCalculation.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/JsonClassifierClasses.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/JsonBinaryPattern.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/IntervalClsPatternsProjectionChain.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/FCAUtils.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/ExtentImpl.o $(OBJDIR_DEBUG)/src/main.o $(OBJDIR_DEBUG)/__/Tools/TopologicalSorting.o $(OBJDIR_DEBUG)/__/Tools/Rmq.o $(OBJDIR_DEBUG)/__/Tools/RelativePathes.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/BinClsPatternsProjectionChain.o $(OBJDIR_DEBUG)/__/Tools/Lca.o $(OBJDIR_DEBUG)/__/Tools/JSONTools.o $(OBJDIR_DEBUG)/__/Tools/Exception.o $(OBJDIR_DEBUG)/__/Tools/ConsoleApplication.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/tools/StabilityChildrenApproximation.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/AddIntentContextProcessor.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/CosineBinClsPatternsProjectionChain.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/CompositPatternManager.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/ClassifierContextProcessor.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/CAEPByDongClassifier.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/BinarySetWithDependenciesPatternManager.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/BinarySetPatternManager.o $(OBJDIR_DEBUG)/__/FCAPS/include/fcaps/ModuleTools.o $(OBJDIR_DEBUG)/__/FCAPS/include/fcaps/ModuleJSONTools.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/AddIntentLatticeBuilder.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/TreeSetPatternManager.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/TrainTestContextSplitter.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/TaxonomyPatternManager.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/SuppIntervalClsPatternsProjectionChain.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/SuppBinClsPatternsProjectionChain.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/StabilityEstimatorContextProcessor.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/StabIntervalClsPatternsProjectionChain.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/StabBinClsPatternsProjectionChain.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/SofiaContextProcessor.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/IntervalPatternManager.o
+OBJ_DEBUG = $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/JsonBinaryPattern.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/storages/VectorIntentStorage.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/storages/CachedIntentStorage.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/TaxonomyJsonReader.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/JsonIntervalPattern.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/JsonClassifierClasses.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/IntervalClsPatternsProjectionChain.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/FCAUtils.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/ExtentImpl.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/BinClsPatternsProjectionChain.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/AddIntentLatticeBuilder.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.o $(OBJDIR_DEBUG)/__/Tools/Library.o $(OBJDIR_DEBUG)/src/main.o $(OBJDIR_DEBUG)/__/Tools/TopologicalSorting.o $(OBJDIR_DEBUG)/__/Tools/Rmq.o $(OBJDIR_DEBUG)/__/Tools/RelativePathes.o $(OBJDIR_DEBUG)/__/Tools/Lca.o $(OBJDIR_DEBUG)/__/Tools/JSONTools.o $(OBJDIR_DEBUG)/__/Tools/Exception.o $(OBJDIR_DEBUG)/__/Tools/ConsoleApplication.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/tools/StabilityChildrenApproximation.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/tools/StabilityCalculation.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/GastonGraphPatternEnumerator.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/CosineBinClsPatternsProjectionChain.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/CompositPatternManager.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/ClassifierContextProcessor.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/CAEPByDongClassifier.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/BinarySetWithDependenciesPatternManager.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/BinarySetPatternManager.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/GeneralStringsPartialOrder.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/AddIntentContextProcessor.o $(OBJDIR_DEBUG)/__/FCAPS/include/fcaps/ModuleTools.o $(OBJDIR_DEBUG)/__/FCAPS/include/fcaps/ModuleJSONTools.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/TreeSetPatternManager.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/TrainTestContextSplitter.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/TaxonomyPatternManager.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/SuppIntervalClsPatternsProjectionChain.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/SuppBinClsPatternsProjectionChain.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/StabilityEstimatorContextProcessor.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/StabIntervalClsPatternsProjectionChain.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/StabClsPatternProjectionChain.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/StabBinClsPatternsProjectionChain.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/SofiaContextProcessor.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/SimpleStringsPartialOrder.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/PartialOrderPatternManager.o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/IntervalPatternManager.o
 
-OBJ_RELEASE = $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/JsonIntervalPattern.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/storages/VectorIntentStorage.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/storages/CachedIntentStorage.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/TaxonomyJsonReader.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/tools/StabilityCalculation.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/JsonClassifierClasses.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/JsonBinaryPattern.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/IntervalClsPatternsProjectionChain.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/FCAUtils.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/ExtentImpl.o $(OBJDIR_RELEASE)/src/main.o $(OBJDIR_RELEASE)/__/Tools/TopologicalSorting.o $(OBJDIR_RELEASE)/__/Tools/Rmq.o $(OBJDIR_RELEASE)/__/Tools/RelativePathes.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/BinClsPatternsProjectionChain.o $(OBJDIR_RELEASE)/__/Tools/Lca.o $(OBJDIR_RELEASE)/__/Tools/JSONTools.o $(OBJDIR_RELEASE)/__/Tools/Exception.o $(OBJDIR_RELEASE)/__/Tools/ConsoleApplication.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/tools/StabilityChildrenApproximation.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/AddIntentContextProcessor.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/CosineBinClsPatternsProjectionChain.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/CompositPatternManager.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/ClassifierContextProcessor.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/CAEPByDongClassifier.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/BinarySetWithDependenciesPatternManager.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/BinarySetPatternManager.o $(OBJDIR_RELEASE)/__/FCAPS/include/fcaps/ModuleTools.o $(OBJDIR_RELEASE)/__/FCAPS/include/fcaps/ModuleJSONTools.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/AddIntentLatticeBuilder.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/TreeSetPatternManager.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/TrainTestContextSplitter.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/TaxonomyPatternManager.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/SuppIntervalClsPatternsProjectionChain.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/SuppBinClsPatternsProjectionChain.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/StabilityEstimatorContextProcessor.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/StabIntervalClsPatternsProjectionChain.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/StabBinClsPatternsProjectionChain.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/SofiaContextProcessor.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/IntervalPatternManager.o
+OBJ_RELEASE = $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/JsonBinaryPattern.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/storages/VectorIntentStorage.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/storages/CachedIntentStorage.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/TaxonomyJsonReader.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/JsonIntervalPattern.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/JsonClassifierClasses.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/IntervalClsPatternsProjectionChain.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/FCAUtils.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/ExtentImpl.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/BinClsPatternsProjectionChain.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/AddIntentLatticeBuilder.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.o $(OBJDIR_RELEASE)/__/Tools/Library.o $(OBJDIR_RELEASE)/src/main.o $(OBJDIR_RELEASE)/__/Tools/TopologicalSorting.o $(OBJDIR_RELEASE)/__/Tools/Rmq.o $(OBJDIR_RELEASE)/__/Tools/RelativePathes.o $(OBJDIR_RELEASE)/__/Tools/Lca.o $(OBJDIR_RELEASE)/__/Tools/JSONTools.o $(OBJDIR_RELEASE)/__/Tools/Exception.o $(OBJDIR_RELEASE)/__/Tools/ConsoleApplication.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/tools/StabilityChildrenApproximation.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/tools/StabilityCalculation.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/GastonGraphPatternEnumerator.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/CosineBinClsPatternsProjectionChain.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/CompositPatternManager.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/ClassifierContextProcessor.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/CAEPByDongClassifier.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/BinarySetWithDependenciesPatternManager.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/BinarySetPatternManager.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/GeneralStringsPartialOrder.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/AddIntentContextProcessor.o $(OBJDIR_RELEASE)/__/FCAPS/include/fcaps/ModuleTools.o $(OBJDIR_RELEASE)/__/FCAPS/include/fcaps/ModuleJSONTools.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/TreeSetPatternManager.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/TrainTestContextSplitter.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/TaxonomyPatternManager.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/SuppIntervalClsPatternsProjectionChain.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/SuppBinClsPatternsProjectionChain.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/StabilityEstimatorContextProcessor.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/StabIntervalClsPatternsProjectionChain.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/StabClsPatternProjectionChain.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/StabBinClsPatternsProjectionChain.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/SofiaContextProcessor.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/SimpleStringsPartialOrder.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/PartialOrderPatternManager.o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/IntervalPatternManager.o
 
 all: debug release
 
@@ -52,10 +52,10 @@ before_debug:
 	test -d bin/Debug || mkdir -p bin/Debug
 	test -d $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details || mkdir -p $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details
 	test -d $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/storages || mkdir -p $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/storages
-	test -d $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/tools || mkdir -p $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/tools
-	test -d $(OBJDIR_DEBUG)/src || mkdir -p $(OBJDIR_DEBUG)/src
-	test -d $(OBJDIR_DEBUG)/__/Tools || mkdir -p $(OBJDIR_DEBUG)/__/Tools
 	test -d $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules || mkdir -p $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules
+	test -d $(OBJDIR_DEBUG)/__/Tools || mkdir -p $(OBJDIR_DEBUG)/__/Tools
+	test -d $(OBJDIR_DEBUG)/src || mkdir -p $(OBJDIR_DEBUG)/src
+	test -d $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/tools || mkdir -p $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/tools
 	test -d $(OBJDIR_DEBUG)/__/FCAPS/include/fcaps || mkdir -p $(OBJDIR_DEBUG)/__/FCAPS/include/fcaps
 
 after_debug: 
@@ -65,8 +65,8 @@ debug: before_debug out_debug after_debug
 out_debug: before_debug $(OBJ_DEBUG) $(DEP_DEBUG)
 	$(LD) $(LIBDIR_DEBUG) -o $(OUT_DEBUG) $(OBJ_DEBUG)  $(LDFLAGS_DEBUG) $(LIB_DEBUG)
 
-$(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/JsonIntervalPattern.o: ../FCAPS/src/fcaps/modules/details/JsonIntervalPattern.cpp
-	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/details/JsonIntervalPattern.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/JsonIntervalPattern.o
+$(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/JsonBinaryPattern.o: ../FCAPS/src/fcaps/modules/details/JsonBinaryPattern.cpp
+	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/details/JsonBinaryPattern.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/JsonBinaryPattern.o
 
 $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/storages/VectorIntentStorage.o: ../FCAPS/src/fcaps/storages/VectorIntentStorage.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/storages/VectorIntentStorage.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/storages/VectorIntentStorage.o
@@ -77,14 +77,11 @@ $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/storages/CachedIntentStorage.o: ../FCAPS/src/
 $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/TaxonomyJsonReader.o: ../FCAPS/src/fcaps/modules/details/TaxonomyJsonReader.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/details/TaxonomyJsonReader.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/TaxonomyJsonReader.o
 
-$(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/tools/StabilityCalculation.o: ../FCAPS/src/fcaps/tools/StabilityCalculation.cpp
-	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/tools/StabilityCalculation.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/tools/StabilityCalculation.o
+$(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/JsonIntervalPattern.o: ../FCAPS/src/fcaps/modules/details/JsonIntervalPattern.cpp
+	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/details/JsonIntervalPattern.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/JsonIntervalPattern.o
 
 $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/JsonClassifierClasses.o: ../FCAPS/src/fcaps/modules/details/JsonClassifierClasses.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/details/JsonClassifierClasses.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/JsonClassifierClasses.o
-
-$(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/JsonBinaryPattern.o: ../FCAPS/src/fcaps/modules/details/JsonBinaryPattern.cpp
-	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/details/JsonBinaryPattern.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/JsonBinaryPattern.o
 
 $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/IntervalClsPatternsProjectionChain.o: ../FCAPS/src/fcaps/modules/details/IntervalClsPatternsProjectionChain.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/details/IntervalClsPatternsProjectionChain.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/IntervalClsPatternsProjectionChain.o
@@ -94,6 +91,18 @@ $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/FCAUtils.o: ../FCAPS/src/fcap
 
 $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/ExtentImpl.o: ../FCAPS/src/fcaps/modules/details/ExtentImpl.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/details/ExtentImpl.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/ExtentImpl.o
+
+$(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/BinClsPatternsProjectionChain.o: ../FCAPS/src/fcaps/modules/details/BinClsPatternsProjectionChain.cpp
+	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/details/BinClsPatternsProjectionChain.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/BinClsPatternsProjectionChain.o
+
+$(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/AddIntentLatticeBuilder.o: ../FCAPS/src/fcaps/modules/details/AddIntentLatticeBuilder.cpp
+	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/details/AddIntentLatticeBuilder.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/AddIntentLatticeBuilder.o
+
+$(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.o: ../FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.cpp
+	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.o
+
+$(OBJDIR_DEBUG)/__/Tools/Library.o: ../Tools/Library.cpp
+	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../Tools/Library.cpp -o $(OBJDIR_DEBUG)/__/Tools/Library.o
 
 $(OBJDIR_DEBUG)/src/main.o: src/main.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c src/main.cpp -o $(OBJDIR_DEBUG)/src/main.o
@@ -106,9 +115,6 @@ $(OBJDIR_DEBUG)/__/Tools/Rmq.o: ../Tools/Rmq.cpp
 
 $(OBJDIR_DEBUG)/__/Tools/RelativePathes.o: ../Tools/RelativePathes.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../Tools/RelativePathes.cpp -o $(OBJDIR_DEBUG)/__/Tools/RelativePathes.o
-
-$(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/BinClsPatternsProjectionChain.o: ../FCAPS/src/fcaps/modules/details/BinClsPatternsProjectionChain.cpp
-	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/details/BinClsPatternsProjectionChain.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/BinClsPatternsProjectionChain.o
 
 $(OBJDIR_DEBUG)/__/Tools/Lca.o: ../Tools/Lca.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../Tools/Lca.cpp -o $(OBJDIR_DEBUG)/__/Tools/Lca.o
@@ -125,8 +131,11 @@ $(OBJDIR_DEBUG)/__/Tools/ConsoleApplication.o: ../Tools/ConsoleApplication.cpp
 $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/tools/StabilityChildrenApproximation.o: ../FCAPS/src/fcaps/tools/StabilityChildrenApproximation.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/tools/StabilityChildrenApproximation.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/tools/StabilityChildrenApproximation.o
 
-$(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/AddIntentContextProcessor.o: ../FCAPS/src/fcaps/modules/AddIntentContextProcessor.cpp
-	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/AddIntentContextProcessor.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/AddIntentContextProcessor.o
+$(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/tools/StabilityCalculation.o: ../FCAPS/src/fcaps/tools/StabilityCalculation.cpp
+	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/tools/StabilityCalculation.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/tools/StabilityCalculation.o
+
+$(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/GastonGraphPatternEnumerator.o: ../FCAPS/src/fcaps/modules/GastonGraphPatternEnumerator.cpp
+	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/GastonGraphPatternEnumerator.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/GastonGraphPatternEnumerator.o
 
 $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/CosineBinClsPatternsProjectionChain.o: ../FCAPS/src/fcaps/modules/CosineBinClsPatternsProjectionChain.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/CosineBinClsPatternsProjectionChain.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/CosineBinClsPatternsProjectionChain.o
@@ -146,17 +155,17 @@ $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/BinarySetWithDependenciesPatternManag
 $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/BinarySetPatternManager.o: ../FCAPS/src/fcaps/modules/BinarySetPatternManager.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/BinarySetPatternManager.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/BinarySetPatternManager.o
 
+$(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/GeneralStringsPartialOrder.o: ../FCAPS/src/fcaps/modules/GeneralStringsPartialOrder.cpp
+	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/GeneralStringsPartialOrder.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/GeneralStringsPartialOrder.o
+
+$(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/AddIntentContextProcessor.o: ../FCAPS/src/fcaps/modules/AddIntentContextProcessor.cpp
+	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/AddIntentContextProcessor.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/AddIntentContextProcessor.o
+
 $(OBJDIR_DEBUG)/__/FCAPS/include/fcaps/ModuleTools.o: ../FCAPS/include/fcaps/ModuleTools.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/include/fcaps/ModuleTools.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/include/fcaps/ModuleTools.o
 
 $(OBJDIR_DEBUG)/__/FCAPS/include/fcaps/ModuleJSONTools.o: ../FCAPS/include/fcaps/ModuleJSONTools.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/include/fcaps/ModuleJSONTools.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/include/fcaps/ModuleJSONTools.o
-
-$(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/AddIntentLatticeBuilder.o: ../FCAPS/src/fcaps/modules/details/AddIntentLatticeBuilder.cpp
-	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/details/AddIntentLatticeBuilder.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details/AddIntentLatticeBuilder.o
-
-$(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.o: ../FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.cpp
-	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.o
 
 $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/TreeSetPatternManager.o: ../FCAPS/src/fcaps/modules/TreeSetPatternManager.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/TreeSetPatternManager.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/TreeSetPatternManager.o
@@ -179,11 +188,20 @@ $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/StabilityEstimatorContextProcessor.o:
 $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/StabIntervalClsPatternsProjectionChain.o: ../FCAPS/src/fcaps/modules/StabIntervalClsPatternsProjectionChain.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/StabIntervalClsPatternsProjectionChain.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/StabIntervalClsPatternsProjectionChain.o
 
+$(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/StabClsPatternProjectionChain.o: ../FCAPS/src/fcaps/modules/StabClsPatternProjectionChain.cpp
+	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/StabClsPatternProjectionChain.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/StabClsPatternProjectionChain.o
+
 $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/StabBinClsPatternsProjectionChain.o: ../FCAPS/src/fcaps/modules/StabBinClsPatternsProjectionChain.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/StabBinClsPatternsProjectionChain.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/StabBinClsPatternsProjectionChain.o
 
 $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/SofiaContextProcessor.o: ../FCAPS/src/fcaps/modules/SofiaContextProcessor.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/SofiaContextProcessor.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/SofiaContextProcessor.o
+
+$(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/SimpleStringsPartialOrder.o: ../FCAPS/src/fcaps/modules/SimpleStringsPartialOrder.cpp
+	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/SimpleStringsPartialOrder.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/SimpleStringsPartialOrder.o
+
+$(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/PartialOrderPatternManager.o: ../FCAPS/src/fcaps/modules/PartialOrderPatternManager.cpp
+	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/PartialOrderPatternManager.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/PartialOrderPatternManager.o
 
 $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/IntervalPatternManager.o: ../FCAPS/src/fcaps/modules/IntervalPatternManager.cpp
 	$(CXX) $(CFLAGS_DEBUG) $(INC_DEBUG) -c ../FCAPS/src/fcaps/modules/IntervalPatternManager.cpp -o $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/IntervalPatternManager.o
@@ -193,20 +211,20 @@ clean_debug:
 	rm -rf bin/Debug
 	rm -rf $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules/details
 	rm -rf $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/storages
-	rm -rf $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/tools
-	rm -rf $(OBJDIR_DEBUG)/src
-	rm -rf $(OBJDIR_DEBUG)/__/Tools
 	rm -rf $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/modules
+	rm -rf $(OBJDIR_DEBUG)/__/Tools
+	rm -rf $(OBJDIR_DEBUG)/src
+	rm -rf $(OBJDIR_DEBUG)/__/FCAPS/src/fcaps/tools
 	rm -rf $(OBJDIR_DEBUG)/__/FCAPS/include/fcaps
 
 before_release: 
 	test -d bin/Release || mkdir -p bin/Release
 	test -d $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details || mkdir -p $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details
 	test -d $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/storages || mkdir -p $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/storages
-	test -d $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/tools || mkdir -p $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/tools
-	test -d $(OBJDIR_RELEASE)/src || mkdir -p $(OBJDIR_RELEASE)/src
-	test -d $(OBJDIR_RELEASE)/__/Tools || mkdir -p $(OBJDIR_RELEASE)/__/Tools
 	test -d $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules || mkdir -p $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules
+	test -d $(OBJDIR_RELEASE)/__/Tools || mkdir -p $(OBJDIR_RELEASE)/__/Tools
+	test -d $(OBJDIR_RELEASE)/src || mkdir -p $(OBJDIR_RELEASE)/src
+	test -d $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/tools || mkdir -p $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/tools
 	test -d $(OBJDIR_RELEASE)/__/FCAPS/include/fcaps || mkdir -p $(OBJDIR_RELEASE)/__/FCAPS/include/fcaps
 
 after_release: 
@@ -216,8 +234,8 @@ release: before_release out_release after_release
 out_release: before_release $(OBJ_RELEASE) $(DEP_RELEASE)
 	$(LD) $(LIBDIR_RELEASE) -o $(OUT_RELEASE) $(OBJ_RELEASE)  $(LDFLAGS_RELEASE) $(LIB_RELEASE)
 
-$(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/JsonIntervalPattern.o: ../FCAPS/src/fcaps/modules/details/JsonIntervalPattern.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/details/JsonIntervalPattern.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/JsonIntervalPattern.o
+$(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/JsonBinaryPattern.o: ../FCAPS/src/fcaps/modules/details/JsonBinaryPattern.cpp
+	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/details/JsonBinaryPattern.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/JsonBinaryPattern.o
 
 $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/storages/VectorIntentStorage.o: ../FCAPS/src/fcaps/storages/VectorIntentStorage.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/storages/VectorIntentStorage.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/storages/VectorIntentStorage.o
@@ -228,14 +246,11 @@ $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/storages/CachedIntentStorage.o: ../FCAPS/sr
 $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/TaxonomyJsonReader.o: ../FCAPS/src/fcaps/modules/details/TaxonomyJsonReader.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/details/TaxonomyJsonReader.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/TaxonomyJsonReader.o
 
-$(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/tools/StabilityCalculation.o: ../FCAPS/src/fcaps/tools/StabilityCalculation.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/tools/StabilityCalculation.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/tools/StabilityCalculation.o
+$(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/JsonIntervalPattern.o: ../FCAPS/src/fcaps/modules/details/JsonIntervalPattern.cpp
+	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/details/JsonIntervalPattern.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/JsonIntervalPattern.o
 
 $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/JsonClassifierClasses.o: ../FCAPS/src/fcaps/modules/details/JsonClassifierClasses.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/details/JsonClassifierClasses.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/JsonClassifierClasses.o
-
-$(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/JsonBinaryPattern.o: ../FCAPS/src/fcaps/modules/details/JsonBinaryPattern.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/details/JsonBinaryPattern.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/JsonBinaryPattern.o
 
 $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/IntervalClsPatternsProjectionChain.o: ../FCAPS/src/fcaps/modules/details/IntervalClsPatternsProjectionChain.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/details/IntervalClsPatternsProjectionChain.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/IntervalClsPatternsProjectionChain.o
@@ -245,6 +260,18 @@ $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/FCAUtils.o: ../FCAPS/src/fc
 
 $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/ExtentImpl.o: ../FCAPS/src/fcaps/modules/details/ExtentImpl.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/details/ExtentImpl.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/ExtentImpl.o
+
+$(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/BinClsPatternsProjectionChain.o: ../FCAPS/src/fcaps/modules/details/BinClsPatternsProjectionChain.cpp
+	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/details/BinClsPatternsProjectionChain.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/BinClsPatternsProjectionChain.o
+
+$(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/AddIntentLatticeBuilder.o: ../FCAPS/src/fcaps/modules/details/AddIntentLatticeBuilder.cpp
+	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/details/AddIntentLatticeBuilder.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/AddIntentLatticeBuilder.o
+
+$(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.o: ../FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.cpp
+	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.o
+
+$(OBJDIR_RELEASE)/__/Tools/Library.o: ../Tools/Library.cpp
+	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../Tools/Library.cpp -o $(OBJDIR_RELEASE)/__/Tools/Library.o
 
 $(OBJDIR_RELEASE)/src/main.o: src/main.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c src/main.cpp -o $(OBJDIR_RELEASE)/src/main.o
@@ -257,9 +284,6 @@ $(OBJDIR_RELEASE)/__/Tools/Rmq.o: ../Tools/Rmq.cpp
 
 $(OBJDIR_RELEASE)/__/Tools/RelativePathes.o: ../Tools/RelativePathes.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../Tools/RelativePathes.cpp -o $(OBJDIR_RELEASE)/__/Tools/RelativePathes.o
-
-$(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/BinClsPatternsProjectionChain.o: ../FCAPS/src/fcaps/modules/details/BinClsPatternsProjectionChain.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/details/BinClsPatternsProjectionChain.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/BinClsPatternsProjectionChain.o
 
 $(OBJDIR_RELEASE)/__/Tools/Lca.o: ../Tools/Lca.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../Tools/Lca.cpp -o $(OBJDIR_RELEASE)/__/Tools/Lca.o
@@ -276,8 +300,11 @@ $(OBJDIR_RELEASE)/__/Tools/ConsoleApplication.o: ../Tools/ConsoleApplication.cpp
 $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/tools/StabilityChildrenApproximation.o: ../FCAPS/src/fcaps/tools/StabilityChildrenApproximation.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/tools/StabilityChildrenApproximation.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/tools/StabilityChildrenApproximation.o
 
-$(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/AddIntentContextProcessor.o: ../FCAPS/src/fcaps/modules/AddIntentContextProcessor.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/AddIntentContextProcessor.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/AddIntentContextProcessor.o
+$(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/tools/StabilityCalculation.o: ../FCAPS/src/fcaps/tools/StabilityCalculation.cpp
+	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/tools/StabilityCalculation.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/tools/StabilityCalculation.o
+
+$(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/GastonGraphPatternEnumerator.o: ../FCAPS/src/fcaps/modules/GastonGraphPatternEnumerator.cpp
+	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/GastonGraphPatternEnumerator.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/GastonGraphPatternEnumerator.o
 
 $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/CosineBinClsPatternsProjectionChain.o: ../FCAPS/src/fcaps/modules/CosineBinClsPatternsProjectionChain.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/CosineBinClsPatternsProjectionChain.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/CosineBinClsPatternsProjectionChain.o
@@ -297,17 +324,17 @@ $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/BinarySetWithDependenciesPatternMan
 $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/BinarySetPatternManager.o: ../FCAPS/src/fcaps/modules/BinarySetPatternManager.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/BinarySetPatternManager.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/BinarySetPatternManager.o
 
+$(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/GeneralStringsPartialOrder.o: ../FCAPS/src/fcaps/modules/GeneralStringsPartialOrder.cpp
+	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/GeneralStringsPartialOrder.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/GeneralStringsPartialOrder.o
+
+$(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/AddIntentContextProcessor.o: ../FCAPS/src/fcaps/modules/AddIntentContextProcessor.cpp
+	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/AddIntentContextProcessor.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/AddIntentContextProcessor.o
+
 $(OBJDIR_RELEASE)/__/FCAPS/include/fcaps/ModuleTools.o: ../FCAPS/include/fcaps/ModuleTools.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/include/fcaps/ModuleTools.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/include/fcaps/ModuleTools.o
 
 $(OBJDIR_RELEASE)/__/FCAPS/include/fcaps/ModuleJSONTools.o: ../FCAPS/include/fcaps/ModuleJSONTools.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/include/fcaps/ModuleJSONTools.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/include/fcaps/ModuleJSONTools.o
-
-$(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/AddIntentLatticeBuilder.o: ../FCAPS/src/fcaps/modules/details/AddIntentLatticeBuilder.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/details/AddIntentLatticeBuilder.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details/AddIntentLatticeBuilder.o
-
-$(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.o: ../FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.cpp
-	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/VectorBinarySetDescriptor.o
 
 $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/TreeSetPatternManager.o: ../FCAPS/src/fcaps/modules/TreeSetPatternManager.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/TreeSetPatternManager.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/TreeSetPatternManager.o
@@ -330,11 +357,20 @@ $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/StabilityEstimatorContextProcessor.
 $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/StabIntervalClsPatternsProjectionChain.o: ../FCAPS/src/fcaps/modules/StabIntervalClsPatternsProjectionChain.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/StabIntervalClsPatternsProjectionChain.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/StabIntervalClsPatternsProjectionChain.o
 
+$(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/StabClsPatternProjectionChain.o: ../FCAPS/src/fcaps/modules/StabClsPatternProjectionChain.cpp
+	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/StabClsPatternProjectionChain.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/StabClsPatternProjectionChain.o
+
 $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/StabBinClsPatternsProjectionChain.o: ../FCAPS/src/fcaps/modules/StabBinClsPatternsProjectionChain.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/StabBinClsPatternsProjectionChain.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/StabBinClsPatternsProjectionChain.o
 
 $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/SofiaContextProcessor.o: ../FCAPS/src/fcaps/modules/SofiaContextProcessor.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/SofiaContextProcessor.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/SofiaContextProcessor.o
+
+$(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/SimpleStringsPartialOrder.o: ../FCAPS/src/fcaps/modules/SimpleStringsPartialOrder.cpp
+	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/SimpleStringsPartialOrder.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/SimpleStringsPartialOrder.o
+
+$(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/PartialOrderPatternManager.o: ../FCAPS/src/fcaps/modules/PartialOrderPatternManager.cpp
+	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/PartialOrderPatternManager.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/PartialOrderPatternManager.o
 
 $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/IntervalPatternManager.o: ../FCAPS/src/fcaps/modules/IntervalPatternManager.cpp
 	$(CXX) $(CFLAGS_RELEASE) $(INC_RELEASE) -c ../FCAPS/src/fcaps/modules/IntervalPatternManager.cpp -o $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/IntervalPatternManager.o
@@ -344,10 +380,10 @@ clean_release:
 	rm -rf bin/Release
 	rm -rf $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules/details
 	rm -rf $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/storages
-	rm -rf $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/tools
-	rm -rf $(OBJDIR_RELEASE)/src
-	rm -rf $(OBJDIR_RELEASE)/__/Tools
 	rm -rf $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/modules
+	rm -rf $(OBJDIR_RELEASE)/__/Tools
+	rm -rf $(OBJDIR_RELEASE)/src
+	rm -rf $(OBJDIR_RELEASE)/__/FCAPS/src/fcaps/tools
 	rm -rf $(OBJDIR_RELEASE)/__/FCAPS/include/fcaps
 
 .PHONY: before_debug after_debug clean_debug before_release after_release clean_release
