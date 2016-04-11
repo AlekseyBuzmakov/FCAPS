@@ -8,6 +8,10 @@ rapidjson/
 # boost is also not under git
 boost
 
+# premake
+Makefile
+*.make
+
 # CB project additional stuff
 *.depend
 *.layout
