@@ -17,12 +17,12 @@ You can put a symbolic (or a hard) link.
 
 > $ mklink /D boost "path/to/boost" \# Windows
 
-Some boost libraries (regex, tread, system, filesystem) should be compiled:
+Some boost libraries (regex, thread, system, filesystem) should be compiled:
 * Go to boost folder and run 
 
 > $ ./bootstrap.
 
-* Then build the all libraries
+* Then build all libraries
 
 > $ ./b2 release
 
@@ -34,11 +34,11 @@ The next step is to convert the project to your most loved envirement. For that 
 
 The most widely used configurations are 
 
-> $ premake4 vs2005|vs2008|vs2010|vs2012 \# for diferent version ovisual studio **sln** filesystem
+> $ premake4 vs2005|vs2008|vs2010|vs2012 \# for diferent version of visual studio **sln** file
 
-> $ premake4 gmake \# for GNU make filesystem
+> $ premake4 gmake \# for GNU make file
 
-> $ premake4 codeblocks \# for cbp files of code::blocks IDE
+> $ premake4 codeblocks \# for cbp file of code::blocks IDE
 
 > $ premake4 clean \# for removing the created files
 

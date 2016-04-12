@@ -209,7 +209,7 @@ void CStabClsPatternProjectionChain::Preimages( const IPatternDescriptor* d, CPa
 
 		// Stability of 'ptrn' has not been changed.
 		//  (probably we should update the fact that stability is up to date)
-		ptrn.MinGraphSupport() = min( ptrn.MinGraphSupport(), nextImage->Size() );
+		ptrn.MinGraphSupport() = min<size_t>( ptrn.MinGraphSupport(), nextImage->Size() );
 		++ptrn.GraphCount();
 		return;
 	}
