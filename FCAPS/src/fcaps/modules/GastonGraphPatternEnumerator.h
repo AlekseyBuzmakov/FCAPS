@@ -95,7 +95,7 @@ private:
 	// Running mode for Gaston
 	TGastonRunningMode gastonMode;
 
-	static bool gastonCallback( LibGastonDataRef data, const LibGastonGraph* graph );
+	static bool LibGastonAPI gastonCallback(LibGastonDataRef data, const LibGastonGraph* graph);
 
 	void loadLibrary();
 	void createGastonThread();
