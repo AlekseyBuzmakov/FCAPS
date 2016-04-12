@@ -17,15 +17,15 @@ solution "Sofia-PS"
 	      "../LibGastonForSofia/inc", 
 	      "Tools/" 
       }
-      files { "**.h", "**.inl", "**.cpp" }
       excludes { "FCAPS/src/fcaps/premodules/**", "rapidjson/**", "boost/**" }
+      files { "**.h", "**.inl", "**.cpp" }
 
       bindir = "bin/"
 	  
 	  rapidjsonDir="rapidjson/"
-	  if not os.isdir(rapidjsonDir) then
-		os.execute(	"git clone https://github.com/miloyip/rapidjson.git " .. rapidjsonDir )
-		os.execute(	"git --git-dir " .. rapidjsonDir .. ".git --work-tree " .. rapidjsonDir .. " reset --hard c745c953adf68" )
+	  if ( not os.isdir(rapidjsonDir)  ) then
+		os.execute( "git clone https://github.com/miloyip/rapidjson.git " .. rapidjsonDir )
+		os.execute( "git --git-dir " .. rapidjsonDir .. ".git --work-tree " .. rapidjsonDir .. " reset --hard c745c953adf68" )
 		os.execute( "git --git-dir " .. rapidjsonDir .. ".git --work-tree " .. rapidjsonDir .. " apply --whitespace=fix rapidjson.patch" )
 	  end
 	  
@@ -38,7 +38,8 @@ solution "Sofia-PS"
       configuration "Debug"
          debugBindir= bindir .. "Debug/"
 	 os.mkdir(debugBindir)
-      	 targetname( debugBindir .. "Sofia-PS-D" )
+      	 targetdir( debugBindir )
+	 targetname( "Sofia-PS-D" )
          defines { "DEBUG" }
          flags { "Symbols" }
 	 links{ 
@@ -52,8 +53,9 @@ solution "Sofia-PS"
       configuration "Release"
          releaseBindir= bindir .. "Release/"
 	 os.mkdir(releaseBindir)
-      	 targetname( releaseBindir .. "Sofia-PS-D" )
-         defines { "NDEBUG" }
+      	 targetdir( releaseBindir )
+	 targetname( "Sofia-PS" )
+         defines { "NDEBUG", "BOOST_DISABLE_ASSERTS" }
          flags { "Optimize" }
 	 links{ 
 		 "boost_filesystem",
