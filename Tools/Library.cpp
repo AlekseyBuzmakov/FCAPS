@@ -5,7 +5,16 @@
 
 #include "Library.h"
 
+#ifndef _WIN32
+
 #include <dlfcn.h>
+
+#else
+
+#include <windows.h>
+#include <StdTools.h>
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -30,15 +39,23 @@ void Library::Open( const std::string& p )
 {
 	Close();
 	path = p;
+#ifndef _WIN32
 	handle = dlopen (path.c_str(), RTLD_LAZY);
-	if( !handle ) {
+#else
+	handle = LoadLibrary(TEXT(path.c_str()));
+#endif
+	if( handle == 0 ) {
 		throw new CLibException( "Library::Open()", dlerror() );
 	}
 }
 void Library::Close()
 {
 	if( IsOpen() ) {
+#ifndef _WIN32
 		dlclose(handle);
+#else
+		FreeLibrary(handle);
+#endif
 	}
 	handle = 0;
 	path.clear();
@@ -46,10 +63,17 @@ void Library::Close()
 Library::TFuncPtr Library::GetFunc( const std::string& name ) const
 {
 	assert( handle != 0 );
+#ifndef _WIN32
 	const TFuncPtr result = dlsym( handle, name.c_str() );
 	const char* const error = dlerror();
     if ( error != 0 )  {
 		throw new CLibException( "Library::GetFunc('" + name + "')", error );
     }
+#else
+	const TFuncPtr result = GetProcAddress(handle, name.c_str());
+	if( result == 0 ) {
+		throw new CLibException( "Library::GetFunc('" + name + "')", "Error code: " + StdExt:to_string(GetLastError()) );
+	}
+#endif
     return result;
 }

@@ -28,7 +28,7 @@ public:
 	//  (if there is a problem, it throws CLibException)
 	void Open( const std::string& path );
 	void Close();
-	// Chekcs if open
+	// Checks if open
 	bool IsOpen() const
 	{ return handle != 0; }
 	// Get a pointer to a function
