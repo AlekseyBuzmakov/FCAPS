@@ -10,7 +10,7 @@
 
 ////////////////////////////////////////////////////////////////////////
 
-struct CLattice;
+class CLattice;
 interface IPatternPrunner;
 interface IExtentStorage;
 interface IIntentStorage;

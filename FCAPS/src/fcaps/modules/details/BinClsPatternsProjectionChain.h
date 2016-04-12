@@ -11,7 +11,7 @@
 
 #include <deque>
 
-interface CBinarySetDescriptorsComparator;
+class CBinarySetDescriptorsComparator;
 
 ////////////////////////////////////////////////////////////////////
 

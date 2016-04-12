@@ -3,7 +3,7 @@
 #ifndef CEXCEPTION_H
 #define CEXCEPTION_H
 
-#include <common.h>
+#include <string>
 
 ////////////////////////////////////////////////////////////////////
 

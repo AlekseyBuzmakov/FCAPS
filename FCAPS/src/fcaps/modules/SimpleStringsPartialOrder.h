@@ -80,7 +80,7 @@ public:
 	void SetMinStrLength( DWORD minLenght )
 		{ minStrLength = 1 < minLenght ? minLenght : 1; }
 	// Set wether is it necessary to cut substrings on empty (IsMoreGeneral) elements
-	DWORD GetCutOnEmptyElems() const
+	bool GetCutOnEmptyElems() const
 		{ return cutOnEmptyElems; }
 	void SetCutOnEmptyElems( bool value )
 		{ cutOnEmptyElems = value; }

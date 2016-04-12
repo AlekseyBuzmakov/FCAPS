@@ -22,7 +22,7 @@ void CCachedPatternStorage<THasher>::Reserve( size_t size )
 	if( patterns == 0 ) {
 		return;
 	}
-	const size_t desiredSize = size / patterns->max_load_factor() + 1;
+	const size_t desiredSize = static_cast<size_t>( size / patterns->max_load_factor() + 1 );
 	if( desiredSize > patterns->bucket_count() ) {
 		patterns->rehash(desiredSize);
 	}

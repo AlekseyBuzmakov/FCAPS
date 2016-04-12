@@ -74,7 +74,7 @@ void CStabIntervalClsPatternsProjectionChain::Preimages( const IPatternDescripto
 	p.StabState() = currStateNum;
 	if( p.Stability() > diff ) {
 		p.Stability() = diff;
-		p.MinAttr() = State().State == CCurrState::S_Left ? -(State().AttrNum + 1) : State().AttrNum + 1;
+		p.MinAttr() = State().State == CCurrState::S_Left ? -(int)(State().AttrNum + 1) : State().AttrNum + 1;
 	}
 }
 
