@@ -89,9 +89,9 @@ struct CGastonGraphPatternEnumerator::CSyncData{
 
 CModuleRegistrar<CGastonGraphPatternEnumerator> CGastonGraphPatternEnumerator::registar(PatternEnumeratorModuleType, GastonGraphPatternEnumeratorModule);
 
-CGastonGraphPatternEnumerator::CGastonGraphPatternEnumerator::CGastonGraphPatternEnumerator() :
+CGastonGraphPatternEnumerator::CGastonGraphPatternEnumerator() :
 	libraryPath( "libGaston.so" ),
-	inputPath( boost::filesystem::unique_path().native() ),
+	inputPath( boost::filesystem::unique_path().string() ),
 	removeInput( true ),
 	syncData( new CSyncData ),
 	isGastonRun( false ),

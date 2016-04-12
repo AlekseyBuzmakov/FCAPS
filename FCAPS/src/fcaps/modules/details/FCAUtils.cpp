@@ -299,7 +299,7 @@ void CLatticeWriter::fillConceptJson( TLatticeNodeId nodeId, MemoryPoolAllocator
 	}
 	if( params.OutStabEstimation ) {
 		assert( cData.size() == lattice.GetNodes().size() );
-		if( isfinite( cData[nodeId].MinStab ) && isfinite( cData[nodeId].MaxStab ) ) {
+		if( isfinite( cData[nodeId].MinStab ) && cData[nodeId].MaxStab > 0 ) {
 			if( params.IsStabilityInLog ) {
 				result
 					.AddMember( "LStab", Value().SetDouble( cData[nodeId].MinStab ), alloc )

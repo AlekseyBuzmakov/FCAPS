@@ -4,10 +4,8 @@
 
 #include <fcaps/modules/VectorBinarySetDescriptor.h>
 
-#include <boost/static_assert.hpp>
+#include <boost/random/mersenne_twister.hpp>
 
-#include <cmath>
-#include <cstdlib>
 #include <vector>
 
 using namespace std;
@@ -38,7 +36,7 @@ CStabilityMonteCarloApproximation::CStabilityMonteCarloApproximation(
 DWORD CStabilityMonteCarloApproximation::CalculateTrialsCount(
 	const double& e, const double& d )
 {
-	return ceil( log( 2.0 / d ) / 2 / (e*e) );
+	return static_cast<DWORD>( ceil( log( 2.0 / d ) / 2 / (e*e) ) );
 }
 
 void CStabilityMonteCarloApproximation::SetStableThreshold( double value )
@@ -61,13 +59,12 @@ void CStabilityMonteCarloApproximation::Compute()
 {
 	leftLimit = 0.0;
 	rightLimit = 0.0;
-	srand( 0 );
+
+	boost::random::mt19937 rnd( 1234 );
 
 	const char rndDigets = 31;
 	const char residue = extent.Size() % rndDigets;
 	const DWORD residueMask = (1 << residue) - 1;
-
-	BOOST_STATIC_ASSERT( RAND_MAX == 2147483647 );
 
 	vector<DWORD> bitMembership;
 	bitMembership.resize( extent.Size() / rndDigets + 1, 0 );
@@ -80,9 +77,9 @@ void CStabilityMonteCarloApproximation::Compute()
 	for( DWORD i = 0; i < trialsNum; ++i ) {
 		// Generate random subset
 		for( DWORD j = 0; j < bitMembership.size() - 1; ++j ) {
-			bitMembership[j] = rand();
+			bitMembership[j] = rnd();
 		}
-		bitMembership.back() = (rand() & residueMask);
+		bitMembership.back() = (rnd() & residueMask);
 
 		// Intersect description of all objects in the subset
 		CSharedPtr<const CVectorBinarySetDescriptor> result;

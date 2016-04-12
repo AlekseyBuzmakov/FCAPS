@@ -17,6 +17,7 @@ Makefile
 *.sdf
 *.sln
 *.vcxproj*
+*.suo
 *.exe
 
 # CB project additional stuff

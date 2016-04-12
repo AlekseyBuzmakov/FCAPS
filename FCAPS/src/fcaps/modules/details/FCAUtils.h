@@ -44,7 +44,7 @@ struct CLatticeFilterParams {
 		PercentageBase( 0 ) {}
 };
 
-struct CLattice;
+class CLattice;
 interface IIntentStorage;
 interface IExtentStorage;
 
