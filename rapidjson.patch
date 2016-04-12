@@ -4,13 +4,13 @@ Date: Thu, 21 May 2015 10:44:44 +0200
 Subject: [PATCH] Reading single values in addition to objects and arrays
 
 ---
- include/rapidjson/reader.h | 2899 ++++++++++++++++++++++----------------------
+ rapidjson/include/rapidjson/reader.h | 2899 ++++++++++++++++++++++----------------------
  1 file changed, 1455 insertions(+), 1444 deletions(-)
 
-diff --git a/include/rapidjson/reader.h b/include/rapidjson/reader.h
+diff --git a/rapidjson/include/rapidjson/reader.h b/rapidjson/include/rapidjson/reader.h
 index 5f54581..2b41a49 100644
---- a/include/rapidjson/reader.h
-+++ b/include/rapidjson/reader.h
+--- a/rapidjson/include/rapidjson/reader.h
++++ b/rapidjson/include/rapidjson/reader.h
 @@ -1,1444 +1,1455 @@
 -// Copyright (C) 2011 Milo Yip
 -//

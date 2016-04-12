@@ -21,13 +21,19 @@ solution "Sofia-PS"
       excludes { "FCAPS/src/fcaps/premodules/**", "rapidjson/**", "boost/**" }
 
       bindir = "bin/"
-
-      configuration "linux or macosx"
-	      libdirs {
-			 "boost/bin.v2/libs/filesystem/build/gcc-4.8/release/link-static/threading-multi/",
-			 "boost/bin.v2/libs/system/build/gcc-4.8/release/link-static/threading-multi/",
-			 "boost/bin.v2/libs/thread/build/gcc-4.8/release/link-static/threading-multi/"
-	      }
+	  
+	  rapidjsonDir="rapidjson/"
+	  if not os.isdir(rapidjsonDir) then
+		os.execute(	"git clone https://github.com/miloyip/rapidjson.git " .. rapidjsonDir )
+		os.execute(	"git --git-dir " .. rapidjsonDir .. ".git --work-tree " .. rapidjsonDir .. " reset --hard c745c953adf68" )
+		os.execute( "git --git-dir " .. rapidjsonDir .. ".git --work-tree " .. rapidjsonDir .. " apply --whitespace=fix rapidjson.patch" )
+	  end
+	  
+	  libdirs {
+		 "boost/bin.v2/libs/filesystem/build/*/release/link-static/threading-multi/",
+		 "boost/bin.v2/libs/system/build/*/release/link-static/threading-multi/",
+		 "boost/bin.v2/libs/thread/build/*/release/link-static/threading-multi/"
+	  }
 
       configuration "Debug"
          debugBindir= bindir .. "Debug/"

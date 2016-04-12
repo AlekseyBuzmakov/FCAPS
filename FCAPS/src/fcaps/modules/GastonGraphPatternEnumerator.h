@@ -18,6 +18,7 @@
 #include <fcaps/ModuleTools.h>
 
 #include <boost/unordered_map.hpp>
+#include <vector>
 
 ////////////////////////////////////////////////////////////////////////
 

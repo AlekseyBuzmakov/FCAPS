@@ -12,6 +12,13 @@ boost
 Makefile
 *.make
 
+# Visual Studio
+*.opensdf
+*.sdf
+*.sln
+*.vcxproj*
+*.exe
+
 # CB project additional stuff
 *.depend
 *.layout
