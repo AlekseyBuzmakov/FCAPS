@@ -350,7 +350,7 @@ bool CStabClsPatternProjectionChain::initializeNewPattern(
 		newPtrn.DMeasure()=min(newPtrn.DMeasure(), extDiff );
 	}
 
-    newPtrn.MinGraphSupport() = min( parent.MinGraphSupport(), nextImage->Size() );
+    newPtrn.MinGraphSupport() = min( parent.MinGraphSupport(), static_cast<DWORD>(nextImage->Size()) );
     newPtrn.GraphCount() = parent.GraphCount() + 1;
 
     return true;
