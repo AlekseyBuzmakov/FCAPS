@@ -8,6 +8,7 @@
 #ifndef _WIN32
 
 #include <dlfcn.h>
+#include <assert.h>
 
 #else
 
