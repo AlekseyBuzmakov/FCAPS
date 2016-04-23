@@ -1,0 +1,32 @@
+{
+	"Type": "ContextProcessorModules",
+	"Name": "AddIntentContextProcessorModule",
+	"Params": {
+		"PatternManager": {
+			"Type" : "PatternManagerModules",
+			"Name" : "CompositPatternManagerModule",
+			"Params" : {
+				"PMs":[
+				{
+					"Type" : "PatternManagerModules",
+					"Name" : "BinarySetJoinPatternManagerModule"
+				},{
+					"Type" : "PatternManagerModules",
+					"Name" : "IntervalPatternManagerModule"
+				}
+				]
+			}
+		},
+		"OutputParams": {
+			"MinExtentSize" : 1,
+			"MinLift" : 1,
+			"MinStab" : 1,
+			"OutExtent" : true,
+			"OutSupport" : true,
+			"OutOrder" : true,
+			"OutStability" : false,
+			"OutStabEstimation" : false,
+			"IsStabilityInLog" : true
+		}
+	}
+}

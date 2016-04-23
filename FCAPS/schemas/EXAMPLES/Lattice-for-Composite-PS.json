@@ -1,0 +1,26 @@
+[
+	{"NodesCount":7,"ArcsCount":9,"Bottom":[0],"Top":[4]},
+	{ 
+		"Nodes":[
+			{"Ext":{"Count":0,"Inds":[]},"Supp":0,"Int":"BOTTOM"},
+			{"Ext":{"Count":1,"Inds":[0],"Names":["g1"]},"Supp":1,"Int":[{"Count":2,"Inds":[0,2]},[[1,1],[1,2]]]},
+			{"Ext":{"Count":2,"Inds":[0,1],"Names":["g1","g2"]},"Supp":2,"Int":[{"Count":1,"Inds":[0]},[[0,1],[1,2]]]},
+			{"Ext":{"Count":1,"Inds":[1],"Names":["g2"]},"Supp":1,"Int":[{"Count":1,"Inds":[0]},[[0,0],[2,2]]]},
+			{"Ext":{"Count":3,"Inds":[0,1,2],"Names":["g1","g2","g3"]},"Supp":3,"Int":[{"Count":0,"Inds":[]},[[0,2],[1,2]]]},
+			{"Ext":{"Count":2,"Inds":[0,2],"Names":["g1","g3"]},"Supp":2,"Int":[{"Count":1,"Inds":[2]},[[1,2],[1,2]]]},
+			{"Ext":{"Count":1,"Inds":[2],"Names":["g3"]},"Supp":1,"Int":[{"Count":2,"Inds":[1,2]},[[2,2],[1,1]]]}
+		]
+	},{ 
+		"Arcs":[
+			{"S":1,"D":0},
+			{"S":2,"D":1},
+			{"S":2,"D":3},
+			{"S":3,"D":0},
+			{"S":4,"D":2},
+			{"S":4,"D":5},
+			{"S":5,"D":1},
+			{"S":5,"D":6},
+			{"S":6,"D":0}
+		]
+	}
+]
