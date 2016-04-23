@@ -111,7 +111,7 @@ This module has two parameters:
 Here we specify that patterns are dealled with module "CompositPatternManagerModule" of type "PatternManagerModules". 
 This module construct a direct product of other pattern structures given as params to the array PMs. Every element of this array is a description of a pattern manager module providing a certain semilattice of descriptions.
 
-We specify that the first one is a binary pattern mananger with the join as the semilattice operation and the second one is an interval tuple data.
+We specify that the first one is a binary pattern mananger with the join as the semilattice operation and the second one is an interval pattern structure.
 
 ## The file with the lattice
 
