@@ -1,6 +1,6 @@
 # Computation of the Pattern Lattice for a composite Pattern Structure
 
-In this example we consider how we can construct a lattice for a pattern structure being a direct product of other pattern structure.
+In this example we consider how we can construct a lattice for a pattern structure being a direct product of other pattern structures.
 In particular here we consider an example of frequently found dataset with numerical and binary attributes together.
 
 ## Sample dataset
@@ -15,21 +15,22 @@ Let us imagine a dataset having 3 binary attributes a,b, c, and 2 numerical attr
 
 ## Pattern lattice
 
-Given the aforementioned dataset, we are going to construct the following pattern lattice.
+Given the aforementioned dataset, we are going to construct the shown below pattern lattice.
 
 {FIG:TODO}
 
-In this lattice, the intents are taken from the following semilattice. Every element is a set of sequences, while the semilattice operation is the set of maximal substrings (without gaps) that are included by at least one sequence from every set. Thus, this pattern structure is a direct product of an interval pattern structure containing attributes X and Y, and a binary pattern structure (standard FCA) based on the set. Here after we will encode the dataset and the pattern structure params based on this notice.
+In this lattice, the intents are taken from the following semilattice. Every element is a tuple of a subset of attributes `{a,b,c}` (encoded by their indices) and a tuple of numercial numbers or intervals.
+Thus, this pattern structure is a direct product of an interval pattern structure containing attributes X and Y, and a binary pattern structure (standard FCA) based on the set `{a,b,c}`. Hereafter we will encode the dataset and the pattern structure params based on this notice.
 
 ## Command line
 
 One can construct this lattice by the following command line.
 
-> $sofia-ps -CP:[settings.json]() -data:[context.json]() -out
+> $sofia-ps -CP:[settings.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/AddIntentContextProcessor-for-composite-bin-IPS.json) -data:[context.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/composite-bin-IPS-Context.json) -out
 
 Where context.json encodes the dataset, and setting.json describes the processing params.
 
-The resulting lattice can be found [here]().
+The resulting lattice can be found [here](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/Lattice-for-Composite-PS.json).
 
 ## Data encoding
 
