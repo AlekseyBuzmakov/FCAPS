@@ -9,7 +9,7 @@
 #include <common.h>
 
 #include <fcaps/Module.h>
-#include <fcaps/ModuleTools.h>
+#include <ModuleTools.h>
 #include <fcaps/PatternManager.h>
 
 #include <ListWrapper.h>

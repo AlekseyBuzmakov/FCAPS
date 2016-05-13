@@ -6,7 +6,7 @@
 #include <fcaps/modules/details/IntervalClsPatternsProjectionChain.h>
 
 #include <fcaps/Module.h>
-#include <fcaps/ModuleTools.h>
+#include <ModuleTools.h>
 
 const char SuppIntervalClsPatternsProjectionChain[] = "SuppIntervalClsPatternsProjectionChainModule";
 

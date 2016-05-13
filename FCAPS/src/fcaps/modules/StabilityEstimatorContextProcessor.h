@@ -9,7 +9,7 @@
 #include <fcaps/tools/StabilityCalculation.h>
 #include <fcaps/tools/StabilityChildrenApproximation.h>
 
-#include <fcaps/ModuleTools.h>
+#include <ModuleTools.h>
 
 class CVectorBinarySetJoinComparator;
 

@@ -3,7 +3,7 @@
 #include "ClassifierContextProcessor.h"
 
 #include <fcaps/Classifier.h>
-#include <fcaps/ModuleJSONTools.h>
+#include <ModuleJSONTools.h>
 
 #include <JSONTools.h>
 

@@ -3,8 +3,9 @@
 // Author: Aleksey Buzmakov
 // Description: Module interface for creting modules by the module name.
 
+#include <ModuleTools.h>
+
 #include <fcaps/Module.h>
-#include <fcaps/ModuleTools.h>
 
 #include <boost/unordered_map.hpp>
 

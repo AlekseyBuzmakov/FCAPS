@@ -15,7 +15,7 @@
 #include <LibGastonForSofia.h>
 
 #include <fcaps/Module.h>
-#include <fcaps/ModuleTools.h>
+#include <ModuleTools.h>
 
 #include <boost/unordered_map.hpp>
 #include <vector>

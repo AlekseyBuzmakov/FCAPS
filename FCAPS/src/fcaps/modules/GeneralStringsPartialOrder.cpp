@@ -2,7 +2,7 @@
 
 #include "GeneralStringsPartialOrder.h"
 
-#include <fcaps/ModuleJSONTools.h>
+#include <ModuleJSONTools.h>
 
 ////////////////////////////////////////////////////////////////////
 

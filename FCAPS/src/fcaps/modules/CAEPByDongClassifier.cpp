@@ -5,7 +5,7 @@
 #include <fcaps/storages/VectorIntentStorage.h>
 #include <fcaps/PatternManager.h>
 
-#include <fcaps/ModuleJSONTools.h>
+#include <ModuleJSONTools.h>
 
 #include <PowerfulSaxJson.h>
 

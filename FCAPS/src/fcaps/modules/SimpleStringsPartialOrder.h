@@ -8,7 +8,7 @@
 #include <fcaps/PartialOrderElementsComparator.h>
 
 #include <fcaps/Module.h>
-#include <fcaps/ModuleTools.h>
+#include <ModuleTools.h>
 
 #include <vector>
 

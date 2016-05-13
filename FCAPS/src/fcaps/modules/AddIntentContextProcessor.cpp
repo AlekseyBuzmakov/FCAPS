@@ -7,8 +7,8 @@
 #include <fcaps/storages/VectorIntentStorage.h>
 #include <fcaps/PatternManager.h>
 
-#include <fcaps/ModuleTools.h>
-#include <fcaps/ModuleJSONTools.h>
+#include <ModuleTools.h>
+#include <ModuleJSONTools.h>
 #include <JSONTools.h>
 
 using namespace std;

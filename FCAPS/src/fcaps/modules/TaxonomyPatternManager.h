@@ -5,7 +5,7 @@
 
 #include <fcaps/PatternManager.h>
 #include <fcaps/Module.h>
-#include <fcaps/ModuleTools.h>
+#include <ModuleTools.h>
 #include <fcaps/modules/details/TaxonomyJsonReader.h>
 
 #include <Lca.h>

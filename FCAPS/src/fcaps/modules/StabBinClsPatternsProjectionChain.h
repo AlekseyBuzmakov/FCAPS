@@ -5,7 +5,7 @@
 
 #include <fcaps/modules/details/BinClsPatternsProjectionChain.h>
 #include <fcaps/Module.h>
-#include <fcaps/ModuleTools.h>
+#include <ModuleTools.h>
 
 #include <fcaps/tools/StabilityChildrenApproximation.h>
 

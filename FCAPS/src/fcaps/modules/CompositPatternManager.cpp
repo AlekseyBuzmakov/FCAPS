@@ -2,7 +2,7 @@
 
 #include <fcaps/modules/CompositPatternManager.h>
 
-#include <fcaps/ModuleJSONTools.h>
+#include <ModuleJSONTools.h>
 
 #include <JSONTools.h>
 #include <StdTools.h>

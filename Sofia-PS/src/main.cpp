@@ -5,11 +5,11 @@
 #include <ConsoleApplication.h>
 
 #include <fcaps/Module.h>
-#include <fcaps/ModuleTools.h>
+#include <ModuleTools.h>
 #include <fcaps/ContextProcessor.h>
 #include <fcaps/Filter.h>
 
-#include <fcaps/ModuleJSONTools.h>
+#include <ModuleJSONTools.h>
 
 #include <JSONTools.h>
 

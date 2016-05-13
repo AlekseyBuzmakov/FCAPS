@@ -4,7 +4,7 @@
 
 #include <fcaps/storages/CachedIntentStorage.h>
 
-#include <fcaps/ModuleJSONTools.h>
+#include <ModuleJSONTools.h>
 
 #include <JSONTools.h>
 

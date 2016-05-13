@@ -7,7 +7,7 @@
 
 #include <fcaps/PatternManager.h>
 #include <fcaps/Module.h>
-#include <fcaps/ModuleTools.h>
+#include <ModuleTools.h>
 
 #include<boost/ptr_container/ptr_vector.hpp>
 

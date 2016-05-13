@@ -9,7 +9,7 @@
 #include <common.h>
 
 #include <fcaps/modules/VectorBinarySetDescriptor.h>
-#include <fcaps/ModuleJSONTools.h>
+#include <ModuleJSONTools.h>
 
 #include <JSONTools.h>
 

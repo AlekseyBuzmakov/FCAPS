@@ -11,7 +11,7 @@
 #include <fcaps/PatternEnumerator.h>
 
 #include <fcaps/Module.h>
-#include <fcaps/ModuleTools.h>
+#include <ModuleTools.h>
 #include <fcaps/modules/VectorBinarySetDescriptor.h>
 
 #include <vector>
