@@ -51,7 +51,7 @@ solution "Sofia-PS"
 			"Tools/inc/", 
 			"../LibGastonForSofia/inc", 
 		}
-		links{ "SharedTools" }
+		links{  }
 		excludes { "FCAPS/src/fcaps/premodules/**", "rapidjson/**", "boost/**" }
 		files { "Sofia-PS/**.cpp", "FCAPS/**.h", "FCAPS/**.inl", "FCAPS/**.cpp" }
 
@@ -81,7 +81,8 @@ solution "Sofia-PS"
 				"boost_system",
 				"boost_thread",
 				"dl",
-				"pthread"
+				"pthread",
+				"SharedTools-D"
 			}
 
 		configuration "Release"
@@ -97,6 +98,7 @@ solution "Sofia-PS"
 				"boost_system",
 				"boost_thread",
 				"dl",
-				"pthread"
+				"pthread",
+				"SharedTools"
 			}
 
