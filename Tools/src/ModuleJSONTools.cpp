@@ -37,3 +37,19 @@ IModule* CreateModuleFromJSON( const rapidjson::Value& moduleJson, std::string& 
 	return result.release();
 }
 
+JSON EnumerateRegisteredModulesToJSON()
+{
+	vector<CModuleRegistration> regs;
+	EnumerateModuleRegistrations( regs );
+
+	JSON result;
+	result += "[\n";
+	for( int i = 0; i < regs.size(); ++i ) {
+		result += "{";
+		result = result + "\"Type\":\"" + regs.Type + "\",";
+		result = result + "\"Name\":\"" + regs.Name + "\",";
+		result = result + "\"Func\":\"" + regs.Name + "\",";
+		result += "}";
+	}
+	result += "]\n";
+}

@@ -2,8 +2,8 @@
 
 #include "AddIntentContextProcessor.h"
 
-#include <fcaps/modules/details/AddIntentLatticeBuilder.h>
-#include <fcaps/modules/details/ExtentImpl.h>
+#include "details/AddIntentLatticeBuilder.h"
+#include "details/ExtentImpl.h"
 #include <fcaps/storages/VectorIntentStorage.h>
 #include <fcaps/PatternManager.h>
 

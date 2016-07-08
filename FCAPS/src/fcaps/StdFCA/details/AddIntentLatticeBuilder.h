@@ -6,8 +6,8 @@
 #ifndef ADDINTENTLATTICEBUILDER_H_
 #define ADDINTENTLATTICEBUILDER_H_
 ///////////////////////////////////////////////////////////////////////////////////
-#include <fcaps/modules/details/LatticeBuilder.h>
-#include <fcaps/modules/details/Lattice.h>
+#include "LatticeBuilder.h"
+#include "Lattice.h"
 
 #include <ListWrapper.h>
 #include <fcaps/CompareResults.h>

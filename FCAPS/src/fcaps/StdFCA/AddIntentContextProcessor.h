@@ -7,8 +7,8 @@
 #include <fcaps/Module.h>
 #include <ModuleTools.h>
 
-#include <fcaps/modules/details/Lattice.h>
-#include <fcaps/modules/details/FCAUtils.h>
+#include "details/Lattice.h"
+#include "details/FCAUtils.h"
 
 interface IPatternManager;
 interface IIntentStorage;

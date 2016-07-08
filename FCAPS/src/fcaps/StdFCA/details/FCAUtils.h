@@ -4,7 +4,7 @@
 // Different small FCA utils
 
 #include <common.h>
-#include <fcaps/modules/details/Lattice.h>
+#include "Lattice.h"
 
 #include <boost/unordered_map.hpp>
 #include <rapidjson/document.h>

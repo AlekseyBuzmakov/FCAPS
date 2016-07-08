@@ -49,3 +49,29 @@ void RegisterModule(const std::string& type, const std::string& name, CreateFunc
 	assert( typedCollection.find( name ) == typedCollection.end() );
 	typedCollection[name]=func;
 }
+int GetModuleNumber()
+{
+	CModuleCollection& collection = getModuleCollection();
+	int result = 0;
+	CStdIterator<CModuleCollection::const_iterator> itr( collection );
+	for( ; !itr.IsEnd(); ++itr ) {
+		result += itr->second.size();
+	}
+	return result;
+}
+void EnumerateModuleRegistrations( std::vector<CModuleRegistration>& regs )
+{
+	CModuleCollection& collection = getModuleCollection();
+	regs.resize(GetModuleNumber());
+	CStdIterator<CModuleCollection::const_iterator> itr( collection );
+	for(int i = 0; !itr.IsEnd(); ++itr ) {
+		const string& type = itr->first;
+		CStdIterator<CTypedModuleCollection::const_iterator> reg( itr->second );
+		for( ; !reg.IsEnd(); ++reg, ++i ) {
+			regs[i].Type = type;
+			regs[i].Name = reg->first;
+			regs[i].Func = reg->second;
+		}
+	}
+}
+

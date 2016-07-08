@@ -7,6 +7,7 @@
 #define MODULETOOLS_H_INCLUDED
 
 #include <fcaps/Module.h>
+#include <vector>
 
 ////////////////////////////////////////////////////////////////////
 
@@ -25,6 +26,18 @@ ModuleInterface* CreateModule( const std::string& type, const std::string& name,
 typedef IModule* (*CreateFunc)();
 // Function to register a new module, normally used from CModuleRegistrar
 void RegisterModule(const std::string& type, const std::string& name, CreateFunc func );
+// Get the number of registered modules
+int GetModuleNumber();
+// Enumerating of registered modules
+struct CModuleRegistration{
+	std::string Type;
+	std::string Name;
+	CreateFunc Func;
+
+	CModuleRegistration() :
+		Func(0) {}
+};
+void EnumerateModuleRegistrations( std::vector<CModuleRegistration>& regs );
 
 // Class for registering a module. Should be used as static member of ModuleClass.
 template<typename ModuleClass>

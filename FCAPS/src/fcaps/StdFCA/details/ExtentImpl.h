@@ -3,7 +3,7 @@
 #ifndef CEXTENTIMPL_H
 #define CEXTENTIMPL_H
 
-#include <fcaps/modules/details/Extent.h>
+#include "Extent.h"
 
 #include <ListWrapper.h>
 

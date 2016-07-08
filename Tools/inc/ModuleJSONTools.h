@@ -4,6 +4,7 @@
 #define MODULEJSONTOOLS_H_INCLUDED
 
 #include <common.h>
+#include <fcaps/BasicTypes.h>
 #include <rapidjson/document.h>
 
 interface IModule;
@@ -25,4 +26,7 @@ TResult* CreateModuleFromJSON( const rapidjson::Value& moduleJson, std::string& 
 	}
 	return 0;
 }
+
+// Enumerate all registered modules to JSON
+JSON EnumerateRegisteredModulesToJSON();
 #endif // MODULEJSONTOOLS_H_INCLUDED

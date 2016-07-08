@@ -11,7 +11,7 @@ solution "Sofia-PS"
 	end	
 
 	project "SharedTools"
-		kind "StaticLib"
+		kind "SharedLib"
 		language "C++"
 		includedirs { 
 			"Tools/inc/",
@@ -27,7 +27,7 @@ solution "Sofia-PS"
 			debugBindir= bindir .. "Debug/"
 			os.mkdir(debugBindir)
 			targetdir( debugBindir )
-			targetname( "SharedTools-D" )
+			targetname( "SharedTools" )
 			defines { "DEBUG" }
 			flags { "Symbols" }
 
@@ -39,6 +39,110 @@ solution "Sofia-PS"
 			defines { "NDEBUG", "BOOST_DISABLE_ASSERTS" }
 			flags { "Optimize" }
 
+	project "Storages"
+		kind "SharedLib"
+		language "C++"
+		includedirs { 
+			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
+			"rapidjson/include",
+			"FCAPS/include/", 
+			"Tools/inc/", 
+		}
+		files{ "FCAPS/src/fcaps/Storages/**.h", "FCAPS/src/fcaps/Storages/**.cpp" }
+
+		libdirs {
+			"boost/stage/libs/",
+		}
+
+		name = "Storages"
+		bindir = "lib/"
+
+		configuration "Debug"
+			debugBindir= bindir .. "Debug/"
+			os.mkdir(debugBindir)
+			targetdir( debugBindir )
+			targetname( name )
+			defines { "DEBUG" }
+			flags { "Symbols" }
+			links{ 
+				--"boost_filesystem",
+				--"boost_system",
+				--"boost_thread",
+				--"dl",
+				--"pthread",
+				"SharedTools"
+			}
+
+		configuration "Release"
+			releaseBindir= bindir .. "Release/"
+			os.mkdir(releaseBindir)
+			targetdir( releaseBindir )
+			targetname( name )
+			defines { "NDEBUG", "BOOST_DISABLE_ASSERTS" }
+			flags { "Optimize" }
+			links{ 
+				--"boost_filesystem",
+				--"boost_system",
+				--"boost_thread",
+				--"dl",
+				--"pthread",
+				"SharedTools"
+			}
+
+	project "StdFCAModule"
+		kind "SharedLib"
+		language "C++"
+		includedirs { 
+			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
+			"rapidjson/include",
+			"FCAPS/src/", -- For IntentStorage
+			"FCAPS/include/", 
+			"Tools/inc/", 
+			"Sofia-PS/inc/"
+		}
+		files{ "FCAPS/src/fcaps/StdFCA/**.h", "FCAPS/src/fcaps/StdFCA/**.cpp" }
+
+		libdirs {
+			"boost/stage/libs/",
+		}
+
+		name = "StdFCAModule"
+		bindir = "modules/"
+
+		configuration "Debug"
+			debugBindir= bindir .. "Debug/"
+			os.mkdir(debugBindir)
+			targetdir( debugBindir )
+			targetname( name  )
+			defines { "DEBUG" }
+			flags { "Symbols" }
+			links{ 
+				--"boost_filesystem",
+				--"boost_system",
+				--"boost_thread",
+				--"dl",
+				--"pthread",
+				"SharedTools",
+				"Storages"
+			}
+
+		configuration "Release"
+			releaseBindir= bindir .. "Release/"
+			os.mkdir(releaseBindir)
+			targetdir( releaseBindir )
+			targetname( name )
+			defines { "NDEBUG", "BOOST_DISABLE_ASSERTS" }
+			flags { "Optimize" }
+			links{ 
+				--"boost_filesystem",
+				--"boost_system",
+				--"boost_thread",
+				--"dl",
+				--"pthread",
+				"SharedTools",
+				"Storages"
+			}
+
 	-- A project defines one build target
 	project "Sofia-PS"
 		kind "ConsoleApp"
@@ -49,11 +153,11 @@ solution "Sofia-PS"
 			"FCAPS/include/", 
 			"FCAPS/src/",
 			"Tools/inc/", 
-			"../LibGastonForSofia/inc", 
+			"Sofia-PS/inc/",
+			"../LibGastonForSofia/inc" 
 		}
-		links{  }
 		excludes { "FCAPS/src/fcaps/premodules/**", "rapidjson/**", "boost/**" }
-		files { "Sofia-PS/**.cpp", "FCAPS/**.h", "FCAPS/**.inl", "FCAPS/**.cpp" }
+		files { "Sofia-PS/**.cpp" } --, "FCAPS/**.h", "FCAPS/**.inl", "FCAPS/**.cpp" }
 
 		bindir = "bin/"
 
@@ -72,7 +176,7 @@ solution "Sofia-PS"
 			debugBindir= bindir .. "Debug/"
 			os.mkdir(debugBindir)
 			targetdir( debugBindir )
-			targetname( "Sofia-PS-D" )
+			targetname( "Sofia-PS" )
 			--libdirs { "libs/Debug/" }
 			defines { "DEBUG" }
 			flags { "Symbols" }
@@ -82,7 +186,7 @@ solution "Sofia-PS"
 				"boost_thread",
 				"dl",
 				"pthread",
-				"SharedTools-D"
+				"SharedTools"
 			}
 
 		configuration "Release"

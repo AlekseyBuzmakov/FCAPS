@@ -2,9 +2,9 @@
 
 #include <common.h>
 
-#include <fcaps/modules/details/FCAUtils.h>
-#include <fcaps/modules/details/Lattice.h>
-#include <fcaps/modules/details/Extent.h>
+#include "FCAUtils.h"
+#include "Lattice.h"
+#include "Extent.h"
 #include <fcaps/storages/IntentStorage.h>
 #include <fcaps/tools/FindConceptOrder.h>
 

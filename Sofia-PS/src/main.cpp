@@ -4,11 +4,14 @@
 
 #include <ConsoleApplication.h>
 
+#include <Sofia.h>
+
 #include <fcaps/Module.h>
 #include <ModuleTools.h>
 #include <fcaps/ContextProcessor.h>
 #include <fcaps/Filter.h>
 
+#include <Library.h>
 #include <ModuleJSONTools.h>
 
 #include <JSONTools.h>
@@ -21,12 +24,38 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/unordered_map.hpp>
+#include <boost/filesystem.hpp> // For enumerating modules
 
 #include <iomanip>
 #include <time.h>
 
 using namespace std;
 using namespace boost;
+using namespace boost::filesystem;
+
+////////////////////////////////////////////////////////////////////
+TModule SofiaAPI CreateModuleFunc( const char* t, int tLength, const char* n, int nLength, const char* jp, int jLength )
+{
+	const string type(t,tLength);
+	const string name(n,nLength);
+	const string jsonParams( jp, jLength );
+	
+	IModule* modulePtr = CreateModule( type, name, jsonParams );
+	return modulePtr;
+}
+
+////////////////////////////////////////////////////////////////////
+
+TSofiaFunction SofiaAPI GetSofiaFunction(const char* chName, int nLength)
+{
+	const string name(chName,nLength);
+	if( name == CreateModuleFunction ) {
+		return reinterpret_cast<TSofiaFunction>(CreateModuleFunc);
+	} else {
+		// No Function found
+		return 0;
+	}
+}
 
 ////////////////////////////////////////////////////////////////////
 
@@ -36,7 +65,8 @@ public:
 		CConsoleApplication( _argc, _argv ),
 		state( S_AddingObjects ),
 		writeOutput(false),
-		maxObjsCount( -1 )
+		maxObjsCount( -1 ),
+		pathToModules( "../modules/" )
 	{
 	}
 
@@ -74,7 +104,14 @@ private:
 	vector<string> objNames;
 	mutable string lastCtxProcessorInfo;
 
+	string pathToModules;
+
 	void printException( const CException& e ) const;
+
+	void loadModules() const;
+	void loadModule(const string& name) const;
+	void extractModules( const JSON& description ) const;
+
 	void runContextProcessor();
 
 	void readContextProcessorJson( rapidjson::Document& cb ) const;
@@ -118,6 +155,8 @@ bool CThisConsoleApplication::ProcessParam( const std::string& param, const std:
 			}
 			indexes.PushBack( nextIndex );
 		}
+	} else if (param == "-M") {
+		pathToModules = value;
 	} else {
 		return CConsoleApplication::ProcessParam( param, value );
 	}
@@ -136,6 +175,7 @@ bool CThisConsoleApplication::ProcessOption( const std::string& option )
 
 bool CThisConsoleApplication::FinalizeParams()
 {
+	loadModules();
 	return true;
 }
 
@@ -149,7 +189,7 @@ std::string CThisConsoleApplication::GetCmdLineDescription( const std::string& p
 {
 	return progName + " -data:{Path} [-CP:{Path}][-fltr:{PATH}] [OPTIONS]\n"
 	"OPTIONS = \n"
-	"\t[-out:{Path} -n:{Num} -index:{Index Set}]\n"
+	"\t[-out:{Path} -n:{Num} -index:{Index Set} -M:{Path}]\n"
 	">>Name of the output is {output file}-patterns\n"
 
 	" -data -- Path to the data in JSON format (see ./JSON-Examples).\n"
@@ -159,6 +199,7 @@ std::string CThisConsoleApplication::GetCmdLineDescription( const std::string& p
 	" -out -- Base path of the result. Suffixes can be added.\n"
 	" -n -- the number of objects to process\n"
 	" -index -- add only objects with requested indexes (e.g. '-index:1,2,6')\n"
+	" -M -- the path to the folder with modules\n"
 	;
 }
 
@@ -308,6 +349,46 @@ void CThisConsoleApplication::printException( const CException& e ) const
 {
 	GetErrorStream() << "\nError in " << e.GetPlace()
 		<< "\n" << e.GetText() << "\n\n";
+}
+
+void CThisConsoleApplication::loadModules() const
+{
+	path p(pathToModules);
+	directory_iterator begin(p),end;
+	CStdIterator<directory_iterator> itr( begin,end );
+	for( ; !itr.IsEnd(); ++itr ) {
+		if(!is_regular_file(itr->status())) {
+			continue;
+		}
+		const string name( itr->path().c_str() );
+		if( name.find("Module") == string::npos ) {
+			// Not a module
+			continue;
+		}
+		GetInfoStream() << "Loading module '" << name << "'\n";
+		loadModule(name);
+	}
+}
+void CThisConsoleApplication::loadModule(const string& name) const
+{
+	try{
+		Library moduleLib( name );
+		assert( moduleLib.IsOpen() );
+
+		const TInitializeModuleFunc initModuleFunc = reinterpret_cast<TInitializeModuleFunc>( moduleLib.GetFunc( "InitializeModule" ) );
+		const TGetModuleDescriptionFunc getModuleDescriptionFunc = reinterpret_cast<TGetModuleDescriptionFunc>( moduleLib.GetFunc( "GetModuleDescription" ) );
+
+		initModuleFunc( &GetSofiaFunction );
+		JSON description = getModuleDescriptionFunc();
+		extractModules( description );
+	} catch( CLibException* e ) {
+		GetInfoStream() << "Cannot load a module (ignored)\n\t";
+		GetInfoStream() << e->GetText() << "\n";
+	}
+}
+
+void CThisConsoleApplication::extractModules( const JSON& description ) const
+{
 }
 
 void CThisConsoleApplication::readContextProcessorJson( rapidjson::Document& cb ) const
