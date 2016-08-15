@@ -14,6 +14,16 @@ using namespace std;
 
 ////////////////////////////////////////////////////////////////////
 
+// #define DEBUG_PRINT true
+#ifdef DEBUG_PRINT
+#define COUT(a) std::cout << a << "\n"
+#else
+#define COUT(a)
+#endif
+#define DEBUG_RETURN(a) COUT(#a << " (" << a << ")"); return a
+
+////////////////////////////////////////////////////////////////////
+
 size_t CIntervalPatternDescriptor::Hash() const
 {
 	size_t hashVal = 0;
@@ -86,6 +96,9 @@ TCompareResult CIntervalPatternManager::Compare(
 	const CIntervalPatternDescriptor& p1 = Pattern(first);
 	const CIntervalPatternDescriptor& p2 = Pattern(second);
 	assert(p1.Intervals().size() == p2.Intervals().size() );
+	COUT(SavePattern(first));
+	COUT(SavePattern(second));
+	
 	bool areEqual = true;
 
 	for( DWORD i = 0; i < p1.Intervals().size(); ++i ) {
@@ -104,25 +117,25 @@ TCompareResult CIntervalPatternManager::Compare(
 			areEqual = false;
 		}
 		if( possibleResults == CR_Incomparable ) {
-			return CR_Incomparable;
+			DEBUG_RETURN(CR_Incomparable);
 		}
 	}
 	if( areEqual && HasAllFlags(possibleResults, CR_Equal ) ) {
-		return CR_Equal;
+		DEBUG_RETURN(CR_Equal);
 	}
 	if( areEqual ) {
-		return CR_Incomparable;
+		DEBUG_RETURN(CR_Incomparable);
 	}
 
 	if( HasAllFlags(possibleResults,CR_MoreGeneral) ) {
 		assert(!HasAllFlags(possibleResults,CR_LessGeneral));
-		return CR_MoreGeneral;
+		DEBUG_RETURN(CR_MoreGeneral);
 	}
 	if( HasAllFlags(possibleResults,CR_LessGeneral) ) {
 		assert(!HasAllFlags(possibleResults,CR_MoreGeneral));
-		return CR_MoreGeneral;
+		DEBUG_RETURN(CR_LessGeneral);
 	}
-	return CR_Incomparable;
+	DEBUG_RETURN(CR_Incomparable);
 }
 
 void CIntervalPatternManager::FreePattern( const IPatternDescriptor * p )
