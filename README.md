@@ -49,10 +49,8 @@ Then, I guess, you know what to do with the resulting file.
 * *For the moment, on some configurations, e.g., Windows and MS Visual Studio, a manual naming of static linked libraries is needed. This libraries are found in boost/stage/libs, but their names are not fixed. They are named like "lib{BOOST LIB NAME}-bla-bla-bla".{a|lib}, for example 'libboost_regex-gcc34-mt-d-1_36.a'*
 * *Be careful, the boost libraries should be compiled by the same toolchain as the main program. For instance it is not possible to compile the boost libraries by the MSVS2015 toolchain and the program by the MSVS2013 toolchain. Errors of linkage occur in this case.* 
 
-The result can be found in __bin/__.
-
-*There is a dependency on file __../LibGastonForSofia/inc__. It can be found [here](https://github.com/AlekseyBuzmakov/LibGastonForSofia/blob/master/inc/LibGastonForSofia.h).
-We will remove this dependency as soon as possible.*
+<!--*There is a dependency on file __../LibGastonForSofia/inc__. It can be found [here](https://github.com/AlekseyBuzmakov/LibGastonForSofia/blob/master/inc/LibGastonForSofia.h).-->
+<!--We will remove this dependency as soon as possible.*-->
 
 <!--*If the program cannot be linked try to remove '-s' key in line 'LDFLAGS_RELEASE = $(LDFLAGS) -s' from Sofia-PS/makefile*-->
 

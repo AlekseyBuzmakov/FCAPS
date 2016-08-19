@@ -11,7 +11,7 @@
 
 ////////////////////////////////////////////////////////////////////
 
-// Function for creating a module by type and name
+// Function for creating a module by type and name. The module is either registered by function RegisterModule or is created by an external function.
 IModule* CreateModule( const std::string& type, const std::string& name, const JSON& params );
 
 template<typename ModuleInterface>
@@ -19,6 +19,12 @@ ModuleInterface* CreateModule( const std::string& type, const std::string& name,
 {
 	return dynamic_cast< ModuleInterface* >( CreateModule( type, name, params ) );
 }
+
+// Prototype of a function for creating modules by types and names. A pointer to this function is used inside CreateModule
+typedef IModule* (*TExternalCreateModuleFunc)( const std::string& type, const std::string& name, const JSON& params);
+// Function for switching to an external module creating function
+// @return The previous value.
+TExternalCreateModuleFunc SwitchToExternalFunction( TExternalCreateModuleFunc  func );
 
 ////////////////////////////////////////////////////////////////////
 

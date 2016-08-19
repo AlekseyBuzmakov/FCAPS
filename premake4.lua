@@ -101,12 +101,10 @@ solution "Sofia-PS"
 			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
 			"rapidjson/include",
 			"FCAPS/include/", 
-			"FCAPS/src/",
 			"Tools/inc/", 
 			"Sofia-PS/inc/",
-			"../LibGastonForSofia/inc" 
 		}
-		files { "Sofia-PS/**.cpp" } --, "FCAPS/**.h", "FCAPS/**.inl", "FCAPS/**.cpp" }
+		files { "Sofia-PS/**.cpp" } 
 
 		libdirs {
 			"boost/stage/libs/",

@@ -25,19 +25,40 @@ CModuleCollection& getModuleCollection()
 
 ////////////////////////////////////////////////////////////////////
 
+TExternalCreateModuleFunc& getCreateModuleFunc()
+{
+	static TExternalCreateModuleFunc func = 0;
+	return func;
+}
+
 IModule* CreateModule( const string& type, const string& name, const JSON& params )
 {
-	CModuleCollection& collection = getModuleCollection();
-	CTypedModuleCollection& typedCollection = collection[type];
-	CTypedModuleCollection::const_iterator fnd = typedCollection.find( name );
-	if( fnd == typedCollection.end() ) {
-		return 0;
+
+	TExternalCreateModuleFunc & extCreateModuleFunc = getCreateModuleFunc();
+	if( extCreateModuleFunc != 0 ) {
+		return extCreateModuleFunc(type,name,params);
+	} else {
+		assert( extCreateModuleFunc == 0 );
+		CModuleCollection& collection = getModuleCollection();
+		CTypedModuleCollection& typedCollection = collection[type];
+		CTypedModuleCollection::const_iterator fnd = typedCollection.find( name );
+		if( fnd == typedCollection.end() ) {
+			return 0;
+		}
+		CreateFunc createFunc = fnd->second;
+		auto_ptr<IModule> newModule( createFunc() );
+		assert( newModule.get() != 0 );
+		newModule->LoadParams( params );
+		return newModule.release();
 	}
-	CreateFunc createFunc = fnd->second;
-	auto_ptr<IModule> newModule( createFunc() );
-	assert( newModule.get() != 0 );
-	newModule->LoadParams( params );
-	return newModule.release();
+}
+
+TExternalCreateModuleFunc SwitchToExternalFunction( TExternalCreateModuleFunc f )
+{
+	TExternalCreateModuleFunc& func = getCreateModuleFunc();
+	const TExternalCreateModuleFunc oldFunc = func;
+	func = f;
+	return oldFunc;
 }
 
 ////////////////////////////////////////////////////////////////////
