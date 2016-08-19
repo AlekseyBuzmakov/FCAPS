@@ -34,11 +34,14 @@ public:
 	// Get a pointer to a function
 	//  (if there is a problem, it throws CLibException)
 	TFuncPtr GetFunc( const std::string& name ) const;
+	// Moves handle to another Library
+	void MoveTo( Library& other );
 private:
 	// Path to library
 	std::string path;
 	// A handle to the loaded library
 	void* handle;
+	const Library& operator=(const Library& other);
 };
 
 #endif // LIBRARY_H

@@ -3,6 +3,7 @@ bin
 obj
 .objs
 lib
+build
 
 # rapidjson folder that is taken from other repo
 rapidjson/

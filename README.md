@@ -43,7 +43,7 @@ The most widely used configurations are
 > $ premake4 clean \# for removing the created files
 
 Basically this script fetches [rapidjson](https://github.com/miloyip/rapidjson.git) and apply the file rapidjson.patch.
-Then it converts the description from the file __premake4.lua__ to the format of your IDE in love.
+Then it converts the description from the file __premake4.lua__ to the format of your IDE in love. The file is placed in the __build__ subdirectory.
 Then, I guess, you know what to do with the resulting file.
 
 * *For the moment, on some configurations, e.g., Windows and MS Visual Studio, a manual naming of static linked libraries is needed. This libraries are found in boost/stage/libs, but their names are not fixed. They are named like "lib{BOOST LIB NAME}-bla-bla-bla".{a|lib}, for example 'libboost_regex-gcc34-mt-d-1_36.a'*

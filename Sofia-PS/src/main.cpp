@@ -66,7 +66,7 @@ public:
 		state( S_AddingObjects ),
 		writeOutput(false),
 		maxObjsCount( -1 ),
-		pathToModules( "../modules/" )
+		pathToModules( "./modules/" )
 	{
 	}
 
@@ -105,11 +105,12 @@ private:
 	mutable string lastCtxProcessorInfo;
 
 	string pathToModules;
+	vector< CSharedPtr<Library> > modules;
 
 	void printException( const CException& e ) const;
 
-	void loadModules() const;
-	void loadModule(const string& name) const;
+	void loadModules();
+	void loadModule(const string& name);
 	void extractModules( const JSON& description ) const;
 
 	void runContextProcessor();
@@ -351,9 +352,12 @@ void CThisConsoleApplication::printException( const CException& e ) const
 		<< "\n" << e.GetText() << "\n\n";
 }
 
-void CThisConsoleApplication::loadModules() const
+void CThisConsoleApplication::loadModules() 
 {
-	path p(pathToModules);
+	string fullPathToModules;
+	RelativePathes::GetFullPath(pathToModules, fullPathToModules );
+
+	path p(fullPathToModules);
 	directory_iterator begin(p),end;
 	CStdIterator<directory_iterator> itr( begin,end );
 	for( ; !itr.IsEnd(); ++itr ) {
@@ -369,7 +373,7 @@ void CThisConsoleApplication::loadModules() const
 		loadModule(name);
 	}
 }
-void CThisConsoleApplication::loadModule(const string& name) const
+void CThisConsoleApplication::loadModule(const string& name) 
 {
 	try{
 		Library moduleLib( name );
@@ -381,7 +385,10 @@ void CThisConsoleApplication::loadModule(const string& name) const
 		initModuleFunc( &GetSofiaFunction );
 		JSON description = getModuleDescriptionFunc();
 		extractModules( description );
-	} catch( CLibException* e ) {
+
+		modules.push_back(CSharedPtr<Library>( new Library) );
+		moduleLib.MoveTo(*(modules.back()));
+	} catch( CException* e ) {
 		GetInfoStream() << "Cannot load a module (ignored)\n\t";
 		GetInfoStream() << e->GetText() << "\n";
 	}
@@ -389,6 +396,27 @@ void CThisConsoleApplication::loadModule(const string& name) const
 
 void CThisConsoleApplication::extractModules( const JSON& description ) const
 {
+	CJsonError jsonError;
+	rapidjson::Document doc;
+	if( !ReadJsonString( description, doc, jsonError ) ) {
+		throw new CJsonException( "ExtractModules", jsonError );
+	}
+	if( !doc.IsArray() ) {
+		jsonError.Data=description;
+		jsonError.Error="Not an array JSON";
+		throw new CJsonException( "ExtractModules", jsonError );
+	}
+	for( int i = 0; i < doc.Size(); ++i ) {
+		if( !doc[i].HasMember("Type") || !doc[i]["Type"].IsString()
+		    || !doc[i].HasMember("Name") || !doc[i]["Name"].IsString()
+		    || !doc[i].HasMember("Func") || !doc[i]["Func"].IsUint() )
+		{
+			jsonError.Data=description;
+			jsonError.Error="'Type', 'Name', or 'Func' has an incorrect format";
+			throw new CJsonException( "ExtractModules", jsonError );
+		}
+		RegisterModule( doc[i]["Type"].GetString(), doc[i]["Name"].GetString(), reinterpret_cast<CreateFunc>(doc[i]["Func"].GetUint()) );
+	}
 }
 
 void CThisConsoleApplication::readContextProcessorJson( rapidjson::Document& cb ) const

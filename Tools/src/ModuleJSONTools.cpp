@@ -6,6 +6,7 @@
 #include <ModuleTools.h>
 
 #include <JSONTools.h>
+#include <StdTools.h>
 
 using namespace std;
 using namespace rapidjson;
@@ -45,11 +46,15 @@ JSON EnumerateRegisteredModulesToJSON()
 	JSON result;
 	result += "[\n";
 	for( int i = 0; i < regs.size(); ++i ) {
+		if( i > 0 ) {
+			result += ",";
+		}
 		result += "{";
-		result = result + "\"Type\":\"" + regs.Type + "\",";
-		result = result + "\"Name\":\"" + regs.Name + "\",";
-		result = result + "\"Func\":\"" + regs.Name + "\",";
+		result = result + "\"Type\":\"" + regs[i].Type + "\",";
+		result = result + "\"Name\":\"" + regs[i].Name + "\",";
+		result = result + "\"Func\":" + StdExt::to_string(reinterpret_cast<size_t>(regs[i].Func));
 		result += "}";
 	}
 	result += "]\n";
+	return result;
 }

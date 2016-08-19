@@ -81,3 +81,10 @@ Library::TFuncPtr Library::GetFunc( const std::string& name ) const
 #endif
     return result;
 }
+
+void Library::MoveTo( Library& other ) {
+	other.handle = handle;
+	other.path = path;
+	handle = 0;
+	path = "";
+}
