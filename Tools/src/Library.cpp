@@ -74,7 +74,7 @@ Library::TFuncPtr Library::GetFunc( const std::string& name ) const
 		throw new CLibException( "Library::GetFunc('" + name + "')", error );
     }
 #else
-	const TFuncPtr result = GetProcAddress(reinterpret_cast<HMODULE>(handle), name.c_str());
+	const TFuncPtr result = reinterpret_cast<TFuncPtr>( GetProcAddress(reinterpret_cast<HMODULE>(handle), name.c_str()) );
 	if( result == 0 ) {
 		throw new CLibException( "Library::GetFunc('" + name + "')", "Error code: " + StdExt::to_string(GetLastError()) );
 	}
