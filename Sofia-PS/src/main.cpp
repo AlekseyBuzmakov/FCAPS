@@ -369,7 +369,7 @@ void CThisConsoleApplication::loadModules()
 			// Not a module
 			continue;
 		}
-		GetInfoStream() << "Loading module '" << name << "'\n";
+		GetInfoStream() << "Loading modules from '" << name << "'\n";
 		loadModule(name);
 	}
 }
