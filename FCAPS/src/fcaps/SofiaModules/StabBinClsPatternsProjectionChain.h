@@ -3,7 +3,7 @@
 #ifndef CSTABBINCLSPATTERNSPROJECTIONCHAIN_H
 #define CSTABBINCLSPATTERNSPROJECTIONCHAIN_H
 
-#include <fcaps/modules/details/BinClsPatternsProjectionChain.h>
+#include <fcaps/SofiaModules/details/BinClsPatternsProjectionChain.h>
 #include <fcaps/Module.h>
 #include <ModuleTools.h>
 

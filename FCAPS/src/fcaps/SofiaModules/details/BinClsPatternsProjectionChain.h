@@ -7,7 +7,7 @@
 
 #include <fcaps/tools/StabilityCalculation.h>
 
-#include <fcaps/modules/VectorBinarySetDescriptor.h>
+#include <fcaps/SharedModulesLib/VectorBinarySetDescriptor.h>
 
 #include <deque>
 

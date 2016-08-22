@@ -10,7 +10,7 @@
 #ifndef COSINEBINCLSPATTERNSPROJECTIONCHAIN_H
 #define COSINEBINCLSPATTERNSPROJECTIONCHAIN_H
 
-#include <fcaps/modules/details/BinClsPatternsProjectionChain.h>
+#include <fcaps/SofiaModules/details/BinClsPatternsProjectionChain.h>
 #include <fcaps/Module.h>
 #include <ModuleTools.h>
 

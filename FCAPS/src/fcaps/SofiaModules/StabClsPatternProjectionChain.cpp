@@ -8,7 +8,7 @@
 
 #include <common.h>
 
-#include <fcaps/modules/VectorBinarySetDescriptor.h>
+#include <fcaps/SharedModulesLib/VectorBinarySetDescriptor.h>
 #include <ModuleJSONTools.h>
 
 #include <JSONTools.h>

@@ -12,7 +12,7 @@
 
 #include <fcaps/Module.h>
 #include <ModuleTools.h>
-#include <fcaps/modules/VectorBinarySetDescriptor.h>
+#include <fcaps/SharedModulesLib/VectorBinarySetDescriptor.h>
 
 #include <vector>
 

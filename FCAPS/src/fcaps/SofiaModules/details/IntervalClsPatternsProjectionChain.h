@@ -5,9 +5,9 @@
 
 #include <fcaps/ProjectionChain.h>
 
-#include <fcaps/modules/VectorBinarySetDescriptor.h>
+#include <fcaps/SharedModulesLib/VectorBinarySetDescriptor.h>
 
-#include <fcaps/modules/details/JsonIntervalPattern.h>
+#include <fcaps/SharedModulesLib/details/JsonIntervalPattern.h>
 
 #include <deque>
 

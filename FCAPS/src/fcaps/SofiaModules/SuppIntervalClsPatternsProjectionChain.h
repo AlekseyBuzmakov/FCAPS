@@ -3,7 +3,7 @@
 #ifndef CSUPPINTERVALCLSPATTERNSPROJECTIONCHAIN_H
 #define CSUPPINTERVALCLSPATTERNSPROJECTIONCHAIN_H
 
-#include <fcaps/modules/details/IntervalClsPatternsProjectionChain.h>
+#include <fcaps/SofiaModules/details/IntervalClsPatternsProjectionChain.h>
 
 #include <fcaps/Module.h>
 #include <ModuleTools.h>
