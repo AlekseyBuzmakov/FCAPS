@@ -93,6 +93,33 @@ solution "Sofia-PS"
 				"Storages"
 			}
 
+	project "PS-Modules"
+		DefaultConfig("modules")
+		kind "SharedLib"
+		language "C++"
+		includedirs { 
+			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
+			"rapidjson/include",
+			"FCAPS/include/", 
+			"Tools/inc/", 
+			"Sofia-PS/inc/"
+		}
+		files{ "FCAPS/src/fcaps/PS-Modules/**.h", "FCAPS/src/fcaps/PS-Modules/**.cpp" }
+
+		libdirs {
+			"boost/stage/libs/",
+		}
+
+		configuration "Debug"
+			links{ 
+				"SharedTools"
+			}
+
+		configuration "Release"
+			links{ 
+				"SharedTools"
+			}
+
 	-- A project defines one build target
 	project "Sofia-PS"
 		DefaultConfig("")
