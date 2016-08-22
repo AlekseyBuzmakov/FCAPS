@@ -2,10 +2,10 @@
 
 #include "StabilityEstimatorContextProcessor.h"
 
-#include <fcaps/modules/VectorBinarySetDescriptor.h>
+#include <fcaps/SharedModulesLib/VectorBinarySetDescriptor.h>
 
 #include <JSONTools.h>
-#include <fcaps/modules/details/JsonBinaryPattern.h>
+#include <fcaps/SharedModulesLib/details/JsonBinaryPattern.h>
 
 using namespace std;
 using namespace boost;
