@@ -39,7 +39,6 @@ bool SofiaAPI InitializeModule( TGetSofiaFunction func )
 const char* SofiaAPI GetModuleDescription()
 {
 	static const std::string description ( EnumerateRegisteredModulesToJSON() );
-	std::cout << description << "\n";
 	return description.c_str();
 }
 

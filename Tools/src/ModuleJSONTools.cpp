@@ -44,10 +44,10 @@ JSON EnumerateRegisteredModulesToJSON()
 	EnumerateModuleRegistrations( regs );
 
 	JSON result;
-	result += "[\n";
+	result += "[";
 	for( int i = 0; i < regs.size(); ++i ) {
 		if( i > 0 ) {
-			result += ",";
+			result += ",\n";
 		}
 		result += "{";
 		result = result + "\"Type\":\"" + regs[i].Type + "\",";

@@ -384,6 +384,9 @@ void CThisConsoleApplication::loadModule(const string& name)
 
 		initModuleFunc( &GetSofiaFunction );
 		JSON description = getModuleDescriptionFunc();
+		#ifdef DEBUG
+		GetInfoStream() << description << "\n";
+		#endif
 		extractModules( description );
 
 		modules.push_back(CSharedPtr<Library>( new Library) );
