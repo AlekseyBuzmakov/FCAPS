@@ -7,7 +7,7 @@
 #include <fcaps/Module.h>
 #include <ModuleTools.h>
 
-#include <fcaps/modules/details/JsonIntervalPattern.h>
+#include <fcaps/PS-Modules/details/JsonIntervalPattern.h>
 
 ////////////////////////////////////////////////////////////////////
 

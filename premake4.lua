@@ -63,6 +63,30 @@ solution "Sofia-PS"
 			links{ 
 			}
 
+	project "SharedModulesLib"
+		DefaultConfig("lib")
+		kind "StaticLib"
+		includedirs { 
+			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
+			"rapidjson/include",
+			"FCAPS/include/", 
+			"FCAPS/src/", 
+			"Tools/inc/", 
+		}
+		files{ "FCAPS/src/fcaps/SharedModulesLib/**.h", "FCAPS/src/fcaps/SharedModulesLib/**.cpp" }
+
+		libdirs {
+			"boost/stage/libs/",
+		}
+
+		configuration "Debug"
+			links{ 
+			}
+
+		configuration "Release"
+			links{ 
+			}
+
 	project "StdFCAModule"
 		DefaultConfig("modules")
 		kind "SharedLib"
@@ -70,7 +94,7 @@ solution "Sofia-PS"
 		includedirs { 
 			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
 			"rapidjson/include",
-			"FCAPS/src/", -- For IntentStorage
+			"FCAPS/src/", 
 			"FCAPS/include/", 
 			"Tools/inc/", 
 			"Sofia-PS/inc/"
@@ -84,13 +108,15 @@ solution "Sofia-PS"
 		configuration "Debug"
 			links{ 
 				"SharedTools",
-				"Storages"
+				"Storages",
+				"SharedModulesLib"
 			}
 
 		configuration "Release"
 			links{ 
 				"SharedTools",
-				"Storages"
+				"Storages",
+				"SharedModulesLib"
 			}
 
 	project "PS-Modules"
@@ -101,6 +127,7 @@ solution "Sofia-PS"
 			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
 			"rapidjson/include",
 			"FCAPS/include/", 
+			"FCAPS/src/", 
 			"Tools/inc/", 
 			"Sofia-PS/inc/"
 		}
@@ -112,12 +139,14 @@ solution "Sofia-PS"
 
 		configuration "Debug"
 			links{ 
-				"SharedTools"
+				"SharedTools",
+				"SharedModulesLib"
 			}
 
 		configuration "Release"
 			links{ 
-				"SharedTools"
+				"SharedTools",
+				"SharedModulesLib"
 			}
 
 	-- A project defines one build target
@@ -153,6 +182,7 @@ solution "Sofia-PS"
 				"dl",
 				"pthread",
 				"SharedTools"
+		
 			}
 
 		configuration "Release"

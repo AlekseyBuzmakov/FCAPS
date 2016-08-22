@@ -3,7 +3,7 @@
 #ifndef GENERALSTRINGSPARTIALORDER_H
 #define GENERALSTRINGSPARTIALORDER_H
 
-#include <fcaps/modules/SimpleStringsPartialOrder.h>
+#include <fcaps/PS-Modules/SimpleStringsPartialOrder.h>
 #include <fcaps/PatternManager.h>
 
 ////////////////////////////////////////////////////////////////////

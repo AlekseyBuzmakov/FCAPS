@@ -350,8 +350,6 @@ JSON CBinarySetDescriptorsComparatorBase::savePattern( const IPatternDescriptor*
 
 ////////////////////////////////////////////////////////////////////
 
-const CModuleRegistrar<CBinarySetDescriptorsComparator> CBinarySetDescriptorsComparator::registrar( PatternManagerModuleType, BinarySetDescriptorsComparator );
-
 const CBinarySetPatternDescriptor* CBinarySetDescriptorsComparator::CalculateSimilarity(
 	const IPatternDescriptor* firstPattern, const IPatternDescriptor* secondPattern )
 {
@@ -391,8 +389,6 @@ TCompareResult CBinarySetDescriptorsComparator::fastCompare( DWORD firstSize, DW
 }
 
 ////////////////////////////////////////////////////////////////////
-
-const CModuleRegistrar<CBinarySetDescriptorsComparator> CUnionBinarySetDescriptorsComparator::registrar( PatternManagerModuleType, UnionBinarySetDescriptorsComparator );
 
 const CBinarySetPatternDescriptor* CUnionBinarySetDescriptorsComparator::CalculateSimilarity(
 	const IPatternDescriptor* firstPattern, const IPatternDescriptor* secondPattern )

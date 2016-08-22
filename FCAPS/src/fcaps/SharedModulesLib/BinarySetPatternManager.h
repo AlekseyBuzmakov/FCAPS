@@ -185,8 +185,6 @@ public:
 		const IPatternDescriptor* first, const IPatternDescriptor* second );
 
 private:
-	static const CModuleRegistrar<CBinarySetDescriptorsComparator> registrar;
-
 	virtual const char* getModuleName() const
 		{ return BinarySetDescriptorsComparator;}
 	virtual bool isEqual( const CBinarySetPatternDescriptor& first, const CBinarySetPatternDescriptor& second ) const;
@@ -206,8 +204,6 @@ public:
 		const IPatternDescriptor* first, const IPatternDescriptor* second );
 
 private:
-	static const CModuleRegistrar<CBinarySetDescriptorsComparator> registrar;
-
 	virtual const char* getModuleName() const
 		{ return UnionBinarySetDescriptorsComparator;}
 	virtual bool isEqual( const CBinarySetPatternDescriptor& first, const CBinarySetPatternDescriptor& second ) const;

@@ -1,11 +1,11 @@
 // Initial software, Aleksey Buzmakov, Copyright (c) INRIA and University of Lorraine, GPL v2 license, 2011-2015, v0.7
 
-#include <fcaps/modules/TreeSetPatternManager.h>
+#include <fcaps/PS-Modules/TreeSetPatternManager.h>
 
-#include <fcaps/modules/details/TaxonomyJsonReader.h>
+#include <fcaps/PS-Modules/details/TaxonomyJsonReader.h>
 #include <JSONTools.h>
 
-#include "ParallelListIteration.inl"
+#include <fcaps/SharedModulesLib/ParallelListIteration.inl> 
 
 using namespace std;
 using namespace boost;

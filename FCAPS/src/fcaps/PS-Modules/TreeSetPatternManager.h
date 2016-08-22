@@ -7,9 +7,9 @@
 #include <fcaps/Module.h>
 #include <ModuleTools.h>
 
-#include <fcaps/modules/BinarySetPatternManager.h> // Used for pattern
+#include <fcaps/SharedModulesLib/BinarySetPatternManager.h> // Used for pattern
 
-#include <fcaps/modules/details/TaxonomyJsonReader.h>
+#include <fcaps/PS-Modules/details/TaxonomyJsonReader.h>
 
 #include <StaticTree.h>
 #include <Rmq.h>

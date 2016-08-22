@@ -3,7 +3,7 @@
 #ifndef BINARYSETDESCRIPTORSWITHDEPENDENCIESCOMPARATOR_H
 #define BINARYSETDESCRIPTORSWITHDEPENDENCIESCOMPARATOR_H
 
-#include <fcaps/modules/BinarySetPatternManager.h>
+#include <fcaps/SharedModulesLib/BinarySetPatternManager.h>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 const char BinarySetDescriptorsWithDependenciesComparator[] = "BinarySetWithDependenciesPatternManagerModule";
