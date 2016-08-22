@@ -179,6 +179,41 @@ solution "Sofia-PS"
 				"SharedModulesLib"
 			}
 
+	project "GastonGraphPatternEnumeratorModule"
+		DefaultConfig("modules")
+		kind "SharedLib"
+		language "C++"
+		includedirs { 
+			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
+			"rapidjson/include",
+			"FCAPS/include/", 
+			"FCAPS/src/", 
+			"Tools/inc/", 
+			"Sofia-PS/inc/",
+			"../LibGastonForSofia/inc"
+		}
+		files{ "FCAPS/src/fcaps/GastonGraphPatternEnumeratorModule/**.h", "FCAPS/src/fcaps/GastonGraphPatternEnumeratorModule/**.cpp" }
+
+		libdirs {
+			"boost/stage/libs/",
+		}
+
+		configuration "Debug"
+			links{ 
+				"boost_thread",
+				"pthread",
+				"SharedTools",
+				"SharedModulesLib"
+			}
+
+		configuration "Release"
+			links{ 
+				"boost_thread",
+				"pthread",
+				"SharedTools",
+				"SharedModulesLib"
+			}
+
 	-- A project defines one build target
 	project "Sofia-PS"
 		DefaultConfig("")
@@ -208,9 +243,7 @@ solution "Sofia-PS"
 			links{ 
 				"boost_filesystem",
 				"boost_system",
-				"boost_thread",
 				"dl",
-				"pthread",
 				"SharedTools"
 		
 			}
