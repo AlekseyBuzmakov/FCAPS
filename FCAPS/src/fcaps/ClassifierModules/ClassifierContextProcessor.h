@@ -7,7 +7,7 @@
 #include <fcaps/Module.h>
 #include <ModuleTools.h>
 
-#include <fcaps/modules/details/JsonClassifierClasses.h>
+#include <fcaps/ClassifierModules/details/JsonClassifierClasses.h>
 
 interface IClassifier;
 

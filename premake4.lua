@@ -214,6 +214,36 @@ solution "Sofia-PS"
 				"SharedModulesLib"
 			}
 
+	project "ClassifierModules"
+		DefaultConfig("modules")
+		kind "SharedLib"
+		language "C++"
+		includedirs { 
+			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
+			"rapidjson/include",
+			"FCAPS/include/", 
+			"FCAPS/src/", 
+			"Tools/inc/", 
+			"Sofia-PS/inc/"
+		}
+		files{ "FCAPS/src/fcaps/ClassifierModules/**.h", "FCAPS/src/fcaps/ClassifierModules/**.cpp" }
+
+		libdirs {
+			"boost/stage/libs/",
+		}
+
+		configuration "Debug"
+			links{ 
+				"SharedTools"
+				--"SharedModulesLib"
+			}
+
+		configuration "Release"
+			links{ 
+				"SharedTools"
+				--"SharedModulesLib"
+			}
+
 	-- A project defines one build target
 	project "Sofia-PS"
 		DefaultConfig("")
