@@ -10,7 +10,7 @@ Such pattern structures were used for mining patient hospitalisation trajectorie
 > [2] A. Buzmakov, E. Egho, N. Jay, S. O. Kuznetsov, A. Napoli, and C. Raïssi, “On Projections of Sequential Pattern Structures (with an application on care trajectories),” in Proc. 10th International Conference on Concept Lattices and Their Applications, 2013, pp. 199–208.
 
 Here we consider how to compute the lattice for the running example that was introduced in [1] and [2]. 
-For understanding of this example it is essential to understand [the example on pattern structures with simple sequences](https://github.com/AlekseyBuzmakov/FCAPS/blob/master/FCAPS/schemas/EXAMPLES/Lattice-Computation-for-simple-Sequential-Context.md). In this section we do not explain the parts that are the same to the aforementioned example.
+For understanding of this example it is essential to understand [the example on pattern structures with simple sequences](https://github.com/AlekseyBuzmakov/FCAPS/blob/master/FCAPS/EXAMPLES/Lattice-Computation-for-simple-Sequential-Context.md). In this section we do not explain the parts that are the same to the aforementioned example.
 
 ## Sequential data
 
@@ -46,11 +46,11 @@ In this lattice, the intents are taken from the following semilattice. Every ele
 
 One can construct this lattice by the following command line.
 
-> $sofia-ps -CP:[settings.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/AddIntentContextProcessor-for-general-Sequential-Data.json) -data:[context.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/general-Sequential-Context.json) -out
+> $sofia-ps -CP:[settings.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/EXAMPLES/AddIntentContextProcessor-for-general-Sequential-Data.json) -data:[context.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/EXAMPLES/general-Sequential-Context.json) -out
 
 Where context.json encodes the dataset, and setting.json describes the processing params.
 
-The resulting lattice can be found [here](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/Lattice-for-general-Sequential-Context.json).
+The resulting lattice can be found [here](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/EXAMPLES/Lattice-for-general-Sequential-Context.json).
 
 ## Data encoding
 
@@ -96,7 +96,7 @@ Here we have used the following file with settings.
 					"Name": "GeneralStringPartialOrderComparatorModule",
 					"Params": {
 ```
-_Here the discussing part starts. Check [simple sequential data](https://github.com/AlekseyBuzmakov/FCAPS/blob/master/FCAPS/schemas/EXAMPLES/Lattice-Computation-for-simple-Sequential-Context.md) for the rest of the settings._
+_Here the discussing part starts. Check [simple sequential data](https://github.com/AlekseyBuzmakov/FCAPS/blob/master/FCAPS/EXAMPLES/Lattice-Computation-for-simple-Sequential-Context.md) for the rest of the settings._
 ```json
 						"SymbolComparator":{
 							"Type": "PatternManagerModules",
@@ -174,5 +174,5 @@ The second semilattice is a classical semilattice of the powerset of attributes.
 
 ## The file with the lattice
 
-The resulting lattice can be found [here](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/Lattice-for-general-Sequential-Context.json).
+The resulting lattice can be found [here](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/EXAMPLES/Lattice-for-general-Sequential-Context.json).
 Basically, it is an array, where the first element is a metadata, the second element enumerates all nodes of the lattice, and third element enumerates all edges or arcs of the lattice. For every node the extent "Ext" and the intent "Int" are given. For every edges the source and destination zero-based indices of the nodes are given.

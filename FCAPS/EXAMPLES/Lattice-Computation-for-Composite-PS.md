@@ -26,11 +26,11 @@ Thus, this pattern structure is a direct product of an interval pattern structur
 
 One can construct this lattice by the following command line.
 
-> $sofia-ps -CP:[settings.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/AddIntentContextProcessor-for-composite-bin-IPS.json) -data:[context.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/composite-bin-IPS-Context.json) -out
+> $sofia-ps -CP:[settings.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/EXAMPLES/AddIntentContextProcessor-for-composite-bin-IPS.json) -data:[context.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/EXAMPLES/composite-bin-IPS-Context.json) -out
 
 Where context.json encodes the dataset, and setting.json describes the processing params.
 
-The resulting lattice can be found [here](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/Lattice-for-Composite-PS.json).
+The resulting lattice can be found [here](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/EXAMPLES/Lattice-for-Composite-PS.json).
 
 ## Data encoding
 

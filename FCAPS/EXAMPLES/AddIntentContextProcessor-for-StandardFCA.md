@@ -1,6 +1,6 @@
 # Example of AddIntent Context Processor for Binary Data
 
-File [AddIntentContextProcessor-for-StandardFCA.json](https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/schemas/EXAMPLES/AddIntentContextProcessor-for-StandardFCA.json) shows an example of settings for AddIntent context processor that uses BinarySetJoinPatternManagerModule for patterns, i.e., it processes formal contexts. 
+File [AddIntentContextProcessor-for-StandardFCA.json](https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/EXAMPLES/AddIntentContextProcessor-for-StandardFCA.json) shows an example of settings for AddIntent context processor that uses BinarySetJoinPatternManagerModule for patterns, i.e., it processes formal contexts. 
 
 
 When printing patterns, only names of attributes and not indices are printed. 

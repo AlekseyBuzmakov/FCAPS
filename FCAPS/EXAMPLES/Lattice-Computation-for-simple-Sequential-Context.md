@@ -25,11 +25,11 @@ In this lattice, the intents are taken from the following semilattice. Every ele
 
 One can construct this lattice by the following command line.
 
-> $sofia-ps -CP:[settings.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/AddIntentContextProcessor-for-simple-Sequential-Context.json) -data:[context.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/simple-Sequential-Context.json) -out
+> $sofia-ps -CP:[settings.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/EXAMPLES/AddIntentContextProcessor-for-simple-Sequential-Context.json) -data:[context.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/EXAMPLES/simple-Sequential-Context.json) -out
 
 Where context.json encodes the dataset, and setting.json describes the processing params.
 
-The resulting lattice can be found [here](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/schemas/EXAMPLES/Lattice-for-simple-Sequential-Context.json).
+The resulting lattice can be found [here](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/EXAMPLES/Lattice-for-simple-Sequential-Context.json).
 
 ## Data encoding
 
