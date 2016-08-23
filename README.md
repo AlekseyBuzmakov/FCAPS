@@ -56,12 +56,12 @@ The repository contains
 * library __Tools__ with some shared tools
 * modules for different kind of pattern structures and different algorithms processing a context
   * __StdFCA__ are modules for the standard FCA. There is algorithm AddIntent and the pattern structure processing binary contexts.
-  > [1] B. Ganter and R. Wille, Formal Concept Analysis: Mathematical Foundations, 1st ed. Springer, 1999.
-  > [2]  D. G. Kourie, S. A. Obiedkov, B. W. Watson, and D. van der Merwe, “An incremental algorithm to construct a lattice of set intersections,” Sci. Comput. Program., vol. 74, no. 3, pp. 128–142, 2009.
+  _[1] B. Ganter and R. Wille, Formal Concept Analysis: Mathematical Foundations, 1st ed. Springer, 1999._
+  _[2]  D. G. Kourie, S. A. Obiedkov, B. W. Watson, and D. van der Merwe, “An incremental algorithm to construct a lattice of set intersections,” Sci. Comput. Program., vol. 74, no. 3, pp. 128–142, 2009._
   * __PS-Modules__ are modules with diferent kinds of pattern structures
-  > [3] B. Ganter and S. O. Kuznetsov, “Pattern Structures and Their Projections,” in Conceptual Structures: Broadening the Base, vol. 2120, H. S. Delugach and G. Stumme, Eds. Springer Berlin Heidelberg, 2001, pp. 129–142.
+  _[3] B. Ganter and S. O. Kuznetsov, “Pattern Structures and Their Projections,” in Conceptual Structures: Broadening the Base, vol. 2120, H. S. Delugach and G. Stumme, Eds. Springer Berlin Heidelberg, 2001, pp. 129–142._
   * __SofiaModules__ are modules for direct search for stable concepts.
-  > [4] A. Buzmakov, S. O. Kuznetsov, and A. Napoli, “Fast Generation of Best Interval Patterns for Nonmonotonic Constraints,” in Machine Learning and Knowledge Discovery in Databases, vol. 9285, A. Appice, P. P. Rodrigues, V. Santos Costa, J. Gama, A. Jorge, and C. Soares, Eds. Springer International Publishing, 2015, pp. 157–172.
+  _[4] A. Buzmakov, S. O. Kuznetsov, and A. Napoli, “Fast Generation of Best Interval Patterns for Nonmonotonic Constraints,” in Machine Learning and Knowledge Discovery in Databases, vol. 9285, A. Appice, P. P. Rodrigues, V. Santos Costa, J. Gama, A. Jorge, and C. Soares, Eds. Springer International Publishing, 2015, pp. 157–172._
   * __GastonGraphPatternEnumeratorModule__ is a special module for enumerating extents of graphs found by Gaston. It can be used in _StabClsPatternProjectionChainModule_ modules from __SofiaModules__. This module has external dependency  on file __../LibGastonForSofia/inc__. That is the interface file of the [library](https://github.com/AlekseyBuzmakov/LibGastonForSofia/blob/master/inc/LibGastonForSofia.h) wrapping the Gaston code. If you are not going to use it, it can be excluded from the compilation.
   * __SharedModulesLib__ are premodules (not registered modules, that are registered in other dynamic libraries) that can be directly used from other modules.
 * __ClassifierModules__ are very basic modules for classification with pattern structures.
