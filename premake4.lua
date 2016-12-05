@@ -179,7 +179,7 @@ solution "Sofia-PS"
 				"SharedModulesLib"
 			}
 
-	project "GastonGraphPatternEnumeratorModule"
+	project "ParallelPatternEnumeratorModules"
 		DefaultConfig("modules")
 		kind "SharedLib"
 		language "C++"
@@ -190,9 +190,10 @@ solution "Sofia-PS"
 			"FCAPS/src/", 
 			"Tools/inc/", 
 			"Sofia-PS/inc/",
+			"../LibgSpanForSofia/inc",
 			"../LibGastonForSofia/inc"
 		}
-		files{ "FCAPS/src/fcaps/GastonGraphPatternEnumeratorModule/**.h", "FCAPS/src/fcaps/GastonGraphPatternEnumeratorModule/**.cpp" }
+		files{ "FCAPS/src/fcaps/ParallelPatternEnumeratorModules/**.h", "FCAPS/src/fcaps/ParallelPatternEnumeratorModules/**.cpp" }
 
 		libdirs {
 			"boost/stage/libs/",
