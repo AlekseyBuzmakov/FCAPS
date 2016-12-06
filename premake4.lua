@@ -193,7 +193,7 @@ solution "Sofia-PS"
 			"../LibgSpanForSofia/inc",
 			"../LibGastonForSofia/inc"
 		}
-		files{ "FCAPS/src/fcaps/ParallelPatternEnumeratorModules/**.h", "FCAPS/src/fcaps/ParallelPatternEnumeratorModules/**.cpp" }
+		files{ "FCAPS/src/fcaps/ParallelPatternEnumeratorModules/*.h", "FCAPS/src/fcaps/ParallelPatternEnumeratorModules/*.cpp" }
 
 		libdirs {
 			"boost/stage/libs/",
