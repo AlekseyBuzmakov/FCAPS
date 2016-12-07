@@ -154,6 +154,8 @@ JSON CParallelPatternEnumerator::SaveParams() const
 
 void CParallelPatternEnumerator::RunAlgoThread()
 {
+	assert(syncData != 0);
+	assert(peByCallback != 0);
     {
         // It should be unlocked before running the Algo in order to lock it later in callback when we are going to report a graph
         boost::unique_lock<boost::mutex> lock( syncData->Access );
@@ -202,7 +204,6 @@ private:
 // Run the ALGO in a separate thread.
 void CParallelPatternEnumerator::createAlgoThread()
 {
-	assert( runAlgo != 0 );
 	COUT << "(!) Starting ALGO thread\n";
 	boost::thread( CThreadStarter( *this ) );
 }
