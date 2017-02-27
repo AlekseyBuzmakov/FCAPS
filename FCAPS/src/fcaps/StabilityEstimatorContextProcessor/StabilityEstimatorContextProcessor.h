@@ -6,8 +6,8 @@
 #include <fcaps/ContextProcessor.h>
 #include <fcaps/Module.h>
 
-#include <fcaps/tools/StabilityCalculation.h>
-#include <fcaps/tools/StabilityChildrenApproximation.h>
+#include <fcaps/SharedModulesLib/StabilityCalculation.h>
+#include <fcaps/SharedModulesLib/StabilityChildrenApproximation.h>
 
 #include <ModuleTools.h>
 

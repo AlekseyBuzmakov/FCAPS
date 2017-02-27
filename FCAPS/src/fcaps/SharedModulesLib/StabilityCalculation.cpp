@@ -2,7 +2,7 @@
 
 #include "StabilityCalculation.h"
 
-#include <fcaps/modules/VectorBinarySetDescriptor.h>
+#include <fcaps/SharedModulesLib/VectorBinarySetDescriptor.h>
 
 // Increase size of the table if neccesary, to include at least minimalSize elements.
 void expandCollection( CSharedPtr<CVectorBinarySetJoinComparator>& cmp,

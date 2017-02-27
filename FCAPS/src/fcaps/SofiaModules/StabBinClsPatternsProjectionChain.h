@@ -7,7 +7,7 @@
 #include <fcaps/Module.h>
 #include <ModuleTools.h>
 
-#include <fcaps/tools/StabilityChildrenApproximation.h>
+#include <fcaps/SharedModulesLib/StabilityChildrenApproximation.h>
 
 ////////////////////////////////////////////////////////////////////
 

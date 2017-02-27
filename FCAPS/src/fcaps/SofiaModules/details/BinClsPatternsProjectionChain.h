@@ -5,7 +5,7 @@
 
 #include <fcaps/ProjectionChain.h>
 
-#include <fcaps/tools/StabilityCalculation.h>
+#include <fcaps/SharedModulesLib/StabilityCalculation.h>
 
 #include <fcaps/SharedModulesLib/VectorBinarySetDescriptor.h>
 

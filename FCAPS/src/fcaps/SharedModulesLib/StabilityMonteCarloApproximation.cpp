@@ -1,8 +1,8 @@
 // Initial software, Aleksey Buzmakov, Copyright (c) INRIA and University of Lorraine, GPL v2 license, 2011-2015, v0.7
 
-#include <fcaps/tools/StabilityMonteCarloApproximation.h>
+#include <fcaps/SharedModulesLib/StabilityMonteCarloApproximation.h>
 
-#include <fcaps/modules/VectorBinarySetDescriptor.h>
+#include <fcaps/SharedModulesLib/VectorBinarySetDescriptor.h>
 
 #include <boost/random/mersenne_twister.hpp>
 

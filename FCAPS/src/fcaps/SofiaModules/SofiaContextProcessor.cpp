@@ -8,7 +8,7 @@
 
 #include <JSONTools.h>
 
-#include <fcaps/tools/FindConceptOrder.h>
+#include <fcaps/SharedModulesLib/FindConceptOrder.h>
 
 #include <rapidjson/document.h>
 

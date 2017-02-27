@@ -58,6 +58,7 @@ protected:
 	std::string outParamFile;
 	std::string paramFileContent;
 	mutable std::ofstream infoStream;
+	enum { IS_File=0,IS_Cout,IS_Cerr} infoStreamStatus;
 	DWORD runTimeLimit;
 
 	time_t startTime;

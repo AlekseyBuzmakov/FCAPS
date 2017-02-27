@@ -6,7 +6,7 @@
 #include <common.h>
 
 #include <fcaps/PatternManager.h>
-#include <fcaps/tools/StabilityCalculation.h>
+#include <fcaps/SharedModulesLib/StabilityCalculation.h>
 
 #include <ListWrapper.h>
 

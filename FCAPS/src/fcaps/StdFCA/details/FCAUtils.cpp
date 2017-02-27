@@ -6,7 +6,7 @@
 #include "Lattice.h"
 #include "Extent.h"
 #include <fcaps/storages/IntentStorage.h>
-#include <fcaps/tools/FindConceptOrder.h>
+#include <fcaps/SharedModulesLib/FindConceptOrder.h>
 
 #include <JSONTools.h>
 #include <rapidjson/document.h>

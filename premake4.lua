@@ -302,7 +302,6 @@ solution "Sofia-PS"
 				"boost_system",
 				"dl",
 				"SharedTools"
-		
 			}
 
 		configuration "Release"

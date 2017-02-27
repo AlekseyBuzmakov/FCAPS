@@ -16,6 +16,7 @@ CConsoleApplication::CConsoleApplication( int _argc, char **_argv ) :
 	argv( _argv ),
 	isSilent( false ),
 	isJustHelp( false ),
+	infoStreamStatus( IS_Cout ),
 	runTimeLimit(-1)
 {
 	string baseName;
@@ -29,6 +30,7 @@ int CConsoleApplication::Run()
 {
 	assert( argc >= 1 );
 
+	// Printing the command line
 	for( int i = 1; i < argc; ++i ) {
 		processArg( argv[i] );
 	}
@@ -36,6 +38,13 @@ int CConsoleApplication::Run()
 		CDestStream dst( outParamFile );
 		dst << paramFileContent;
 	}
+
+	GetInfoStream() << "APPLICATION: " << argv[0] << endl;	
+	GetInfoStream() << "PARAMS: ";
+	for( int i = 1; i < argc; ++i ) {
+		GetInfoStream() << " "<< argv[i];
+	}
+	GetInfoStream() << endl;
 
 	if( !FinalizeParams() || !AreParamsCorrect() || isJustHelp ) {
 		if( !isJustHelp ) {
@@ -49,6 +58,7 @@ int CConsoleApplication::Run()
 			GetInfoStream() << "\t--infoLogging:{PATH} - print INFO in a file\n";
 			GetInfoStream() << "\t--silent - minimaze output\n";
 			GetInfoStream() << "\t--paramfile:{PATH} - path to file with one param per one line\n";
+			GetInfoStream() << "\t\tCOUT for console, CERR for error stream\n";
 			GetInfoStream() << "\t--writeparamfile:{PATH} - write down the file with all params\n\n";
 		}
 		return isJustHelp ? 0 : 1;
@@ -76,7 +86,13 @@ bool CConsoleApplication::ProcessParam( const std::string& param, const std::str
 	} else if ( param == "--writeparamfile" ) {
 		outParamFile = value;
 	} else if ( param == "--infoLogging" ) {
-		infoStream.open( value.c_str() );
+		if( value == "COUT" ) {
+			infoStreamStatus=IS_Cout;
+		} else if( value == "CERR" ) {
+			infoStreamStatus=IS_Cerr;
+		} else {
+			infoStream.open( value.c_str() );
+		}
 	} else if ( param == "--timeLimit" ) {
 		runTimeLimit = boost::lexical_cast<DWORD>( value );
 	} else {
@@ -110,10 +126,21 @@ ostream& CConsoleApplication::GetStatusStream() const
 ostream& CConsoleApplication::GetInfoStream() const
 {
 	checkRunningTime();
-	if( !infoStream.is_open() ) {
-		return cout;
-	} else {
-		return infoStream;
+	switch( infoStreamStatus ) {
+		case IS_File:
+			assert( !infoStream.is_open() );
+			if( !infoStream.is_open() ) {
+				return cout;
+			} else {
+				return infoStream;
+			}
+		case IS_Cout:
+			return cout;
+		case IS_Cerr:
+			return cerr;
+		default:
+			assert( false );
+			return cout;
 	}
 }
 

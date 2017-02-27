@@ -322,7 +322,7 @@ void CThisConsoleApplication::runContextProcessor() {
 	processor->ProcessAllObjectsAddition();
 
 	const time_t end = time( NULL );
-	GetInfoStream() << "\rProcessing time is " << end - start << "                                 \n";
+	GetInfoStream() << "\nProcessing time is " << end - start << "                                 \n";
 	GetInfoStream() << lastCtxProcessorInfo << "\n";
 
 	// Output base path
@@ -369,7 +369,7 @@ void CThisConsoleApplication::loadModules()
 			// Not a module
 			continue;
 		}
-		GetInfoStream() << "Loading modules from '" << name << "'\n";
+		GetStatusStream() << "Loading modules from '" << name << "'\n";
 		loadModule(name);
 	}
 }
