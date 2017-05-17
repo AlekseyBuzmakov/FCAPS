@@ -412,13 +412,13 @@ void CThisConsoleApplication::extractModules( const JSON& description ) const
 	for( int i = 0; i < doc.Size(); ++i ) {
 		if( !doc[i].HasMember("Type") || !doc[i]["Type"].IsString()
 		    || !doc[i].HasMember("Name") || !doc[i]["Name"].IsString()
-		    || !doc[i].HasMember("Func") || !doc[i]["Func"].IsUint() )
+		    || !doc[i].HasMember("Func") || !doc[i]["Func"].IsUint64() )
 		{
 			jsonError.Data=description;
 			jsonError.Error="'Type', 'Name', or 'Func' has an incorrect format";
 			throw new CJsonException( "ExtractModules", jsonError );
 		}
-		RegisterModule( doc[i]["Type"].GetString(), doc[i]["Name"].GetString(), reinterpret_cast<CreateFunc>(doc[i]["Func"].GetUint()) );
+		RegisterModule( doc[i]["Type"].GetString(), doc[i]["Name"].GetString(), reinterpret_cast<CreateFunc>(doc[i]["Func"].GetUint64()) );
 	}
 }
 
