@@ -277,14 +277,15 @@ void CSofiaContextProcessor::adjustThreshold()
 	sort( measures.begin(), measures.end(), compareCachedPatterns );
 	assert( measures.front().second > thld );
 
+	thld = measures[mpn].second + 0.1; // TODO: what if not integer measure?
 	// Finding the final threshold.
 	// Too slow?
 	// What if Zero?s
-	DWORD finalSize = mpn;
-	while( abs((measures[finalSize-1].second - measures[mpn].second)/measures[mpn].second) < 0.00001 ) {
-		--finalSize;
-	}
-	thld = (measures[finalSize-1].second + measures[finalSize].second)/2;
+	//DWORD finalSize = mpn;
+	//while( abs((measures[finalSize-1].second - measures[mpn].second)/measures[mpn].second) < 0.00001 ) {
+		//--finalSize;
+	//}
+	//thld = (measures[finalSize-1].second + measures[finalSize].second)/2;
 
 	for( int i = finalSize; i < measures.size(); ++i ) {
 		storage.RemovePattern(measures[i].first);
