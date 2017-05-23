@@ -162,6 +162,20 @@ void CBinClsPatternsProjectionChain::LoadCommonParams( const JSON& json )
 		}
 		intCmp->SetNames(names);
 	}
+	if(params.HasMember("AttrOrder") && params["AttrOrder"].IsString()){
+		const string order(params["AttrOrder"].GetString());
+		if(order == "desc") {
+			OrderType()=AO_DescendingSize;
+		} else if( order == "asc") {
+			OrderType()=AO_AscendingSize;
+		} else if( order == "none" ) {
+			OrderType()=AO_None;
+		} else if( order == "rand" ) {
+			OrderType()=AO_Random;
+		} else {
+			OrderType()=AO_None;
+		}
+	}
 
 }
 JSON CBinClsPatternsProjectionChain::SaveCommonParams() const
@@ -178,6 +192,25 @@ JSON CBinClsPatternsProjectionChain::SaveCommonParams() const
 	} else if( HasAllFlags( f, BSDC_UseNames ) ) {
         params.AddMember( "IntentWritingMode", "Names", alloc );
 	}
+	string orderType;
+	switch( OrderType() ) {
+		case AO_DescendingSize:
+			orderType="desc";
+			break;
+		case AO_AscendingSize:
+			orderType="asc";
+			break;
+		case AO_None:
+			orderType="none";
+			break;
+		case AO_Random:
+			orderType="rand";
+			break;
+		default:
+			assert(false);
+			orderType="error";
+	}
+	params.AddMember( "AttrOrder", rapidjson::StringRef( orderType.c_str() ), alloc );
     const vector<string>& names=intCmp->GetNames();
 	if( !names.empty() ) {
 		params.AddMember( "AttrNames", rapidjson::Value().SetArray(), alloc );
@@ -284,7 +317,7 @@ public:
 		switch( order ) {
 		case CBinClsPatternsProjectionChain::AO_None:
 			return true;
-		case CBinClsPatternsProjectionChain::AO_AscesndingSize:
+		case CBinClsPatternsProjectionChain::AO_AscendingSize:
 			return attrToTidsetMap[i1]->Size() < attrToTidsetMap[i2]->Size();
 		case CBinClsPatternsProjectionChain::AO_DescendingSize:
 			return attrToTidsetMap[i1]->Size() > attrToTidsetMap[i2]->Size();

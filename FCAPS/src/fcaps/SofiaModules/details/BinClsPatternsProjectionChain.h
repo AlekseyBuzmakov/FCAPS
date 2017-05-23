@@ -21,7 +21,7 @@ public:
 		// No order
 		AO_None = 0,
 		// Ascending/Descending order by size of the extent
-		AO_AscesndingSize,
+		AO_AscendingSize,
 		AO_DescendingSize,
 		// Random order of attributes
 		AO_Random,

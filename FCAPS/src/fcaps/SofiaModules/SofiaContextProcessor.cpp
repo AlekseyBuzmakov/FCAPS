@@ -287,9 +287,11 @@ void CSofiaContextProcessor::adjustThreshold()
 	//}
 	//thld = (measures[finalSize-1].second + measures[finalSize].second)/2;
 
-	for( int i = finalSize; i < measures.size(); ++i ) {
+	for( int i = measures.size() - 1; i >= 0 && measures[i].second < thld ; --i ) {
 		storage.RemovePattern(measures[i].first);
 	}
+	assert( i < mpn );
+	assert( storage.Size() <= mpn );
 	pChain->UpdateInterestThreshold( thld );
 }
 

@@ -10,7 +10,7 @@ CModuleRegistrar<CCosineBinClsPatternsProjectionChain> CCosineBinClsPatternsProj
 CCosineBinClsPatternsProjectionChain::CCosineBinClsPatternsProjectionChain()
 {
 	Thld() = 0;
-	OrderType() = AO_AscesndingSize;
+	OrderType() = AO_AscendingSize;
 }
 
 void CCosineBinClsPatternsProjectionChain::ComputeZeroProjection( CPatternList& ptrns )
