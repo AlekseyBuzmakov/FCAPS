@@ -243,12 +243,12 @@ void CSofiaContextProcessor::addNewPatterns( const IProjectionChain::CPatternLis
 	for( ; !itr.IsEnd(); ++itr, ++i ) {
         const IPatternDescriptor* origP = *itr;
 		const IPatternDescriptor* p = storage.AddPattern( origP );
-		// TOKILL
-		if( pChain->GetPatternInterest(p) - thld < 0) {
-            int a = 0;
-            ++a;
+#ifdef _DEBUG
+		if( !(pChain->GetPatternInterest(p) - thld >= -0.00001*thld) ) {
+			std::cerr << "M(origP)" <<  pChain->GetPatternInterest(origP) << " M(p)=" <<  pChain->GetPatternInterest(p) << " Thld=" << thld << endl;
+			assert(false);
 		}
-		assert( pChain->GetPatternInterest(p) - thld >= -0.00001*thld );
+#endif
 	}
 }
 
@@ -287,7 +287,8 @@ void CSofiaContextProcessor::adjustThreshold()
 	//}
 	//thld = (measures[finalSize-1].second + measures[finalSize].second)/2;
 
-	for( int i = measures.size() - 1; i >= 0 && measures[i].second < thld ; --i ) {
+	int i = measures.size() - 1;
+	for( ; i >= 0 && measures[i].second < thld ; --i ) {
 		storage.RemovePattern(measures[i].first);
 	}
 	assert( i < mpn );

@@ -83,7 +83,7 @@ void CStabClsPatternProjectionChain::AddObject( DWORD objectNum, const JSON& int
 }
 void CStabClsPatternProjectionChain::UpdateInterestThreshold( const double& t )
 {
-	thld = static_cast<DWORD>( t + 0.5 );
+	thld = static_cast<DWORD>( ceil(t) );
 }
 double CStabClsPatternProjectionChain::GetPatternInterest( const IPatternDescriptor* p )
 {
@@ -196,6 +196,7 @@ void CStabClsPatternProjectionChain::Preimages( const IPatternDescriptor* d, CPa
     }
 
     const CStabClsPatternDescription& ptrn = Ptrn(d);
+    assert(ptrn.DMeasure() >= thld);
 	// Computing the only possible preimage
 	CSharedPtr<const CVectorBinarySetDescriptor> res(
 		extCmp->CalculateSimilarity( ptrn.Extent(), *nextImage ), extDeleter );
@@ -219,13 +220,14 @@ void CStabClsPatternProjectionChain::Preimages( const IPatternDescriptor* d, CPa
 		//  We should add it to preimages.
 		isStablePtrnFound = true;
 
+		assert(newPtrn->DMeasure() >= thld);
 		preimages.PushBack( newPtrn.release() );
 	}
 
 	// Child is added only here because initialiasation rely on the old set of children.
 	addChild( res, ptrn );
 
-	// Updating the measure of current pattern.
+	// Updating the measure of the current pattern.
 	ptrn.DMeasure() = min( ptrn.DMeasure(), extDiff );
 }
 JSON CStabClsPatternProjectionChain::SaveExtent( const IPatternDescriptor* d ) const
@@ -348,6 +350,7 @@ bool CStabClsPatternProjectionChain::initializeNewPattern(
 		addChild( res, newPtrn );
 
 		newPtrn.DMeasure()=min(newPtrn.DMeasure(), extDiff );
+		assert(newPtrn.DMeasure() >= thld);
 	}
 
     newPtrn.MinGraphSupport() = min( parent.MinGraphSupport(), static_cast<DWORD>(nextImage->Size()) );
