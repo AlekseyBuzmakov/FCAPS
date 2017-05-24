@@ -125,7 +125,8 @@ bool CStabClsPatternProjectionChain::IsTopoSmaller(const IPatternDescriptor* p, 
 }
 void CStabClsPatternProjectionChain::FreePattern(const IPatternDescriptor* p ) const
 {
-	delete &Ptrn(p);
+	const CStabClsPatternDescription& ptrn=Ptrn(p);
+	delete &ptrn;
 }
 void CStabClsPatternProjectionChain::ComputeZeroProjection( CPatternList& ptrns )
 {

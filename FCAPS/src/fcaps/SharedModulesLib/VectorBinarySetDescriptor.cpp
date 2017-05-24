@@ -416,7 +416,15 @@ bool CVectorBinarySetJoinComparator::checkSameBlock( const uintptr_t* p1, const 
 // Allocates new memory
 inline void CVectorBinarySetJoinComparator::allocate()
 {
-	allocate( memory.Size() == 0 ? 1000 : memory.Back().size() / blockSize * 2 );
+	DWORD s = 0;
+	if(memory.Size() == 0) {
+		s=1000;
+	}else{
+		const DWORD lastS = memory.Back().size() / blockSize;
+		// TOCHANGE : Exp is so power that in certain moment we can be out of memory because of such a multiplication
+		s = lastS < 100000 ? lastS * 2 : lastS;
+	}
+	allocate( s );
 }
 
 // Allocates the requeested amount of blocks
