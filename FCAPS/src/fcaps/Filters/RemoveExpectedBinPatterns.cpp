@@ -110,16 +110,19 @@ void CRemoveExpectedBinPatterns::Process()
 	boost::math::chi_squared chi2(1);
 	// Computing P-value for every found concept
 	for( int i = 0; i < tmpContext.size(); ++i ) {
+		std::cout << "Concept " << i << " \n";
 		const DWORD support = nodes[i]["Ext"].GetUint();
 		double pvalue = 1;
 
 		const CList<DWORD>& curr = tmpContext[i];
 		CStdIterator<boost::container::multimap<DWORD,DWORD>::const_iterator>  itr( parents.find(i), parents.end() );
 		// Verifying if there any parent concept that could generate this one by chance.
-		for( ; !itr.IsEnd(); +itr ) {
+		for( ; !itr.IsEnd() && (*itr).first == i; ++itr ) {
 			const DWORD parentIndex = (*itr).second;
+			std::cout << "\tParent " << parentIndex << " \n";
 			assert(parentIndex < tmpContext.size());
 			const CList<DWORD>& parent = tmpContext[parentIndex];
+
 			assert(parent.Size() < curr.Size());
 			const DWORD supportParent = nodes[parentIndex]["Ext"].GetUint();
 			assert(supportParent > support);
@@ -159,14 +162,17 @@ void CRemoveExpectedBinPatterns::Process()
 
 			// Computing pvalue by chi2
 			//
-			//  expected probabilities
-			const double e1 = static_cast<double>(newAttrsIntent->Size())/objCount;
-			const double e0 = 1 - e1;
-			//  observed probabilities
-			const double o1 = static_cast<double>(support)/supportParent;
-			const double o0 = 1 - o1;
-			const double T = (e1-o1)*(e1-o1)/e1 + (e0-o0)*(e0-o0)/o0;
-			pvalue *= boost::math::cdf(chi2,T);
+			//  observed counts
+			const DWORD o1 = support;
+			const DWORD o0 = supportParent - o1;
+			//  expected counts
+			const double probability = static_cast<double>(newAttrsIntent->Size())/objCount;
+			const double e1 = supportParent * probability;  
+			const double e0 = supportParent - e1;
+			const double T = (e1-o1)*(e1-o1)/e1 + (e0-o0)*(e0-o0)/e0;
+			const double currPValue = boost::math::cdf(chi2,T);
+			pvalue *= currPValue ;
+			std::cout << "\t\tp-value " << 1 - currPValue << " all p-value " << 1-pvalue << "\n";
 			if( 1 - pvalue > significance ) {
 				pvalue = 0;
 				break;
@@ -175,7 +181,16 @@ void CRemoveExpectedBinPatterns::Process()
 		}
 
 		pvals[i]=1 - pvalue;
+		std::cout << "\tp-value " << 1 - pvalue << " Significance " << significance << "\n";
 	}	
+
+	DWORD removed = 0;
+	for( int i = 0; i < pvals.size(); ++i ) {
+		if( pvals[i] > significance ) {
+			++removed;
+		}	
+	}
+	std::cout << "REMOVED " << removed << " from " << pvals.size() << " concepts\n";
 
 
 	/////////////////////////////////////////////////////////
@@ -222,7 +237,7 @@ void CRemoveExpectedBinPatterns::LoadParams( const JSON& json )
 		error.Error = "'Significance' not found";
 		throw new CJsonException(place, error);
 	} else {
-		significance = !params["Significance"].GetDouble();
+		significance = params["Significance"].GetDouble();
 	}
 
 	if( params.HasMember("OutSuffix") && params["OutSuffix"].IsString() ) {
