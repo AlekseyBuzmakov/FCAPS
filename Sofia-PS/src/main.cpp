@@ -357,6 +357,8 @@ void CThisConsoleApplication::loadModules()
 	string fullPathToModules;
 	RelativePathes::GetFullPath(pathToModules, fullPathToModules );
 
+	GetStatusStream() << "Searching for Module Dynamic Libraries in '" << fullPathToModules << "'\n";
+
 	path p(fullPathToModules);
 	directory_iterator begin(p),end;
 	CStdIterator<directory_iterator> itr( begin,end );
@@ -502,11 +504,16 @@ IContextProcessor* CThisConsoleApplication::createContextProcessor( rapidjson::D
 
 void CThisConsoleApplication::runFilters()
 {
+	string filterFullPath;
+	RelativePathes::BaseName(fltrPath,filterFullPath);
+	RelativePathes::CSearchPath cbPathSwitcher( filterFullPath );
+
 	GetInfoStream() << "\nApplying filters...";
 	const time_t start = time( NULL );
 
 	CSharedPtr<IFilter> filter ( createFilter() );
-	filter->SetInputFile( outBaseName );
+	filter->SetDataFile( dataPath.c_str() );
+	filter->SetInputFile( outBaseName.c_str() );
 	filter->Process();
 
 	const time_t end = time( NULL );

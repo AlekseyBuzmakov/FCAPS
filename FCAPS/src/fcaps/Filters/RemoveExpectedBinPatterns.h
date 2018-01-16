@@ -7,15 +7,23 @@
 #include <fcaps/Module.h>
 #include <ModuleTools.h>
 
+#include <fcaps/SharedModulesLib/VectorBinarySetDescriptor.h>
+
+#include <fcaps/SharedModulesLib/StabilityCalculation.h>
+
 #include <rapidjson/document.h>
+
+#include <deque>
+
+class CBinarySetDescriptorsComparator;
 
 ////////////////////////////////////////////////////////////////////
 
-const char TrainTestContextSplitter[] = "TrainTestContextSplitterModule";
+const char RemoveExpectedBinPatterns[] = "RemoveExpectedBinPatternsModule";
 
-class CTrainTestContextSplitter : public IFilter, public IModule {
+class CRemoveExpectedBinPatterns : public IFilter, public IModule {
 public:
-	CTrainTestContextSplitter();
+	CRemoveExpectedBinPatterns();
 	// Methods of IFilter
 	virtual const int GetResultFileCount() const 
 		{ return results.size(); }
@@ -37,29 +45,35 @@ public:
 	virtual const char* const GetType() const
 		{ return ContextFilterModuleType; };
 	virtual const char* const GetName() const
-		{ return TrainTestContextSplitter; };
+		{ return RemoveExpectedBinPatterns; };
 
 private:
-	static const CModuleRegistrar<CTrainTestContextSplitter> registrar;
+	static const CModuleRegistrar<CRemoveExpectedBinPatterns> registrar;
 	// Resulting file (two files).
 	std::vector<std::string> results;
-	// The path to the input file.
+	// The path to the data file.
 	std::string dataFile;
 	// The path to the input file.
 	std::string inputFile;
-	// The proportion between train and test datasets. Default 90% is the train set.
-	double proportion;
-	// Seed for the random
-	int seed;
+	// Significance level
+	double significance;
+	// Output file suffix
+	std::string outSuffix;
 
-	rapidjson::Value data;
-	rapidjson::Document params;
-	rapidjson::Value objNames;
+	// Temrorarily context
+	std::deque< CList<DWORD> > tmpContext;
+	// The number of objects
+	DWORD objCount;
+	// Comparator for extents
+	CSharedPtr<CVectorBinarySetJoinComparator> extCmp;
+	CPatternDeleter extDeleter;
+	// Comparator for intents;
+	CSharedPtr<CBinarySetDescriptorsComparator> intCmp;
+	// The context in the form from attrs to objects
+	CBinarySetCollection attrToTidsetMap;
 
-	void writeDataset(
-		std::vector<int>::const_iterator b, std::vector<int>::const_iterator e,
-		const std::string& path );
-	void initObjectNames(std::vector<int>::const_iterator b, std::vector<int>::const_iterator e );
+	void convertContext();
+	void addColumnToTable( DWORD columnNum, const CList<DWORD>& values, CBinarySetCollection& table );
 };
 
 #endif // CTRAINTESTCONTEXTSPLITTER_H

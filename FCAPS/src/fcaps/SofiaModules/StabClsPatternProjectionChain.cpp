@@ -231,6 +231,10 @@ void CStabClsPatternProjectionChain::Preimages( const IPatternDescriptor* d, CPa
 	// Updating the measure of the current pattern.
 	ptrn.DMeasure() = min( ptrn.DMeasure(), extDiff );
 }
+int CStabClsPatternProjectionChain::GetExtentSize( const IPatternDescriptor* d ) const
+{
+	return Ptrn(d).Extent().Size();
+}
 JSON CStabClsPatternProjectionChain::SaveExtent( const IPatternDescriptor* d ) const
 {
 	return extCmp->SavePattern( &Ptrn(d).Extent() );

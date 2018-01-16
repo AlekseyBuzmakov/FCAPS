@@ -156,6 +156,11 @@ void CIntervalClsPatternsProjectionChain::Preimages( const IPatternDescriptor* d
 	}
 }
 
+int CIntervalClsPatternsProjectionChain::GetExtentSize( const IPatternDescriptor* d ) const
+{
+	return Pattern(d).Extent().Size();
+}
+
 JSON CIntervalClsPatternsProjectionChain::SaveExtent( const IPatternDescriptor* d ) const
 {
 	return extCmp->SavePattern( &Pattern(d).Extent() );

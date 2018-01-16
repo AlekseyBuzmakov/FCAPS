@@ -408,6 +408,8 @@ dst << "{";
 
 	if( outParams.OutExtent ) {
 		dst << "\"Ext\":" << pChain->SaveExtent( c.first ) << ",";
+	} else {
+		dst << "\"Ext\":" << pChain->GetExtentSize( c.first ) << ",";
 	}
 	if( outParams.OutIntent ) {
 		dst << "\"Int\":" << pChain->SaveIntent( c.first ) << ",";

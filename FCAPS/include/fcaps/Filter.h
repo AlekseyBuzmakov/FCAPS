@@ -13,10 +13,14 @@ const char LatticeFilterModuleType[] = "LatticeFilters";
 
 interface IFilter : public virtual IObject {
 	// Returns the list of the resulting files.
-	virtual const std::vector<std::string>& GetResultFiles() const = 0;
+	virtual const int GetResultFileCount() const = 0;
+	virtual const char* GetResultFilePath( int index ) const = 0;
+	// Get/Set data file
+	virtual const char* GetDataFile() const = 0;
+	virtual void SetDataFile( const char* ) = 0;
 	// Get/Set input file
-	virtual const std::string& GetInputFile() const = 0;
-	virtual void SetInputFile( const std::string& ) = 0;
+	virtual const char* GetInputFile() const = 0;
+	virtual void SetInputFile( const char* ) = 0;
 	// Process the input file
 	virtual void Process() = 0;
 };

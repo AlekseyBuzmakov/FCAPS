@@ -51,6 +51,8 @@ public:
 		{ return double(currAttr)/attrOrder.size(); }
 	virtual void Preimages( const IPatternDescriptor* d, CPatternList& preimages );
 
+	virtual int GetExtentSize( const IPatternDescriptor* d ) const;
+
 	virtual JSON SaveExtent( const IPatternDescriptor* d ) const;
 	virtual JSON SaveIntent( const IPatternDescriptor* d ) const;
 

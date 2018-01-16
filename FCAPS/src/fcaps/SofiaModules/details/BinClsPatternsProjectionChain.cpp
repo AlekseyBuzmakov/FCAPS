@@ -119,6 +119,11 @@ void CBinClsPatternsProjectionChain::Preimages(
 	}
 }
 
+int CBinClsPatternsProjectionChain::GetExtentSize( const IPatternDescriptor* d ) const
+{
+	return Pattern(d).Extent().Size();
+}
+
 JSON CBinClsPatternsProjectionChain::SaveExtent( const IPatternDescriptor* d ) const
 {
 	return extCmp->SavePattern( &Pattern(d).Extent() );

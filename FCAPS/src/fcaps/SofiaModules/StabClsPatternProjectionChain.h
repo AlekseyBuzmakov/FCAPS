@@ -41,6 +41,8 @@ public:
 	virtual bool NextProjection();
 	virtual double GetProgress() const;
 	virtual void Preimages( const IPatternDescriptor* d, CPatternList& preimages );
+
+	int GetExtentSize( const IPatternDescriptor* d ) const;
 	virtual JSON SaveExtent( const IPatternDescriptor* d ) const;
 	virtual JSON SaveIntent( const IPatternDescriptor* d ) const;
 
