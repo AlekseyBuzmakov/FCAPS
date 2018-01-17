@@ -35,8 +35,7 @@ public:
 		{ dataFile = path; }
 	virtual const char* GetInputFile() const
 		 { return inputFile.c_str(); }
-	virtual void SetInputFile( const char* path )
-		{ inputFile = path; }
+	virtual void SetInputFile( const char* path );
 	virtual void Process();
 
 	// Methods of IModule
@@ -59,6 +58,8 @@ private:
 	double significance;
 	// Output file suffix
 	std::string outSuffix;
+	// Should the order of filtered concepts be found
+	bool findPartialOrder; 
 
 	// Temrorarily context
 	std::deque< CList<DWORD> > tmpContext;
