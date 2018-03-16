@@ -21,32 +21,33 @@ using namespace std;
 
 ////////////////////////////////////////////////////////////////////
 
-//class CConceptsForOrder {
-//public:
-	//CConceptsForOrder( const CBinarySetDescriptorsComparator& _cmp, const std::deque< CSharedPtr<const CBinarySetPatternDescriptor> >& _concepts ) :
-		//cmp( _cmp ), concepts( _concepts ) {}
+class CConceptsForOrder {
+public:
+	CConceptsForOrder( IPatternManager& _cmp, const std::deque< CSharedPtr<const IPatternDescriptor> >& _concepts, const vector<DWORD>& _extSize ) :
+		cmp( _cmp ), concepts( _concepts ), extSize(_extSize) {}
 
-	//// Methods of TConcepts requiring by CFindConceptOrder
-	//DWORD Size() const
-		//{ return concepts.size(); }
-	//bool IsTopologicallyLess( DWORD c1, DWORD c2 ) const
-	//{
-		//assert( c1 < concepts.size() );
-		//assert( c2 < concepts.size() );
-		//const bool res = concepts[c1]->GetAttribs().Size() < concepts[c2]->GetAttribs().Size();
-		//return res;
-	//}
-	//bool IsLess( DWORD c1, DWORD c2 ) const
-	//{
-		//assert( c1 < concepts.size() );
-		//assert( c2 < concepts.size() );
-		//const bool res = cmp.Compare(*concepts[c1],*concepts[c2], CR_MoreGeneral, CR_MoreGeneral | CR_Incomparable ) == CR_MoreGeneral; 
-		//return res;
-	//}
-//private:
-	//const CBinarySetDescriptorsComparator& cmp;
-	//const std::deque< CSharedPtr<const CBinarySetPatternDescriptor> >& concepts;
-//};
+	// Methods of TConcepts requiring by CFindConceptOrder
+	DWORD Size() const
+		{ return concepts.size(); }
+	bool IsTopologicallyLess( DWORD c1, DWORD c2 ) const
+	{
+		assert( c1 < concepts.size() );
+		assert( c2 < concepts.size() );
+		const bool res = extSize[c1] >= extSize[c2];
+		return res;
+	}
+	bool IsLess( DWORD c1, DWORD c2 ) const
+	{
+		assert( c1 < concepts.size() );
+		assert( c2 < concepts.size() );
+		const bool res = cmp.Compare(concepts[c1].get(),concepts[c2].get(), CR_MoreGeneral, CR_MoreGeneral | CR_Incomparable ) == CR_MoreGeneral; 
+		return res;
+	}
+private:
+	IPatternManager& cmp;
+	const std::deque< CSharedPtr<const IPatternDescriptor> >& concepts;
+	const vector<DWORD>& extSize;
+};
 
 ////////////////////////////////////////////////////////////////////
 const CModuleRegistrar<CRemoveExpectedIntPatterns> CRemoveExpectedIntPatterns::registrar(
@@ -242,83 +243,86 @@ void CRemoveExpectedIntPatterns::Process()
 	}	
 
 	//// Removing insignificant nodes from initial lattice
-	//std::deque< CSharedPtr<const CBinarySetPatternDescriptor> > fltrConcepts;	
-	//rapidjson::Value newNodeArray;
-	//newNodeArray.SetArray();
-	//for( int i = 0; i < pvals.size(); ++i ) {
-		//if( pvals[i] < significance ) {
-			//nodes[i].AddMember("P-Val",rapidjson::Value().SetDouble(pvals[i]),alloc);
-			//newNodeArray.PushBack(nodes[i].Move(), alloc);
-			//fltrConcepts.push_back(concepts[i]);
-		//}	
-	//}
-	//doc[1]["Nodes"] = newNodeArray;
-	//doc[0]["NodesCount"] = rapidjson::Value().SetUint(doc[1]["Nodes"].Size());
+	std::deque< CSharedPtr<const IPatternDescriptor> > fltrConcepts;	
+	rapidjson::Value newNodeArray;
+	newNodeArray.SetArray();
+	vector<DWORD> extSize;
+	for( int i = 0; i < pvals.size(); ++i ) {
+		if( pvals[i] < significance ) {
+			const DWORD support = nodes[i]["Ext"].GetUint();
+			nodes[i].AddMember("P-Val",rapidjson::Value().SetDouble(pvals[i]),alloc);
+			newNodeArray.PushBack(nodes[i].Move(), alloc);
+			fltrConcepts.push_back(concepts[i]);
+			extSize.push_back(support);
+		}	
+	}
+	doc[1]["Nodes"] = newNodeArray;
+	doc[0]["NodesCount"] = rapidjson::Value().SetUint(doc[1]["Nodes"].Size());
 
-	//// Updating arcs
-	//if( !findPartialOrder ) {
-		//doc[2]=rapidjson::Value().Move();
-		//doc[0]["ArcsCount"] = rapidjson::Value().SetInt(0);
-	//} else {
-		//CConceptsForOrder conceptsForOrder( *intCmp, fltrConcepts );
-		//CFindConceptOrder<CConceptsForOrder> order( conceptsForOrder );
-		//order.Compute();
+	// Updating arcs
+	if( !findPartialOrder ) {
+		doc[2]=rapidjson::Value().Move();
+		doc[0]["ArcsCount"] = rapidjson::Value().SetInt(0);
+	} else {
+		CConceptsForOrder conceptsForOrder( *cmp, fltrConcepts, extSize );
+		CFindConceptOrder<CConceptsForOrder> order( conceptsForOrder );
+		order.Compute();
 
-		//CList<DWORD> tops;
-		//vector<bool> bottoms;
-		//bottoms.resize( fltrConcepts.size(), true );
-		//doc[2]["Arcs"].SetArray();
-		//for( DWORD i = 0; i < fltrConcepts.size(); ++i ) {
-			//const CList<DWORD>& parents = order.GetParents( i );
-			//if( parents.Size() == 0 ) {
-				//tops.PushBack( i );
-			//}
-			//CStdIterator<CList<DWORD>::CConstIterator,false> p( parents );
-			//for( ; !p.IsEnd(); ++p ) {
-				//bottoms[*p] = false;
-				//doc[2]["Arcs"].PushBack( 
-					//rapidjson::Value().SetObject()
-						//.AddMember("S", rapidjson::Value().SetUint(*p), alloc)
-						//.AddMember("D", rapidjson::Value().SetUint(i), alloc)
-					//,alloc);	
-			//}
-		//}
+		CList<DWORD> tops;
+		vector<bool> bottoms;
+		bottoms.resize( fltrConcepts.size(), true );
+		doc[2]["Arcs"].SetArray();
+		for( DWORD i = 0; i < fltrConcepts.size(); ++i ) {
+			const CList<DWORD>& parents = order.GetParents( i );
+			if( parents.Size() == 0 ) {
+				tops.PushBack( i );
+			}
+			CStdIterator<CList<DWORD>::CConstIterator,false> p( parents );
+			for( ; !p.IsEnd(); ++p ) {
+				bottoms[*p] = false;
+				doc[2]["Arcs"].PushBack( 
+					rapidjson::Value().SetObject()
+						.AddMember("S", rapidjson::Value().SetUint(*p), alloc)
+						.AddMember("D", rapidjson::Value().SetUint(i), alloc)
+					,alloc);	
+			}
+		}
 
-		//doc[0]["ArcsCount"].SetInt(doc[2]["Arcs"].Size());
-		//assert(tops.Size() > 0 );
+		doc[0]["ArcsCount"].SetInt(doc[2]["Arcs"].Size());
+		assert(tops.Size() > 0 );
 
-		//doc[0]["Top"].SetArray();
-		//CStdIterator<CList<DWORD>::CConstIterator, false> top(tops);
-		//for( ;!top.IsEnd(); ++top ) {
-			//doc[0]["Top"].PushBack(rapidjson::Value().SetUint(*top), alloc);
-		//}
+		doc[0]["Top"].SetArray();
+		CStdIterator<CList<DWORD>::CConstIterator, false> top(tops);
+		for( ;!top.IsEnd(); ++top ) {
+			doc[0]["Top"].PushBack(rapidjson::Value().SetUint(*top), alloc);
+		}
 
-		//doc[0]["Bottom"].SetArray();
-		//for( DWORD i = 0; i < bottoms.size(); ++i ) {
-			//if(!bottoms[i]) {
-				//continue;
-			//}
-			//doc[0]["Bottom"].PushBack(rapidjson::Value().SetUint(i), alloc);
-		//}
-		//assert(doc[0]["Bottom"].Size() > 0);
-         //}
+		doc[0]["Bottom"].SetArray();
+		for( DWORD i = 0; i < bottoms.size(); ++i ) {
+			if(!bottoms[i]) {
+				continue;
+			}
+			doc[0]["Bottom"].PushBack(rapidjson::Value().SetUint(i), alloc);
+		}
+		assert(doc[0]["Bottom"].Size() > 0);
+	 }
 
 
-	//// Updating params of the lattice
-	//JSON json = SaveParams();
-	//rapidjson::Document thisParams;
-	//if( !ReadJsonString( json, thisParams, error ) ) {
-		//assert(false);
-	//}
-	//if( !doc[0].HasMember("Filters") ) {
-		//doc[0].AddMember( "Filters", rapidjson::Value().SetArray(), alloc );
-	//}
-	//doc[0]["Filters"].PushBack(thisParams, alloc );
+	// Updating params of the lattice
+	JSON json = SaveParams();
+	rapidjson::Document thisParams;
+	if( !ReadJsonString( json, thisParams, error ) ) {
+		assert(false);
+	}
+	if( !doc[0].HasMember("Filters") ) {
+		doc[0].AddMember( "Filters", rapidjson::Value().SetArray(), alloc );
+	}
+	doc[0]["Filters"].PushBack(thisParams, alloc );
 
-	//JSON outputStr;
-	//CreateStringFromJSON( doc, outputStr );
-	//CDestStream dst(results[0]);
-	//dst << outputStr;
+	JSON outputStr;
+	CreateStringFromJSON( doc, outputStr );
+	CDestStream dst(results[0]);
+	dst << outputStr;
 }
 
 void CRemoveExpectedIntPatterns::LoadParams( const JSON& json )
