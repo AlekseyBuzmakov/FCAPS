@@ -231,6 +231,7 @@ void CRemoveExpectedBinPatterns::Process()
 	newNodeArray.SetArray();
 	for( int i = 0; i < pvals.size(); ++i ) {
 		if( pvals[i] < significance ) {
+			nodes[i].AddMember("P-Val",rapidjson::Value().SetDouble(pvals[i]),alloc);
 			newNodeArray.PushBack(nodes[i].Move(), alloc);
 			fltrConcepts.push_back(concepts[i]);
 		}	
