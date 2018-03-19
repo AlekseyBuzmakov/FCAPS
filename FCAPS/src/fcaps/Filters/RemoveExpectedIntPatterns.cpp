@@ -54,7 +54,8 @@ const CModuleRegistrar<CRemoveExpectedIntPatterns> CRemoveExpectedIntPatterns::r
 	LatticeFilterModuleType, RemoveExpectedIntPatterns );
 
 CRemoveExpectedIntPatterns::CRemoveExpectedIntPatterns() :
-	cmp(dynamic_cast<IPatternManager*>(CreateModule("PatternManagerModules","IntervalPatternManagerModule","{}"))),
+	cmp(dynamic_cast<IPatternManager*>(CreateModule(PatternManagerModuleType,"IntervalPatternManagerModule",
+					string("{\"Type\":\"") + PatternManagerModuleType +"\",\"Name\":\"IntervalPatternManagerModule\"}"))),
 	deleter(cmp),
 	significance(-1),
 	outSuffix(".FILTERED"),
@@ -179,7 +180,7 @@ void CRemoveExpectedIntPatterns::Process()
 
 			bool hasNonModifiedAttribute = false;
 			for( int i = 0; i < current.size(); ++i ) {
-				assert(neg_inf < current[i].first && curent[i].second < pos_inf);
+				assert(neg_inf < current[i].first && current[i].second < pos_inf);
 				if(areEqual(current[i].first,parent[i].first) && areEqual(current[i].second,parent[i].second)) {
 					hasNonModifiedAttribute = true;	
 					generalParent[i].first=neg_inf;
