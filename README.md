@@ -17,7 +17,7 @@ You can put a symbolic (or a hard) link.
 
 > $ mklink /D boost "path/to/boost" \# Windows
 
-Some boost libraries (regex, thread, system, filesystem) should be compiled:
+Boost library can be install in the system and then the corresponding folder should be linked to boost subfloder, or can be downloaded from the site. In this case some boost libraries (regex, thread, system, filesystem) should be compiled:
 * Go to boost folder and run 
 
 > $ ./bootstrap.
