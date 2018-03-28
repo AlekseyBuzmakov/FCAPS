@@ -8,7 +8,7 @@ Initial software, Aleksey Buzmakov, Copyright (c) INRIA and University of Lorrai
 You will need
 * git
 * [boost](http://www.boost.org/)
-* [premake4](https://premake.github.io/download.html)
+* [premake5](https://premake.github.io/download.html)
 
 Boost libraries should be in the _root_ of the git folder under the name __boost__. 
 You can put a symbolic (or a hard) link.

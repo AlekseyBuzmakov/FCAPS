@@ -24,7 +24,8 @@ solution "Sofia-PS"
 
 	project "SharedTools"
 		DefaultConfig("lib")
-		kind "SharedLib"
+		kind "StaticLib"
+		pic "On"
 		includedirs { 
 			"Tools/inc/",
 			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
