@@ -24,7 +24,8 @@ solution "Sofia-PS"
 
 	project "SharedTools"
 		DefaultConfig("lib")
-		kind "SharedLib"
+		kind "StaticLib"
+		pic "On"
 		includedirs { 
 			"Tools/inc/",
 			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
@@ -41,7 +42,8 @@ solution "Sofia-PS"
 
 	project "Storages"
 		DefaultConfig("lib")
-		kind "SharedLib"
+		kind "StaticLib"
+		pic "On"
 		includedirs { 
 			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
 			"rapidjson/include",
@@ -65,7 +67,8 @@ solution "Sofia-PS"
 
 	project "SharedModulesLib"
 		DefaultConfig("lib")
-		kind "SharedLib"
+		kind "StaticLib"
+		pic "On"
 		includedirs { 
 			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
 			"rapidjson/include",
@@ -89,7 +92,7 @@ solution "Sofia-PS"
 
 	project "StdFCAModule"
 		DefaultConfig("modules")
-		kind "SharedLib"
+		kind "StaticLib"
 		language "C++"
 		includedirs { 
 			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
