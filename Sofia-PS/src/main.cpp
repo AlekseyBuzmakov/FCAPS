@@ -366,7 +366,7 @@ void CThisConsoleApplication::loadModules()
 		if(!is_regular_file(itr->status())) {
 			continue;
 		}
-		const string name( itr->path().c_str() );
+		const string name( itr->path().string() );
 		if( name.find("Module") == string::npos ) {
 			// Not a module
 			continue;

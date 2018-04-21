@@ -44,7 +44,7 @@ solution "Sofia-PS"
 
 	project "Storages"
 		DefaultConfig("lib")
-		kind "SharedLib"
+		kind "StaticLib"
 		includedirs { 
 			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
 			"rapidjson/include",
@@ -60,15 +60,17 @@ solution "Sofia-PS"
 
 		configuration "Debug"
 			links{ 
+				"SharedTools"
 			}
 
 		configuration "Release"
 			links{ 
+				"SharedTools"
 			}
 
 	project "SharedModulesLib"
 		DefaultConfig("lib")
-		kind "SharedLib"
+		kind "StaticLib"
 		includedirs { 
 			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
 			"rapidjson/include",
@@ -240,12 +242,16 @@ solution "Sofia-PS"
 
 		configuration "Debug"
 			links{ 
-				"SharedTools"
+				"SharedTools",
+				"SharedModulesLib",
+				"Storages"
 			}
 
 		configuration "Release"
 			links{ 
-				"SharedTools"
+				"SharedTools",
+				"SharedModulesLib",
+				"Storages"
 			}
 
 	project "StabilityEstimatorContextProcessorModules"
@@ -268,12 +274,16 @@ solution "Sofia-PS"
 
 		configuration "Debug"
 			links{ 
-				"SharedTools"
+				"SharedTools",
+				"SharedModulesLib",
+				"Storages"
 			}
 
 		configuration "Release"
 			links{ 
-				"SharedTools"
+				"SharedTools",
+				"SharedModulesLib",
+				"Storages"
 			}
 
 	project "FilterModules"
