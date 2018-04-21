@@ -34,7 +34,7 @@ The next step is to convert the project to your most loved envirement. For that 
 
 The most widely used configurations are 
 
-> $ premake5 vs2005|vs2008|vs2010|vs2012 \# for diferent version of visual studio   *sln** file
+> $ premake5 vs2005|vs2008|...|vs2017 \# for diferent version of visual studio   *sln** file
 
 > $ premake5 gmake \# for GNU make file
 
