@@ -11,13 +11,13 @@ solution "Sofia-PS"
 		configuration "Debug"
 			defines { "DEBUG", "_DEBUG" }
 			symbols "On"
-			nativewchar "Off"
+			characterset "MBCS"
 			targetdir ("build/debug/" .. complimentName)
 
 		configuration "Release"
 			defines { "NDEBUG", "BOOST_DISABLE_ASSERTS" }
 			optimize "On"
-			nativewchar "Off"
+			characterset "MBCS"
 			targetdir ("build/release/" .. complimentName)
 
 
