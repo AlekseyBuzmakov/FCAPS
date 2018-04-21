@@ -387,7 +387,7 @@ void CStabClsPatternProjectionChain::addChild( const CSharedPtr<const CVectorBin
 			// 'child' could be a parent of currCh
 			if( extCmp->Compare(*child, **currCh, CR_LessGeneral, CR_LessGeneral | CR_Incomparable ) != CR_Incomparable ) {
 				// ch should be removed
-				ptrn.Children().erase( currCh );
+				ptrn.Children().erase( currCh.Get() );
 			}
 		}
 	}
@@ -395,6 +395,6 @@ void CStabClsPatternProjectionChain::addChild( const CSharedPtr<const CVectorBin
 		ptrn.Children().push_front( child );
 	} else {
 		++placeToAdd;
-		ptrn.Children().insert( placeToAdd, child );
+		ptrn.Children().insert( placeToAdd.Get(), child );
 	}
 }

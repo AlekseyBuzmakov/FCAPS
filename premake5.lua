@@ -4,7 +4,6 @@
 solution "Sofia-PS"
 	location "build"
 	language "C++"
-	nativewchar "Off"
 
 	configurations { "release", "debug" }
 
@@ -12,11 +11,13 @@ solution "Sofia-PS"
 		configuration "Debug"
 			defines { "DEBUG", "_DEBUG" }
 			symbols "On"
+			nativewchar "Off"
 			targetdir ("build/debug/" .. complimentName)
 
 		configuration "Release"
 			defines { "NDEBUG", "BOOST_DISABLE_ASSERTS" }
 			optimize "On"
+			nativewchar "Off"
 			targetdir ("build/release/" .. complimentName)
 
 
@@ -198,7 +199,7 @@ solution "Sofia-PS"
 		files{ "FCAPS/src/fcaps/ParallelPatternEnumeratorModules/*.h", "FCAPS/src/fcaps/ParallelPatternEnumeratorModules/*.cpp" }
 
 		libdirs {
-			"boost/stage/libs/",
+			"boost/stage/lib/"
 		}
 
 		configuration "Debug"
