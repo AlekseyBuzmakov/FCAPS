@@ -55,7 +55,7 @@ solution "Sofia-PS"
 		files{ "FCAPS/src/fcaps/storages/**.h", "FCAPS/src/fcaps/storages/**.cpp" }
 
 		libdirs {
-			"boost/stage/libs/",
+			"boost/stage/lib/",
 		}
 
 		configuration "Debug"
@@ -79,7 +79,7 @@ solution "Sofia-PS"
 		files{ "FCAPS/src/fcaps/SharedModulesLib/**.h", "FCAPS/src/fcaps/SharedModulesLib/**.cpp" }
 
 		libdirs {
-			"boost/stage/libs/",
+			"boost/stage/lib/",
 		}
 
 		configuration "Debug"
@@ -105,7 +105,7 @@ solution "Sofia-PS"
 		files{ "FCAPS/src/fcaps/StdFCA/**.h", "FCAPS/src/fcaps/StdFCA/**.cpp" }
 
 		libdirs {
-			"boost/stage/libs/",
+			"boost/stage/lib/",
 		}
 
 		configuration "Debug"
@@ -137,7 +137,7 @@ solution "Sofia-PS"
 		files{ "FCAPS/src/fcaps/PS-Modules/**.h", "FCAPS/src/fcaps/PS-Modules/**.cpp" }
 
 		libdirs {
-			"boost/stage/libs/",
+			"boost/stage/lib/",
 		}
 
 		configuration "Debug"
@@ -167,7 +167,7 @@ solution "Sofia-PS"
 		files{ "FCAPS/src/fcaps/SofiaModules/**.h", "FCAPS/src/fcaps/SofiaModules/**.cpp" }
 
 		libdirs {
-			"boost/stage/libs/",
+			"boost/stage/lib/",
 		}
 
 		configuration "Debug"
@@ -233,7 +233,7 @@ solution "Sofia-PS"
 		files{ "FCAPS/src/fcaps/ClassifierModules/**.h", "FCAPS/src/fcaps/ClassifierModules/**.cpp" }
 
 		libdirs {
-			"boost/stage/libs/",
+			"boost/stage/lib/",
 		}
 
 		configuration "Debug"
@@ -261,7 +261,7 @@ solution "Sofia-PS"
 		files{ "FCAPS/src/fcaps/StabilityEstimatorContextProcessor/**.h", "FCAPS/src/fcaps/StabilityEstimatorContextProcessor/**.cpp" }
 
 		libdirs {
-			"boost/stage/libs/",
+			"boost/stage/lib/",
 		}
 
 		configuration "Debug"
@@ -289,7 +289,7 @@ solution "Sofia-PS"
 		files{ "FCAPS/src/fcaps/Filters/**.h", "FCAPS/src/fcaps/Filters/**.cpp" }
 
 		libdirs {
-			"boost/stage/libs/",
+			"boost/stage/lib/",
 		}
 
 		configuration "Debug"
@@ -318,7 +318,7 @@ solution "Sofia-PS"
 		files { "Sofia-PS/**.cpp" } 
 
 		libdirs {
-			"boost/stage/libs/",
+			"boost/stage/lib/",
 		}
 
 		rapidjsonDir="rapidjson/"
