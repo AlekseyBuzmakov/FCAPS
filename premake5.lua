@@ -4,18 +4,19 @@
 solution "Sofia-PS"
 	location "build"
 	language "C++"
+	nativewchar "Off"
 
 	configurations { "release", "debug" }
 
 	function DefaultConfig(complimentName)
 		configuration "Debug"
 			defines { "DEBUG", "_DEBUG" }
-			flags { "Symbols" }
+			symbols "On"
 			targetdir ("build/debug/" .. complimentName)
 
 		configuration "Release"
 			defines { "NDEBUG", "BOOST_DISABLE_ASSERTS" }
-			flags { "Optimize" }
+			optimize "On"
 			targetdir ("build/release/" .. complimentName)
 
 
