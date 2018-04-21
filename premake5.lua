@@ -84,10 +84,12 @@ solution "Sofia-PS"
 
 		configuration "Debug"
 			links{ 
+				"SharedTools"
 			}
 
 		configuration "Release"
 			links{ 
+				"SharedTools"
 			}
 
 	project "StdFCAModule"
