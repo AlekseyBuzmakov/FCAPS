@@ -45,6 +45,7 @@ solution "Sofia-PS"
 	project "Storages"
 		DefaultConfig("lib")
 		kind "StaticLib"
+		pic "On"
 		includedirs { 
 			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
 			"rapidjson/include",
@@ -71,6 +72,7 @@ solution "Sofia-PS"
 	project "SharedModulesLib"
 		DefaultConfig("lib")
 		kind "StaticLib"
+		pic "On"
 		includedirs { 
 			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
 			"rapidjson/include",
@@ -206,21 +208,16 @@ solution "Sofia-PS"
 			"boost/stage/lib/"
 		}
 
-		configuration "Debug"
-			links{ 
+		links{ 
+			"SharedTools",
+			"SharedModulesLib"
+		}
+		filter{ "system:not windows" }
+			links{
 				"boost_thread",
 				"pthread",
-				"SharedTools",
-				"SharedModulesLib"
 			}
-
-		configuration "Release"
-			links{ 
-				"boost_thread",
-				"pthread",
-				"SharedTools",
-				"SharedModulesLib"
-			}
+		filter{}
 
 	project "ClassifierModules"
 		DefaultConfig("modules")
@@ -340,23 +337,19 @@ solution "Sofia-PS"
 			os.execute( "git --git-dir " .. rapidjsonDir .. ".git --work-tree " .. rapidjsonDir .. " apply --whitespace=fix rapidjson.patch" )
 		end
 
+		links{ 
+			"SharedTools"
+		}
+		filter{ "system:not windows" }
+			links{ 
+				"dl",
+				"boost_filesystem",
+				"boost_system"
+			}
+		filter{}
 		configuration "Debug"
 			targetname( "Sofia-PS" )
-			links{ 
-				"boost_filesystem",
-				"boost_system",
-				"dl",
-				"SharedTools"
-			}
 
 		configuration "Release"
 			targetname( "Sofia-PS" )
-			links{ 
-				"boost_filesystem",
-				"boost_system",
-				"boost_thread",
-				"dl",
-				"pthread",
-				"SharedTools"
-			}
 
