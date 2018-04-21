@@ -24,10 +24,12 @@ Boost library can be install in the system and then the corresponding folder sho
 
 * Then build all libraries
 
+> $ ./b2 debug stage
 > $ ./b2 release stage
 
 * _If you want a faster compiling please read the instructions from the   *Boost** library. In particular the following could be used_ 
 
+> $ ./b2 --with-system --with-filesystem --with-thread debug stage
 > $ ./b2 --with-system --with-filesystem --with-thread release stage
 
 The next step is to convert the project to your most loved envirement. For that run
