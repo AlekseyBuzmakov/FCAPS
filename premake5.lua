@@ -4,6 +4,7 @@
 solution "Sofia-PS"
 	location "build"
 	language "C++"
+	startproject "Sofia-PS"
 
 	configurations { "release", "debug" }
 
@@ -334,7 +335,6 @@ solution "Sofia-PS"
 				"SharedModulesLib"
 			}
 
-	-- A project defines one build target
 	project "Sofia-PS"
 		DefaultConfig("")
 		kind "ConsoleApp"

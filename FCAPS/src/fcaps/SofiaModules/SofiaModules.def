@@ -1,0 +1,4 @@
+LIBRARY	"SofiaModules"
+EXPORTS
+	InitializeModule	@1
+	GetModuleDescription	@2
