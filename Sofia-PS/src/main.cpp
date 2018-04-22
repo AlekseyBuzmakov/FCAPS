@@ -367,7 +367,12 @@ void CThisConsoleApplication::loadModules()
 			continue;
 		}
 		const string name( itr->path().string() );
-		if( name.find("Module") == string::npos ) {
+		if( name.find("Module") == string::npos
+			|| (name.find(".DLL") == string::npos
+				&& name.find(".dll") == string::npos
+				&& name.find(".so") == string::npos
+				))
+		{
 			// Not a module
 			continue;
 		}

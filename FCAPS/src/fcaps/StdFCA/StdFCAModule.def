@@ -1,0 +1,4 @@
+LIBRARY	"StdFCAModule"
+EXPORTS
+	InitializeModule	@1
+	GetModuleDescription	@2

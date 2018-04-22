@@ -109,6 +109,9 @@ solution "Sofia-PS"
 			"Sofia-PS/inc/"
 		}
 		files{ "FCAPS/src/fcaps/StdFCA/**.h", "FCAPS/src/fcaps/StdFCA/**.cpp" }
+		filter{ "system:windows" }
+			files{ "FCAPS/src/fcaps/StdFCA/**.def" }
+		filter{}
 
 		libdirs {
 			"boost/stage/lib/",
@@ -141,6 +144,9 @@ solution "Sofia-PS"
 			"Sofia-PS/inc/"
 		}
 		files{ "FCAPS/src/fcaps/PS-Modules/**.h", "FCAPS/src/fcaps/PS-Modules/**.cpp" }
+		filter{ "system:windows" }
+			files{ "FCAPS/src/fcaps/PS-Modules/**.def" }
+		filter{}
 
 		libdirs {
 			"boost/stage/lib/",
@@ -171,6 +177,9 @@ solution "Sofia-PS"
 			"Sofia-PS/inc/"
 		}
 		files{ "FCAPS/src/fcaps/SofiaModules/**.h", "FCAPS/src/fcaps/SofiaModules/**.cpp" }
+		filter{ "system:windows" }
+			files{ "FCAPS/src/fcaps/SofiaModules/**.def" }
+		filter{}
 
 		libdirs {
 			"boost/stage/lib/",
@@ -203,6 +212,9 @@ solution "Sofia-PS"
 			"../LibGastonForSofia/inc"
 		}
 		files{ "FCAPS/src/fcaps/ParallelPatternEnumeratorModules/*.h", "FCAPS/src/fcaps/ParallelPatternEnumeratorModules/*.cpp" }
+		filter{ "system:windows" }
+			files{ "FCAPS/src/fcaps/ParallelPatternEnumeratorModules/**.def" }
+		filter{}
 
 		libdirs {
 			"boost/stage/lib/"
@@ -232,6 +244,9 @@ solution "Sofia-PS"
 			"Sofia-PS/inc/"
 		}
 		files{ "FCAPS/src/fcaps/ClassifierModules/**.h", "FCAPS/src/fcaps/ClassifierModules/**.cpp" }
+		filter{ "system:windows" }
+			files{ "FCAPS/src/fcaps/ClassifierModules/**.def" }
+		filter{}
 
 		libdirs {
 			"boost/stage/lib/",
@@ -264,6 +279,9 @@ solution "Sofia-PS"
 			"Sofia-PS/inc/"
 		}
 		files{ "FCAPS/src/fcaps/StabilityEstimatorContextProcessor/**.h", "FCAPS/src/fcaps/StabilityEstimatorContextProcessor/**.cpp" }
+		filter{ "system:windows" }
+			files{ "FCAPS/src/fcaps/StabilityEstimatorContextProcessor/**.def" }
+		filter{}
 
 		libdirs {
 			"boost/stage/lib/",
@@ -296,6 +314,9 @@ solution "Sofia-PS"
 			"Sofia-PS/inc/"
 		}
 		files{ "FCAPS/src/fcaps/Filters/**.h", "FCAPS/src/fcaps/Filters/**.cpp" }
+		filter{ "system:windows" }
+			files{ "FCAPS/src/fcaps/Filters/**.def" }
+		filter{}
 
 		libdirs {
 			"boost/stage/lib/",
