@@ -5,8 +5,11 @@
 Initial software, Aleksey Buzmakov, Copyright (c) INRIA and University of Lorraine, 2011-2015, Copyright NRU Higher School of Economics, 2016, GPL v2 license, v0.9
 
 ## Compilation
+
+Bellow there is some commands that should be copied in the console (__terminal__ in Linux/MacOs or __cmd__ in Windows). By "$" a prompt is denoted, which means that this sign should NOT be typed to the console.
+
 You will need
-* git
+* git (on Windows it should be accesible from __cmd__, i.e., you should be able to run "$git status" from __cmd__)
 * [boost](http://www.boost.org/)
 * [premake5](https://premake.github.io/download.html)
 
@@ -17,20 +20,34 @@ You can put a symbolic (or a hard) link.
 
 > $ mklink /D boost "path/to/boost" \# Windows
 
+Now inside __root__ (FCAPS, the cloned folder of this project), you should see the following structure.
+
+* boost
+* FCAPS
+* Sofia-PS
+* Tools
+* {files}
+
 Boost library can be install in the system and then the corresponding folder should be linked to boost subfloder, or can be downloaded from the site. In this case some boost libraries (regex, thread, system, filesystem) should be compiled:
 * Go to boost folder and run 
 
 > $ ./bootstrap.
 
-* Then build all libraries
+Or in Windows,
 
-> $ ./b2 debug stage
-> $ ./b2 release stage
+> $ bootstrap.bat
 
-* _If you want a faster compiling please read the instructions from the   *Boost** library. In particular the following could be used_ 
+* Then build the necessary libraries.
 
+For Linux/MacOs:
 > $ ./b2 --with-system --with-filesystem --with-thread debug stage
+
 > $ ./b2 --with-system --with-filesystem --with-thread release stage
+
+For Windows:
+> $ b2.exe --with-system --with-filesystem --with-thread debug stage
+
+> $ b2.exe --with-system --with-filesystem --with-thread release stage
 
 The next step is to convert the project to your most loved envirement. For that run
 
@@ -50,7 +67,17 @@ Basically this script fetches [rapidjson](https://github.com/miloyip/rapidjson.g
 Then it converts the description from the file __premake5.lua__ to the format of your IDE in love. The file is placed in the __build__ subdirectory.
 Then, I guess, you know what to do with the resulting file.
 
-* *For the moment, on some configurations, e.g., Windows and MS Visual Studio, a manual naming of static linked libraries is needed. These libraries are found in boost/stage/libs, but their names are not fixed. They are named like "lib{BOOST LIB NAME}-bla-bla-bla".{a|lib}, for example 'libboost_regex-gcc34-mt-d-1_36.a'*
+After running the scirpt you should see the following structure of folders in __root__ (two new folders had to appear):
+
+* boost
+* __build__
+* FCAPS
+* __rapidjson__
+* Sofia-PS
+* Tools
+* {files}
+
+* *This step is likely to be skipped, however if some problems appear, it can be a reason. For the moment, on some configurations, e.g., Windows and MS Visual Studio, a manual naming of static linked libraries is needed. These libraries are found in boost/stage/libs, but their names are not fixed. They are named like "lib{BOOST LIB NAME}-bla-bla-bla".{a|lib}, for example 'libboost_regex-gcc34-mt-d-1_36.a'*
 * *Be careful, the boost libraries should be compiled by the same toolchain as the main program. For instance it is not possible to compile the boost libraries by the MSVS2015 toolchain and the program by the MSVS2013 toolchain. Errors of linkage occur in this case.* 
 
 ## Repository content
