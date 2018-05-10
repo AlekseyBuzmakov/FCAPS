@@ -30,50 +30,80 @@ int CConsoleApplication::Run()
 {
 	assert( argc >= 1 );
 
-	// Printing the command line
-	for( int i = 1; i < argc; ++i ) {
-		processArg( argv[i] );
-	}
-	if( !outParamFile.empty() ) {
-		CDestStream dst( outParamFile );
-		dst << paramFileContent;
-	}
-
-	GetInfoStream() << "APPLICATION: " << argv[0] << endl;	
-	GetInfoStream() << "PARAMS: ";
-	for( int i = 1; i < argc; ++i ) {
-		GetInfoStream() << " "<< argv[i];
-	}
-	GetInfoStream() << endl;
-
-	if( !FinalizeParams() || !AreParamsCorrect() || isJustHelp ) {
-		if( !isJustHelp ) {
-			GetErrorStream() << "(!) Wrong Parameters\n";
-		}
-		if( isJustHelp || !isSilent ) {
-			GetInfoStream() << "Usage:\n";
-			GetInfoStream() << GetCmdLineDescription( argv[0] ) << "\n";
-			GetInfoStream() << "General Params:\n";
-			GetInfoStream() << "\t--help - out only help, all other params are ignored\n";
-			GetInfoStream() << "\t--infoLogging:{PATH} - print INFO in a file\n";
-			GetInfoStream() << "\t--silent - minimaze output\n";
-			GetInfoStream() << "\t--paramfile:{PATH} - path to file with one param per one line\n";
-			GetInfoStream() << "\t\tCOUT for console, CERR for error stream\n";
-			GetInfoStream() << "\t--writeparamfile:{PATH} - write down the file with all params\n\n";
-		}
-		return isJustHelp ? 0 : 1;
-	}
 	int result = 1;
-	try{
-		result = Execute();
+	// Initialisation
+	try {
+		// Printing the command line
+		for( int i = 1; i < argc; ++i ) {
+			processArg( argv[i] );
+		}
+		if( !outParamFile.empty() ) {
+			CDestStream dst( outParamFile );
+			dst << paramFileContent;
+		}
+
+		GetInfoStream() << "APPLICATION: " << argv[0] << endl;	
+		GetInfoStream() << "PARAMS: ";
+		for( int i = 1; i < argc; ++i ) {
+			GetInfoStream() << " "<< argv[i];
+		}
+		GetInfoStream() << endl;
+
+		if( !FinalizeParams() || !AreParamsCorrect() || isJustHelp ) {
+			if( !isJustHelp ) {
+				GetErrorStream() << "(!) Wrong Parameters\n";
+			}
+			if( isJustHelp || !isSilent ) {
+				GetInfoStream() << "Usage:\n";
+				GetInfoStream() << GetCmdLineDescription( argv[0] ) << "\n";
+				GetInfoStream() << "General Params:\n";
+				GetInfoStream() << "\t--help - out only help, all other params are ignored\n";
+				GetInfoStream() << "\t--infoLogging:{PATH} - print INFO in a file\n";
+				GetInfoStream() << "\t--silent - minimaze output\n";
+				GetInfoStream() << "\t--paramfile:{PATH} - path to file with one param per one line\n";
+				GetInfoStream() << "\t\tCOUT for console, CERR for error stream\n";
+				GetInfoStream() << "\t--writeparamfile:{PATH} - write down the file with all params\n\n";
+			}
+			return isJustHelp ? 0 : 1;
+		}
 	} catch( CException * e ) {
-		GetErrorStream() << "Unhandled exception:\n"
+		GetErrorStream() << "Unhandled exception in init:\n"
 			<< e->GetPlace() << "\n"
 			<< e->GetText() << "\n";
 		delete e;
 		return 1;
+	} catch( const std::exception& e ) {
+		GetErrorStream() << "Unhandled exception in init:\n"
+			<< e.what() << "\n";
+		return 1;
+	} catch( const std::string& e ) {
+		GetErrorStream() << "Unhandled exception in init:\n"
+			<< e << "\n";
+		return 1;
 	} catch( ... ) {
-		GetErrorStream() << "!!! Unknown exception\n";
+		GetErrorStream() << "!!! Unknown exception in init\n";
+		return 2;
+	}
+
+	// The main routin of the program
+	try{
+		result = Execute();
+	} catch( CException * e ) {
+		GetErrorStream() << "Unhandled exception in execution:\n"
+			<< e->GetPlace() << "\n"
+			<< e->GetText() << "\n";
+		delete e;
+		return 1;
+	} catch( const std::exception& e ) {
+		GetErrorStream() << "Unhandled exception in execution:\n"
+			<< e.what() << "\n";
+		return 1;
+	} catch( const std::string& e ) {
+		GetErrorStream() << "Unhandled exception in execution:\n"
+			<< e << "\n";
+		return 1;
+	} catch( ... ) {
+		GetErrorStream() << "!!! Unknown exception in execution\n";
 		return 2;
 	}
 	return result;
