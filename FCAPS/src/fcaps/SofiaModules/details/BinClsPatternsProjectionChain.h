@@ -72,7 +72,8 @@ protected:
 		virtual size_t Hash() const { return extent->Hash(); }
 
 		// Methods of this class
-		const CVectorBinarySetDescriptor& Extent() const { return *extent;}
+		const CVectorBinarySetDescriptor& Extent() const
+		    { return *extent;}
 		CList<DWORD>& Intent() const
 			{return intent;}
 
