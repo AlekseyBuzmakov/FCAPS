@@ -368,9 +368,11 @@ void CThisConsoleApplication::loadModules()
 		}
 		const string name( itr->path().string() );
 		if( name.find("Module") == string::npos
-			|| (name.find(".DLL") == string::npos
+			|| (
+				name.find(".DLL") == string::npos
 				&& name.find(".dll") == string::npos
 				&& name.find(".so") == string::npos
+				&& name.find(".dylib") == string::npos
 				))
 		{
 			// Not a module
