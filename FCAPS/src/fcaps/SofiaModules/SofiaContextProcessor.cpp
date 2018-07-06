@@ -79,12 +79,20 @@ void CSofiaContextProcessor::LoadParams( const JSON& json )
 		}
 	}
 
+	if( p.HasMember("OptimisticEstimator") && p["OptimisticEstimator"].IsObject()) {
+		const rapidjson::Value& pc = params["Params"]["OptimisticEstimator"];
+		string errorText;
+		oest.reset( CreateModuleFromJSON<IOptimisticEstimator>(pc,errorText) );	
+		if( oest == 0 ) {
+			throw new CJsonException( "CSofiaContextProcessor::LoadParams", CJsonError( json, errorText ) );
+		}
+	}
+
 	if( !p.HasMember("ProjectionChain") ) {
 		error.Data = json;
 		error.Error = "Params is not found. Necessary for ProjectionChain";
 		throw new CJsonException("CSofiaContextProcessor::LoadParams", error);
 	}
-
 
 	const rapidjson::Value& pc = params["Params"]["ProjectionChain"];
 	string errorText;
@@ -123,6 +131,17 @@ JSON CSofiaContextProcessor::SaveParams() const
 		const bool rslt = ReadJsonString( pChainParams, pChainParamsDoc, error );
 		assert(rslt);
 		params["Params"].AddMember("ProjectionChain", pChainParamsDoc.Move(), alloc );
+	}
+
+	m = dynamic_cast<IModule*>(oest.get());
+	JSON oestParams;
+	rapidjson::Document oestParamsDoc;
+	if( m != 0 ) {
+		oestParams = m->SaveParams();
+		CJsonError error;
+		const bool rslt = ReadJsonString( oestParams, oestParamsDoc, error );
+		assert(rslt);
+		params["Params"].AddMember("OptimisticEstimator", oestParamsDoc.Move(), alloc );
 	}
 
 	JSON result;

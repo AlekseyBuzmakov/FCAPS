@@ -8,6 +8,7 @@
 
 #include <common.h>
 #include <fcaps/BasicTypes.h>
+#include <fcaps/Extent.h>
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -21,23 +22,6 @@ enum TCurrentPatternUsage {
     CPU_Reject,
 
     CPU_EnumCount
-};
-
-// A structure for encoding the image of a pattern
-struct CPatternImage {
-    typedef unsigned int TPatternId;
-
-	// Unique id of the pattern
-	TPatternId PatternId;
-	// The cardinality of the image, known as support.
-    int ImageSize;
-	// The image (the set of objects) of the pattern.
-    int* Objects;
-
-	CPatternImage() :
-		PatternId( -1 ),
-		ImageSize( 0 ),
-		Objects( 0 ) {}
 };
 
 interface IPatternEnumerator : public virtual IObject {

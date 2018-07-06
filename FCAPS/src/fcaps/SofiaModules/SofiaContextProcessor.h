@@ -8,6 +8,7 @@
 #include <ModuleTools.h>
 
 #include <fcaps/ProjectionChain.h>
+#include <fcaps/OptimisticEstimator.h>
 
 #include <fcaps/storages/CachedPatternStorage.h>
 
@@ -86,6 +87,9 @@ private:
 	CSharedPtr<IProjectionChain> pChain;
 	// Callback for progess reporting
 	const IContextProcessorCallback* callback;
+	// An object that evaluates every extent and provides the upperbound estimate for possible values on extent subsets
+	CSharedPtr<IOptimisticEstimator> oest;
+
 	// Current thld for a measure
 	double thld;
 	// Maximal number of patterns
