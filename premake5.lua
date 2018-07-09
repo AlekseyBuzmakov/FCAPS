@@ -335,6 +335,39 @@ solution "Sofia-PS"
 				"SharedModulesLib"
 			}
 
+	project "OptimisticEstimators"
+		DefaultConfig("modules")
+		kind "SharedLib"
+		language "C++"
+		includedirs { 
+			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
+			"rapidjson/include",
+			"FCAPS/include/", 
+			"FCAPS/src/", 
+			"Tools/inc/", 
+			"Sofia-PS/inc/"
+		}
+		files{ "FCAPS/src/fcaps/OptimisticEstimators/**.h", "FCAPS/src/fcaps/OptimisticEstimators/**.cpp" }
+		filter{ "system:windows" }
+			files{ "FCAPS/src/fcaps/Filters/**.def" }
+		filter{}
+
+		libdirs {
+			"boost/stage/lib/",
+		}
+
+		configuration "Debug"
+			links{ 
+				"SharedTools",
+				"SharedModulesLib"
+			}
+
+		configuration "Release"
+			links{ 
+				"SharedTools",
+				"SharedModulesLib"
+			}
+
 	project "Sofia-PS"
 		DefaultConfig("")
 		kind "ConsoleApp"
