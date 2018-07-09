@@ -30,7 +30,7 @@ struct CPatternImage {
 
 interface IExtent : public virtual IObject {
     // Get number of objects in the extent
-    virtual DWORD GetSize() const = 0;
+    virtual DWORD Size() const = 0;
     // Get the list of objects
     // The memory for objects can be allocated in the method. After usage it should be freed.
     virtual void GetExtent( CPatternImage& extent ) const = 0;

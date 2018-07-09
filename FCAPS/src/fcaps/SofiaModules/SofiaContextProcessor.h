@@ -8,9 +8,10 @@
 #include <ModuleTools.h>
 
 #include <fcaps/ProjectionChain.h>
-#include <fcaps/OptimisticEstimator.h>
 
 #include <fcaps/storages/CachedPatternStorage.h>
+
+interface IOptimisticEstimator;
 
 template<typename T>
 class CFindConceptOrder;

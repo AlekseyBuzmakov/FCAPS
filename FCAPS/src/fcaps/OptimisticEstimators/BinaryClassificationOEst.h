@@ -38,10 +38,18 @@ public:
 
 private:
 	static const CModuleRegistrar<CBinaryClassificationOEst> registrar;
-	// The vector of 
+	// The filename with text classes
+	std::string classesFilePath;
+	// The vector of text classes
 	std::vector<std::string> strClasses;
+	// The vector of classes that are considered as positive classes
 	std::unordered_set<std::string> targetClasses;
+	// The vector specifying which class label is a target label
 	std::vector<bool> classes;
+	// The number of positive objects
+	DWORD nPlus;
+
+	DWORD getPositiveObjectsCount(const IExtent* ext) const;
 };
 
 #endif // BINARYCLASSIFICATIONOEST_H

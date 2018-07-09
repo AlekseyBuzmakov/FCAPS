@@ -1,6 +1,7 @@
 // Initial software, Aleksey Buzmakov, Copyright (c) INRIA and University of Lorraine, GPL v2 license, 2011-2015, v0.7
 
 #include <fcaps/OptimisticEstimators/BinaryClassificationOEst.h>
+#include <fcaps/Extent.h>
 
 #include <ModuleJSONTools.h>
 
@@ -17,18 +18,34 @@ using namespace std;
 const CModuleRegistrar<CBinaryClassificationOEst> CBinaryClassificationOEst::registrar(
 	                 OptimisticEstimatorModuleType, BinaryClassificationOptimisticEstimator );
 
-CBinaryClassificationOEst::CBinaryClassificationOEst()
+CBinaryClassificationOEst::CBinaryClassificationOEst() :
+	nPlus(0)
 {
 	
 }
 
 double CBinaryClassificationOEst::GetValue(const IExtent* ext) const
 {
-	return 0;
+	assert(ext!=0);
+	const DWORD curNPlus=getPositiveObjectsCount(ext);
+	assert(curNPlus <= ext->Size());
+
+	
+	return static_cast<double>(ext->Size()) / classes.size()
+		* (1.0L * curNPlus / ext->Size() - 1.0L * nPlus / classes.size());
 }
 double CBinaryClassificationOEst::GetBestSubsetEstimate(const IExtent* ext) const
 {
-	return 0;
+	assert(ext!=0);
+	const DWORD curNPlus=getPositiveObjectsCount(ext);
+	assert(curNPlus <= ext->Size());
+
+	// Here we should find maximum of locNPlus/n - nPlus*locN/n^2, the first one is maximized when locNPlus == curNPLus,
+	//   the second one is maximized when locN is minimized, i.e., it should be equal curNPlus.
+	
+	const double result = static_cast<double>( curNPlus) * (1.0L / classes.size() - 1.0L * nPlus / classes.size() * classes.size());
+	assert( result - GetValue(ext) > -1e-10);
+	return result;
 }
 
 void CBinaryClassificationOEst::LoadParams( const JSON& json )
@@ -49,18 +66,18 @@ void CBinaryClassificationOEst::LoadParams( const JSON& json )
 	const rapidjson::Value& p = params["Params"];
 
 	// Reading Levels that are considered as positive
-	if(!(p.HasMember("TargetLevels") && (p["TargetLevels"].IsArray() || p["TargetLevels"].IsString()))) {
+	if(!(p.HasMember("TargetClasses") && (p["TargetClasses"].IsArray() || p["TargetClasses"].IsString()))) {
 		error.Data = json;
-		error.Error = "Params.TargetLevels is not found or is neither 'Array' nor 'String'.";
+		error.Error = "Params.TargetClasses is not found or is neither 'Array' nor 'String'.";
 		throw new CJsonException("CBinaryClassificationOEst::LoadParams", error);
 	}
-	for( int i = 0 ; p["TargetLevels"].Size(); ++i ) {
-		if(!p["TargetLevels"][i].IsString()) {
+	for( int i = 0 ; p["TargetClasses"].Size(); ++i ) {
+		if(!p["TargetClasses"][i].IsString()) {
 			error.Data = json;
-			error.Error = "Params.TargetLevels has nonstring values.";
+			error.Error = "Params.TargetClasses has nonstring values.";
 			throw new CJsonException("CBinaryClassificationOEst::LoadParams", error);
 		}
-		targetClasses.insert(p["TargetLevels"][i].GetString());
+		targetClasses.insert(p["TargetClasses"][i].GetString());
 	}
 
 	// Reading class labels information
@@ -73,16 +90,17 @@ void CBinaryClassificationOEst::LoadParams( const JSON& json )
 	if( p["Classes"].IsArray() ) {
 		cl_ptr = &p["Classes"];
 	} else {
-		// TODO: read class info from a separte file
+		classesFilePath = p["Classes"].GetString();
 		rapidjson::Document classesDocument;
-		if( !ReadJsonFile( json, params, error ) ) {
+		if( !ReadJsonFile( classesFilePath, params, error ) ) {
 			throw new CJsonException( "CBinaryClassificationOEst::LoadParams", error );
 		}
 		cl_ptr=&classesDocument;
 	}
 	assert(cl_ptr != 0);
-	
 	const rapidjson::Value& cl = *cl_ptr;
+
+	assert(nPlus==0);
 	classes.resize(cl.Size(),false);
 	strClasses.resize(cl.Size());
 	for( int i = 0 ; cl.Size(); ++i ) {
@@ -93,13 +111,54 @@ void CBinaryClassificationOEst::LoadParams( const JSON& json )
 		}
 		strClasses[i]=cl[i].GetString();
 		classes[i]=targetClasses.find(strClasses[i]) != targetClasses.end();
+		nPlus += classes[i];
 	}
 }
 
 JSON CBinaryClassificationOEst::SaveParams() const
 {
+	rapidjson::Document params;
+	rapidjson::MemoryPoolAllocator<>& alloc = params.GetAllocator();
+	params.SetObject()
+		.AddMember( "Type", OptimisticEstimatorModuleType, alloc )
+		.AddMember( "Name", BinaryClassificationOptimisticEstimator, alloc )
+		.AddMember( "Params", rapidjson::Value().SetObject(), alloc );
+
+	rapidjson::Value& p = params["Params"];
+
+	rapidjson::Value& targets = p.AddMember( "TargetClasses", rapidjson::Value().SetArray(), alloc )["TargetClasses"];
+	for(auto it = targetClasses.begin(); it != targetClasses.end(); ++it) {
+		targets.PushBack(rapidjson::StringRef((*it).c_str()), alloc);
+	}
+
+	if(classesFilePath != "") {
+		p.AddMember("Classes", rapidjson::StringRef(classesFilePath.c_str()), alloc);
+	} else {
+		// TODO How should we do that??
+		//   skipping for now
+	}
+
+	JSON result;
+	CreateStringFromJSON( params, result );
+	return result;
 	// TODO
-	return "";	
+	return "'TODO'";	
 }
 
-
+// Returns the number of positive objects in the extent @param ext
+DWORD CBinaryClassificationOEst::getPositiveObjectsCount(const IExtent* ext) const
+{
+	assert(ext!=0);
+	
+	CPatternImage img;
+	ext->GetExtent(img);
+	assert(img.ImageSize != 0 && img.Objects != 0);
+	assert(ext->Size() == img.ImageSize);
+	
+	DWORD nPlus = 0;
+	for( int i = 0; i < img.ImageSize; ++i) {
+		const DWORD objNum = img.Objects[i];
+		assert(objNum < classes.size());
+		nPlus += classes[objNum];
+	}
+}
