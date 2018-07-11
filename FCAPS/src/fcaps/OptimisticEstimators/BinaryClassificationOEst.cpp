@@ -141,8 +141,6 @@ JSON CBinaryClassificationOEst::SaveParams() const
 	JSON result;
 	CreateStringFromJSON( params, result );
 	return result;
-	// TODO
-	return "'TODO'";	
 }
 
 // Returns the number of positive objects in the extent @param ext

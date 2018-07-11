@@ -24,7 +24,10 @@ CSofiaContextProcessor::CSofiaContextProcessor() :
 	thld( 0 ),
 	mpn( 1000 ),
 	shouldFindPartialOrder(false),
-	shouldAdjustThld(true)
+	shouldAdjustThld(true),
+	objectNumber(0),
+	minPotential(1),
+	maxPotential(-1)
 {
 	storage.Reserve( mpn );
 }
@@ -177,31 +180,43 @@ void CSofiaContextProcessor::AddObject( DWORD objectNum, const JSON& intent )
 {
 	assert(pChain != 0);
 	pChain->AddObject(objectNum, intent);
+	++objectNumber;
 }
 
 void CSofiaContextProcessor::ProcessAllObjectsAddition()
 {
 	assert( pChain != 0 );
 	pChain->UpdateInterestThreshold( thld );
+	assert(minPotential == 1 && maxPotential == -1);
+
+	if(oest != 0 && !oest->CheckObjectNumber(objectNumber)) {
+		throw new CTextException("CSofiaContextprocessor::ProcessAllObjectsAddition", "Optimistic estimator is based on different number of objects that are found in the data");
+	}
+
 	IProjectionChain::CPatternList newPatterns;
 	pChain->ComputeZeroProjection( newPatterns );
 	addNewPatterns( newPatterns );
 
 	while( pChain->NextProjection() ) {
 		newPatterns.Clear();
-		CCachedPatternStorage<CHasher>::CIteratorWrapper itr = storage.Iterator();
-		while( !itr.IsEnd() ) {
-			CCachedPatternStorage<CHasher>::CIteratorWrapper currItr = itr;
+		auto itr = projectionPatterns.Begin();
+		while( itr != projectionPatterns.End()) {
+			auto currItr = itr;
 			++itr;
 
 			pChain->Preimages( *currItr, newPatterns );
 			if( pChain->GetPatternInterest( *currItr ) < thld ) {
 				// Normally the iterator should not be invalidated here
 				// Sure?
-				storage.RemovePattern(*currItr);
+				projectionPatterns.Erase(currItr);
+				removeProjectionPattern(*currItr);
 			}
 		}
 		addNewPatterns( newPatterns );
+		if(minPotential < bestPattern.Q) {
+			// there are some inpotential patterns
+			removeInpotentialPatterns();
+		}
 		adjustThreshold();
 		reportProgress();
 	}
@@ -234,6 +249,11 @@ private:
 	const IProjectionChain& cmp;
 	const vector<CPatternMeasurePair>& concepts;
 };
+template<typename T>
+static inline bool compareCachedPatterns(const T& p1, const T& p2)
+{
+	return p1.second > p2.second;
+}
 void CSofiaContextProcessor::SaveResult( const std::string& path )
 {
 	vector<CPatternMeasurePair> concepts;
@@ -243,7 +263,7 @@ void CSofiaContextProcessor::SaveResult( const std::string& path )
 		const IPatternDescriptor* p = *pItr;
 		concepts.push_back( CPatternMeasurePair( p, pChain->GetPatternInterest(p) ) );
 	}
-	sort( concepts.begin(), concepts.end(), compareCachedPatterns );
+	sort( concepts.begin(), concepts.end(), compareCachedPatterns<CPatternMeasurePair> );
 	assert( concepts.size() == 0 || concepts.back().second >= thld );
 
 	CConceptsForOrder conceptsForOrder( *pChain, concepts );
@@ -262,42 +282,129 @@ void CSofiaContextProcessor::addNewPatterns( const IProjectionChain::CPatternLis
 	DWORD i = 0;
 	for( ; !itr.IsEnd(); ++itr, ++i ) {
         const IPatternDescriptor* origP = *itr;
-		const IPatternDescriptor* p = storage.AddPattern( origP );
+        const IPatternDescriptor* p = storage.AddPattern( origP ); // Patterns are stored here
+		assert( p!=0 );
+		if(p==origP) {
+			projectionPatterns.PushBack(p);
+		}
 #ifdef _DEBUG
 		if( !(pChain->GetPatternInterest(p) - thld >= -0.00001*thld) ) {
 			std::cerr << "M(origP)" <<  pChain->GetPatternInterest(origP) << " M(p)=" <<  pChain->GetPatternInterest(p) << " Thld=" << thld << endl;
 			assert(false);
 		}
 #endif
+		// Computing Optimistic estimates
+		if( p == origP && oest != 0) {
+			COEstQuality q;
+			computeOEstimate(p,q);
+
+			if(minPotential == 1 && maxPotential == -1) {
+				// It is starting point so it is normal. Just initialization.
+				minPotential = q.OEstPotential;
+				maxPotential = q.OEstPotential;
+				bestPattern.Pattern = p;
+				bestPattern.IsProjectionPattern = true;
+				bestPattern.Q = q.OEstMeasure;
+				oestQuality.insert(std::pair<const IPatternDescriptor*,COEstQuality>(p,q));
+			} else {
+				// Should check if the new pattern is better than the existing ones
+				assert(minPotential <= maxPotential);
+				minPotential = min(minPotential,q.OEstPotential);
+				maxPotential = max(maxPotential,q.OEstPotential);
+				if(q.OEstPotential <= bestPattern.Q) {
+					// The potential of the pattern is less then already found pattern
+					//  no sense to store it neither to expand it
+					projectionPatterns.PopBack();
+					removeProjectionPattern(p);
+				} else {
+					// The pattern should be preserved
+					oestQuality.insert(std::pair<const IPatternDescriptor*,COEstQuality>(p,q));
+				}
+				if(q.OEstMeasure > bestPattern.Q) {
+					removeBestPattern();
+					// Should change the best pattern
+					bestPattern.Q = q.OEstMeasure;
+					bestPattern.Pattern = p;
+					bestPattern.IsProjectionPattern = true;
+				}
+			}
+		}
 	}
 }
-
+// Computes OEstimate for pattern @param p
+void CSofiaContextProcessor::computeOEstimate(const IPatternDescriptor* p, COEstQuality& q)
+{
+	assert(p != 0);
+	assert(false);
+}
+// Removes projection pattern from storage if it is removed from potentially best pattern
+void CSofiaContextProcessor::removeProjectionPattern(const IPatternDescriptor* p)
+{
+	assert(p != 0);
+	if(bestPattern.Pattern == p) {
+		assert(bestPattern.IsProjectionPattern);
+		bestPattern.IsProjectionPattern = false;
+	} else {
+		// not best pattern, just remove
+		storage.RemovePattern(p);
+	}
+}
+// Removes best pattern from storage if it is not in projection
+void CSofiaContextProcessor::removeBestPattern()
+{
+	if(!bestPattern.IsProjectionPattern) {
+		assert(bestPattern.Pattern != 0);
+		storage.RemovePattern(bestPattern.Pattern);
+	}
+	bestPattern.Pattern = 0;
+}
+// Removes all patternss from chain that cannot produce interesting results
+void CSofiaContextProcessor::removeInpotentialPatterns()
+{
+	assert(minPotential < bestPattern.Q);
+	minPotential = maxPotential;
+	auto itr = projectionPatterns.Begin();
+	while( itr != projectionPatterns.End() ) {
+		auto currItr = itr;
+		++itr;
+		const IPatternDescriptor* p = *currItr;
+		assert(p != 0);
+		auto res = oestQuality.find(p);
+		assert(res != oestQuality.end());
+		if(res->second.OEstPotential < bestPattern.Q) {
+			// should be removed
+			assert( p != bestPattern.Pattern);
+			projectionPatterns.Erase(currItr);
+			removeProjectionPattern(p);
+		} else {
+			minPotential = min(minPotential, res->second.OEstPotential);
+		}
+	}
+}
 ////////////////////////////////////////////////////////////////////
 // CSofiaContextProcessor::adjustThreshold stuff
 
-inline bool CSofiaContextProcessor::compareCachedPatterns(
-	const CPatternMeasurePair& p1, const CPatternMeasurePair& p2)
-{
-	return p1.second > p2.second;
-}
+typedef pair<CList<const IPatternDescriptor*>::CIterator,double> CPtrnIteratorMeasurePair;
 
 // Adjusts threshold in order to be in memory
 void CSofiaContextProcessor::adjustThreshold()
 {
-	if( !shouldAdjustThld || storage.Size() <= mpn ) {
+	assert(projectionPatterns.Size() <= storage.Size() && storage.Size() <= projectionPatterns.Size()+1);
+
+	if( !shouldAdjustThld || projectionPatterns.Size() <= mpn ) {
 		return;
 	}
 
-	vector<CPatternMeasurePair> measures;
-	measures.reserve(storage.Size() );
-	CCachedPatternStorage<CHasher>::CIteratorWrapper pItr = storage.Iterator();
-	for( ; !pItr.IsEnd(); ++pItr ) {
-		measures.push_back( CPatternMeasurePair( *pItr, pChain->GetPatternInterest(*pItr) ) );
+	vector< CPtrnIteratorMeasurePair > measures;
+	measures.reserve(projectionPatterns.Size() );
+	auto pItr = projectionPatterns.Begin();
+	for( ; pItr != projectionPatterns.End(); ++pItr ) {
+		measures.push_back( CPtrnIteratorMeasurePair( pItr, pChain->GetPatternInterest(*pItr) ) );
 	}
-	sort( measures.begin(), measures.end(), compareCachedPatterns );
+	sort( measures.begin(), measures.end(), compareCachedPatterns<CPtrnIteratorMeasurePair> );
 	assert( measures.front().second > thld );
 
-	thld = measures[mpn].second + 0.1; // TODO: what if not integer measure?
+	thld = measures[mpn].second + 0.001; // TODO: what if not integer measure?
 	// Finding the final threshold.
 	// Too slow?
 	// What if Zero?s
@@ -309,10 +416,10 @@ void CSofiaContextProcessor::adjustThreshold()
 
 	int i = measures.size() - 1;
 	for( ; i >= 0 && measures[i].second < thld ; --i ) {
-		storage.RemovePattern(measures[i].first);
+		projectionPatterns.Erase(measures[i].first);
 	}
 	assert( i < mpn );
-	assert( storage.Size() <= mpn );
+	assert( projectionPatterns.Size() <= mpn );
 	pChain->UpdateInterestThreshold( thld );
 }
 
@@ -321,9 +428,15 @@ void CSofiaContextProcessor::reportProgress() const
 	if( callback == 0 ) {
 		return;
 	}
+	string oestStr;
+	if(oest != 0){
+		oestStr = " Best: " + StdExt::to_string(bestPattern.Q)
+			+ " Min: " + StdExt::to_string(minPotential)
+			+ " Max: " + StdExt::to_string(maxPotential);
+	}
 	callback->ReportProgress( pChain->GetProgress(),
 		"Concepts: " + StdExt::to_string(storage.Size())
-		+ " Thld: " + StdExt::to_string(thld) );
+		+ " Thld: " + StdExt::to_string(thld) + oestStr );
 }
 
 void CSofiaContextProcessor::saveToFile(

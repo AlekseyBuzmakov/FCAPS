@@ -11,6 +11,8 @@
 
 #include <fcaps/storages/CachedPatternStorage.h>
 
+#include <unordered_map>
+
 interface IOptimisticEstimator;
 
 template<typename T>
@@ -71,6 +73,17 @@ private:
 	private:
 		CSharedPtr<IProjectionChain> chain;
 	};
+	struct COEstQuality {
+		// The objective value of the pattern
+		double OEstMeasure;
+		// The potential value of a more specific pattern
+		double OEstPotential;
+
+		COEstQuality():
+			OEstMeasure(0),
+			OEstPotential(0)
+		{}
+	};
 	typedef std::pair<const IPatternDescriptor*,double> CPatternMeasurePair;
 	class CConceptsForOrder;
 
@@ -80,6 +93,14 @@ private:
 
 		COutputParams() :
 			OutExtent( true ), OutIntent( true ) {}
+	};
+	struct CBestPattern{
+		const IPatternDescriptor* Pattern;
+		bool IsProjectionPattern;
+		double Q;
+
+		CBestPattern():
+			Pattern(0), IsProjectionPattern(false), Q(0) {}
 	};
 
 private:
@@ -102,15 +123,30 @@ private:
 	// The params of the output
 	COutputParams outParams;
 
+	// The number of added objects
+	DWORD objectNumber;
+
 	// TODO: move hashed storage to projections.
 	//  then it would be possible to check if a stability for a pattern should be computed
 	//  and if a pattern has been nicely created.
 	CCachedPatternStorage<CHasher> storage;
+	// The set of patterns that are used for passing through projection.
+	CList<const IPatternDescriptor*> projectionPatterns;
+	// A correspondance between patterns and their quality
+	std::unordered_map<const IPatternDescriptor*,COEstQuality> oestQuality;
+
+	// The best found pattern by OEst
+	CBestPattern bestPattern;
+	// The minimal and maximal potential in the search space.
+	double minPotential;
+	double maxPotential;
 
 	void addNewPatterns( const IProjectionChain::CPatternList& newPatterns );
+	void computeOEstimate(const IPatternDescriptor* p, COEstQuality& q);
+	void removeProjectionPattern(const IPatternDescriptor* p);
+	void removeBestPattern();
+	void removeInpotentialPatterns();
 	void adjustThreshold();
-	static bool compareCachedPatterns(
-		const CPatternMeasurePair& p1, const CPatternMeasurePair& p2);
 	void reportProgress() const;
 
 	void saveToFile( const std::vector<CPatternMeasurePair>& concepts, const CFindConceptOrder<CConceptsForOrder>& order, const std::string& path );
