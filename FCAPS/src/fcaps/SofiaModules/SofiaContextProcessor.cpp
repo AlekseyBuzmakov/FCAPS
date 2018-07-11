@@ -256,23 +256,31 @@ static inline bool compareCachedPatterns(const T& p1, const T& p2)
 }
 void CSofiaContextProcessor::SaveResult( const std::string& path )
 {
+	// TODO save best pattern if available
 	vector<CPatternMeasurePair> concepts;
-	concepts.reserve(storage.Size() );
-	CCachedPatternStorage<CHasher>::CIteratorWrapper pItr = storage.Iterator();
-	for( ; !pItr.IsEnd(); ++pItr ) {
-		const IPatternDescriptor* p = *pItr;
-		concepts.push_back( CPatternMeasurePair( p, pChain->GetPatternInterest(p) ) );
-	}
-	sort( concepts.begin(), concepts.end(), compareCachedPatterns<CPatternMeasurePair> );
-	assert( concepts.size() == 0 || concepts.back().second >= thld );
+	if( oest == 0 ) {
+		concepts.reserve(projectionPatterns.Size());
+		auto pItr = projectionPatterns.Begin();
+		for( ; pItr != projectionPatterns.End(); ++pItr ) {
+			const IPatternDescriptor* p = *pItr;
+			concepts.push_back( CPatternMeasurePair( p, pChain->GetPatternInterest(p) ) );
+		}
+		sort( concepts.begin(), concepts.end(), compareCachedPatterns<CPatternMeasurePair> );
+		assert( concepts.size() == 0 || concepts.back().second >= thld );
 
-	CConceptsForOrder conceptsForOrder( *pChain, concepts );
-	CFindConceptOrder<CConceptsForOrder> conceptOrderFinder( conceptsForOrder );
-	if( shouldFindPartialOrder ) {
-		conceptOrderFinder.Compute();
-	}
+		CConceptsForOrder conceptsForOrder( *pChain, concepts );
+		CFindConceptOrder<CConceptsForOrder> conceptOrderFinder( conceptsForOrder );
+		if( shouldFindPartialOrder ) {
+			conceptOrderFinder.Compute();
+		}
 
-	saveToFile( concepts, conceptOrderFinder, path );
+		saveToFile( concepts, conceptOrderFinder, path );
+	} else {
+		concepts.push_back( CPatternMeasurePair( bestPattern.Pattern, pChain->GetPatternInterest(bestPattern.Pattern) ) );
+		CConceptsForOrder conceptsForOrder( *pChain, concepts );
+		CFindConceptOrder<CConceptsForOrder> conceptOrderFinder( conceptsForOrder );
+		saveToFile( concepts, conceptOrderFinder, path );
+	}
 }
 
 // Adds new patterns to
