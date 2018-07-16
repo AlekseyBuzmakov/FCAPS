@@ -50,6 +50,17 @@ double CBinaryClassificationOEst::GetBestSubsetEstimate(const IExtent* ext) cons
 	return result;
 }
 
+JSON CBinaryClassificationOEst::GetJsonQuality(const IExtent* ext) const
+{
+	std::stringstream rslt;
+	const DWORD curNPlus=getPositiveObjectsCount(ext);
+	rslt << "{"
+		<< "\"Positiveness\":" << static_cast<double>(curNPlus) / ext->Size() << ","
+		<< "\"BasePositiveness\":" << static_cast<double>(nPlus) / classes.size() << ","
+		<< "\"Value\":" << GetValue(ext)
+		<<"}";
+	return rslt.str();
+}
 void CBinaryClassificationOEst::LoadParams( const JSON& json )
 {
 	CJsonError error;

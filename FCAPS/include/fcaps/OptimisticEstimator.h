@@ -24,7 +24,8 @@ interface IOptimisticEstimator : public virtual IObject {
 	// A predicate verifying if one value is better than another value
 	virtual bool IsBetter(const double& a, const double& b) const 
 		{return a > b;}
-
+	// Get JSON description of pattern quality
+	virtual JSON GetJsonQuality(const IExtent* ext) const = 0;
 };
 
 #endif // PATTERNENUMERATOR_H_INCLUDED

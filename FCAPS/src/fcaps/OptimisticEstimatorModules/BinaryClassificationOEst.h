@@ -25,8 +25,8 @@ public:
 		{ assert( strClasses.size() == classes.size()); return n==classes.size(); }
 	// Methods of IOptimisticEstimator
 	virtual double GetValue(const IExtent* ext) const;
-	// Returns the best estimate of the value on extent subsets
 	virtual double GetBestSubsetEstimate(const IExtent* ext) const;
+	virtual JSON GetJsonQuality(const IExtent* ext) const; 
 
 	// Methods of IModule
 	virtual void LoadParams( const JSON& );

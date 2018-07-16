@@ -481,7 +481,7 @@ void CSofiaContextProcessor::saveToFile(
 	dst << "[";
 
 	// Params of the lattice
-	dst << "{";
+	dst << "{\n";
 		dst << "\"NodesCount\":" << concepts.size() << ",";
 		dst << "\"ArcsCount\":" << arcsCount << ",";
 
@@ -511,8 +511,9 @@ void CSofiaContextProcessor::saveToFile(
             }
             dst << "],";
 		}
+        dst << "\n";
 		dst << "\"Params\":" << SaveParams();
-	dst << "},";
+	dst << "\n},";
 
 	// Nodes of the lattice
 	dst << "{";
@@ -523,14 +524,14 @@ void CSofiaContextProcessor::saveToFile(
 				dst << ",\n";
 			}
 			isFirst=false;
+			dst << "  ";
 			printConceptToJson( concepts[i], dst );
 		}
 		dst << "\n]";
-	dst << "},";
 
 	// Arcs of the poset
 	dst << "{";
-		dst << "\"Arcs\":[";
+		dst << "\"Arcs\":[\n";
 		isFirst = true;
 		if( shouldFindPartialOrder ) {
 			for( DWORD i = 0; i < concepts.size(); ++i ) {
@@ -540,7 +541,7 @@ void CSofiaContextProcessor::saveToFile(
 						dst << ",";
 					}
 					isFirst=false;
-					dst << "{\"S\":" << *p << ",\"D\":" << i << "}";
+					dst << "  {\"S\":" << *p << ",\"D\":" << i << "}";
 				}
 			}
 		}
@@ -561,6 +562,9 @@ dst << "{";
 	}
 	if( outParams.OutIntent ) {
 		dst << "\"Int\":" << pChain->SaveIntent( c.first ) << ",";
+	}
+	if(oest != 0) {
+		dst << "\"PatternQuality\":" << oest->GetJsonQuality(dynamic_cast<const IExtent*>(c.first)) << ",";
 	}
 
 	dst << "\"Interest\":" << c.second;
