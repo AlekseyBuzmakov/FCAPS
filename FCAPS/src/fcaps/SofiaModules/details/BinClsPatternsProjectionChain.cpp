@@ -24,10 +24,11 @@ void CBinClsPatternsProjectionChain::CPatternDescription::GetExtent( CPatternIma
 	cmp.EnumValues(*extent, values);
 	auto itr=values.Begin();
 	DWORD i = 0;
-	for(; itr != values.End(); ++itr) {
+	for(; itr != values.End(); ++itr, ++i) {
 		assert(i < ext.ImageSize);
 		ext.Objects[i]=*itr;
 	}
+	assert( i == ext.ImageSize);
 }
 void CBinClsPatternsProjectionChain::CPatternDescription::ClearMemory( CPatternImage& ext ) const
 {

@@ -335,7 +335,7 @@ solution "Sofia-PS"
 				"SharedModulesLib"
 			}
 
-	project "OptimisticEstimators"
+	project "OptimisticEstimatorModules"
 		DefaultConfig("modules")
 		kind "SharedLib"
 		language "C++"
@@ -347,9 +347,9 @@ solution "Sofia-PS"
 			"Tools/inc/", 
 			"Sofia-PS/inc/"
 		}
-		files{ "FCAPS/src/fcaps/OptimisticEstimators/**.h", "FCAPS/src/fcaps/OptimisticEstimators/**.cpp" }
+		files{ "FCAPS/src/fcaps/OptimisticEstimatorModules/**.h", "FCAPS/src/fcaps/OptimisticEstimatorModules/**.cpp" }
 		filter{ "system:windows" }
-			files{ "FCAPS/src/fcaps/Filters/**.def" }
+			files{ "FCAPS/src/fcaps/OptimisticEstimatorModules/**.def" }
 		filter{}
 
 		libdirs {

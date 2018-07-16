@@ -1,6 +1,6 @@
 // Initial software, Aleksey Buzmakov, Copyright (c) INRIA and University of Lorraine, GPL v2 license, 2011-2015, v0.7
 
-#include <fcaps/OptimisticEstimators/BinaryClassificationOEst.h>
+#include <fcaps/OptimisticEstimatorModules/BinaryClassificationOEst.h>
 #include <fcaps/Extent.h>
 
 #include <ModuleJSONTools.h>
@@ -43,7 +43,9 @@ double CBinaryClassificationOEst::GetBestSubsetEstimate(const IExtent* ext) cons
 	// Here we should find maximum of locNPlus/n - nPlus*locN/n^2, the first one is maximized when locNPlus == curNPLus,
 	//   the second one is maximized when locN is minimized, i.e., it should be equal curNPlus.
 	
-	const double result = static_cast<double>( curNPlus) * (1.0L / classes.size() - 1.0L * nPlus / classes.size() * classes.size());
+	const double result =
+		static_cast<double>( curNPlus) / classes.size() - 1.0L * nPlus * curNPlus / (classes.size() * classes.size());
+	
 	assert( result - GetValue(ext) > -1e-10);
 	return result;
 }
@@ -66,12 +68,12 @@ void CBinaryClassificationOEst::LoadParams( const JSON& json )
 	const rapidjson::Value& p = params["Params"];
 
 	// Reading Levels that are considered as positive
-	if(!(p.HasMember("TargetClasses") && (p["TargetClasses"].IsArray() || p["TargetClasses"].IsString()))) {
+	if(!(p.HasMember("TargetClasses") && (p["TargetClasses"].IsArray()))) {
 		error.Data = json;
-		error.Error = "Params.TargetClasses is not found or is neither 'Array' nor 'String'.";
+		error.Error = "Params.TargetClasses is not found or is neither an 'Array'.";
 		throw new CJsonException("CBinaryClassificationOEst::LoadParams", error);
 	}
-	for( int i = 0 ; p["TargetClasses"].Size(); ++i ) {
+	for( int i = 0 ; i < p["TargetClasses"].Size(); ++i ) {
 		if(!p["TargetClasses"][i].IsString()) {
 			error.Data = json;
 			error.Error = "Params.TargetClasses has nonstring values.";
@@ -86,13 +88,14 @@ void CBinaryClassificationOEst::LoadParams( const JSON& json )
 		error.Error = "Params.Classes is not found or is neither 'Array' nor 'String'.";
 		throw new CJsonException("CBinaryClassificationOEst::LoadParams", error);
 	}
+
 	const rapidjson::Value* cl_ptr = 0;
+	rapidjson::Document classesDocument;
 	if( p["Classes"].IsArray() ) {
 		cl_ptr = &p["Classes"];
 	} else {
 		classesFilePath = p["Classes"].GetString();
-		rapidjson::Document classesDocument;
-		if( !ReadJsonFile( classesFilePath, params, error ) ) {
+		if( !ReadJsonFile( classesFilePath, classesDocument, error ) ) {
 			throw new CJsonException( "CBinaryClassificationOEst::LoadParams", error );
 		}
 		cl_ptr=&classesDocument;
@@ -103,7 +106,7 @@ void CBinaryClassificationOEst::LoadParams( const JSON& json )
 	assert(nPlus==0);
 	classes.resize(cl.Size(),false);
 	strClasses.resize(cl.Size());
-	for( int i = 0 ; cl.Size(); ++i ) {
+	for( int i = 0; i < cl.Size(); ++i ) {
 		if(!cl[i].IsString()) {
 			error.Data = json;
 			error.Error = "Params.Classes has nonstring values.";
@@ -159,4 +162,5 @@ DWORD CBinaryClassificationOEst::getPositiveObjectsCount(const IExtent* ext) con
 		assert(objNum < classes.size());
 		nPlus += classes[objNum];
 	}
+	return nPlus;
 }
