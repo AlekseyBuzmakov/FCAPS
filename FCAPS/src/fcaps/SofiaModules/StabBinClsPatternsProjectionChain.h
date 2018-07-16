@@ -34,8 +34,8 @@ public:
 protected:
 	class CStabPatternDescription : public CPatternDescription {
 	public:
-		CStabPatternDescription(const CSharedPtr<const CVectorBinarySetDescriptor>& ext) :
-			CPatternDescription( ext ), stability(0),stabAttrNum(-1),minAttr(-1), globMinAttr( -1 ), globMinValue( -1 ) {}
+		CStabPatternDescription(const CVectorBinarySetJoinComparator& cmp, const CSharedPtr<const CVectorBinarySetDescriptor>& ext) :
+			CPatternDescription(cmp, ext), stability(0),stabAttrNum(-1),minAttr(-1), globMinAttr( -1 ), globMinValue( -1 ) {}
 
 		double& Stability() const { return stability; }
 		DWORD& StabAttrNum() const { return stabAttrNum;}
@@ -59,7 +59,7 @@ protected:
 	};
 	// Methods of CBinClsPatternsProjectionChain
 	virtual CStabPatternDescription* NewPattern(const CSharedPtr<const CVectorBinarySetDescriptor>& ext)
-		{ return new CStabPatternDescription(ext); }
+		{ return new CStabPatternDescription(ExtCmp(), ext); }
 	virtual void ReportAttrSimilarity( const CPatternDescription& p, DWORD i, const CVectorBinarySetDescriptor& res );
 	// Methods of the class
 	const CStabPatternDescription& StabPattern( const CPatternDescription& d);

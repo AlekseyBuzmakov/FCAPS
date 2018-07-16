@@ -21,7 +21,7 @@ class CBinaryClassificationOEst : public IOptimisticEstimator, public IModule {
 public:
 	CBinaryClassificationOEst();
 
-	virtual bool CheckObjectNumber(DWORD n)
+	virtual bool CheckObjectNumber(DWORD n) const
 		{ assert( strClasses.size() == classes.size()); return n==classes.size(); }
 	// Methods of IOptimisticEstimator
 	virtual double GetValue(const IExtent* ext) const;

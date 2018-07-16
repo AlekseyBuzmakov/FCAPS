@@ -9,6 +9,34 @@
 #include <rapidjson/document.h>
 
 using namespace std;
+////////////////////////////////////////////////////////////////////
+void CBinClsPatternsProjectionChain::CPatternDescription::GetExtent( CPatternImage& ext ) const
+{
+	if (ext.Objects != 0) {
+		assert(false);
+		ClearMemory(ext);
+	}
+
+	ext.PatternId = -1;
+	ext.ImageSize = extent->Size();
+	ext.Objects = new int[ext.ImageSize];
+	CList<DWORD> values;
+	cmp.EnumValues(*extent, values);
+	auto itr=values.Begin();
+	DWORD i = 0;
+	for(; itr != values.End(); ++itr) {
+		assert(i < ext.ImageSize);
+		ext.Objects[i]=*itr;
+	}
+}
+void CBinClsPatternsProjectionChain::CPatternDescription::ClearMemory( CPatternImage& ext ) const
+{
+	if(ext.Objects == 0) {
+		ext.ImageSize = 0;
+		ext.PatternId=-1;
+	}
+	delete[] ext.Objects;
+}
 
 ////////////////////////////////////////////////////////////////////
 CBinClsPatternsProjectionChain::CBinClsPatternsProjectionChain() :
@@ -111,7 +139,7 @@ void CBinClsPatternsProjectionChain::Preimages(
 	if( preimage == 0 ) {
 		return;
 	}
-	auto_ptr<const CPatternDescription> newPtrn( preimage );
+	unique_ptr<const CPatternDescription> newPtrn( preimage );
 
 	if( GetPatternInterest( newPtrn.get() ) >= thld ) {
 		NewConceptCreated( *newPtrn );
@@ -233,7 +261,7 @@ JSON CBinClsPatternsProjectionChain::SaveCommonParams() const
 
 CBinClsPatternsProjectionChain::CPatternDescription* CBinClsPatternsProjectionChain::NewPattern(const CSharedPtr<const CVectorBinarySetDescriptor>& ext)
 {
-	return new CPatternDescription(ext);
+	return new CPatternDescription(ExtCmp(), ext);
 }
 CBinClsPatternsProjectionChain::CPatternDescription* CBinClsPatternsProjectionChain::Preimage( const CPatternDescription& ptrn )
 {
@@ -270,7 +298,7 @@ CBinClsPatternsProjectionChain::CPatternDescription* CBinClsPatternsProjectionCh
 		return 0;
 	}
 
-	auto_ptr<CPatternDescription> holder( NewPattern( res ) );
+	unique_ptr<CPatternDescription> holder( NewPattern( res ) );
 
 	holder->Intent()=ptrn.Intent();
 	holder->Intent().PushBack(currAttr);

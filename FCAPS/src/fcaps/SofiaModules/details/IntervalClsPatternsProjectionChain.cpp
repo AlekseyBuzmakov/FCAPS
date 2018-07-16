@@ -81,7 +81,7 @@ void CIntervalClsPatternsProjectionChain::ComputeZeroProjection( CPatternList& p
 	// TODO init order of run.
 
 	CSharedPtr<CVectorBinarySetDescriptor> ptrn(extCmp->NewPattern(), extDeleter);
-	auto_ptr<CPatternDescription> result(NewPattern( ptrn ));
+	unique_ptr<CPatternDescription> result(NewPattern( ptrn ));
 	// Extent
 	for( DWORD i = 0; i < context.size(); ++i ) {
 		extCmp->AddValue(i,*ptrn);
@@ -330,7 +330,7 @@ void CIntervalClsPatternsProjectionChain::leftPreimages(
 		return;
 	}
 
-    auto_ptr<CPatternDescription> res( NewPattern(sim) );
+    unique_ptr<CPatternDescription> res( NewPattern(sim) );
     res->Intent() = intent;
     res->Intent()[attrOrder[state.AttrNum]].first = state.ValueNum + 1;
 	preimages.PushBack(res.release());
@@ -358,7 +358,7 @@ void CIntervalClsPatternsProjectionChain::rightPreimages(
 		return;
 	}
 
-    auto_ptr<CPatternDescription> res( NewPattern(sim) );
+    unique_ptr<CPatternDescription> res( NewPattern(sim) );
     res->Intent() = intent;
     res->Intent()[attrOrder[state.AttrNum]].second = currValue - 1;
 	preimages.PushBack(res.release());

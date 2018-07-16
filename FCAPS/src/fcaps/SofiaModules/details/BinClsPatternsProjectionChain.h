@@ -4,6 +4,7 @@
 #define BINCLSPATTERNSPROJECTIONCHAIN_H
 
 #include <fcaps/ProjectionChain.h>
+#include <fcaps/Extent.h>
 
 #include <fcaps/SharedModulesLib/StabilityCalculation.h>
 
@@ -62,14 +63,20 @@ public:
 		{ return Thld();}
 
 protected:
-	class CPatternDescription : public IPatternDescriptor {
+	class CPatternDescription : public IPatternDescriptor, public IExtent {
 	public:
-		CPatternDescription( const CSharedPtr<const CVectorBinarySetDescriptor>& e ) :
-			extent(e), nextOptimAttr(-1) {}
+		CPatternDescription( const CVectorBinarySetJoinComparator& _cmp, const CSharedPtr<const CVectorBinarySetDescriptor>& e ) :
+			cmp(_cmp), extent(e), nextOptimAttr(-1) {}
 		// Methdos of IPatternDescriptor
 		virtual TPatternType GetType() const { return PT_Other; }
 		virtual bool IsMostGeneral() const { /*TODO?*/return false; };
 		virtual size_t Hash() const { return extent->Hash(); }
+
+		// Methods of IExtent
+		virtual DWORD Size() const
+		    { return Extent().Size();}
+		virtual void GetExtent( CPatternImage& extent ) const;
+		virtual void ClearMemory( CPatternImage& extent ) const;
 
 		// Methods of this class
 		const CVectorBinarySetDescriptor& Extent() const
@@ -87,6 +94,7 @@ protected:
 			{ return nextOptimAttr; }
 
 	private:
+		const CVectorBinarySetJoinComparator& cmp;
 		CSharedPtr<const CVectorBinarySetDescriptor> extent;
 		mutable CList<DWORD> intent;
 		mutable CList<DWORD> attrsInClosure;

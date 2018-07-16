@@ -79,7 +79,7 @@ void CStabBinClsPatternsProjectionChain::Preimages( const IPatternDescriptor* d,
 		return;
 	}
 
-	std::auto_ptr<const CStabPatternDescription> newPtrn(
+	std::unique_ptr<const CStabPatternDescription> newPtrn(
 		&StabPattern( *preimage ) );
 	assert(newPtrn.get() != 0 );
 

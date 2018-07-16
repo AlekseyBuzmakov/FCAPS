@@ -343,7 +343,14 @@ void CSofiaContextProcessor::addNewPatterns( const IProjectionChain::CPatternLis
 void CSofiaContextProcessor::computeOEstimate(const IPatternDescriptor* p, COEstQuality& q)
 {
 	assert(p != 0);
-	assert(false);
+	assert(oest != 0);
+	const IExtent* ext = dynamic_cast<const IExtent*>(p);
+	if( ext == 0) {
+		throw new CTextException("CSofiaContextProcessor::computeOEstimate",
+		                         "Cannot extract extent from pattern. Projection chain does not support it.");
+	}
+	q.OEstMeasure = oest->GetValue(ext);
+	q.OEstPotential = oest->GetBestSubsetEstimate(ext);
 }
 // Removes projection pattern from storage if it is removed from potentially best pattern
 void CSofiaContextProcessor::removeProjectionPattern(const IPatternDescriptor* p)

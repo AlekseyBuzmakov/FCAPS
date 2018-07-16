@@ -16,7 +16,7 @@ const char OptimisticEstimatorModuleType[] = "OptimisticEstimatorModules";
 
 interface IOptimisticEstimator : public virtual IObject {
 	// Check if the availbale number of objects is suitable for the Estimator
-	virtual bool CheckObjectNumber(DWORD) = 0;
+	virtual bool CheckObjectNumber(DWORD) const = 0;
 	// Returns the exact value of the extent ext
 	virtual double GetValue(const IExtent* ext) const = 0;
 	// Returns the best estimate of the value on extent subsets
