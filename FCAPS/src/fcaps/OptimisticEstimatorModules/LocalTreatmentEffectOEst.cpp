@@ -32,13 +32,13 @@ double CLocalTreatmentEffectOEst::GetValue(const IExtent* ext) const
 {
 	assert(ext!=0);
 	extractObjValues(ext);
-	const double delta = objValues.Test[signifObjectNum[objValues.Test.size()]]
-		- objValues.Cntrl[objValues.Cntrl.size()+1 - signifObjectNum[objValues.Cntrl.size()]];
+	const double delta = objValues.Test[signifObjectNum[objValues.Test.size()]-1]
+		- objValues.Cntrl[objValues.Cntrl.size() - signifObjectNum[objValues.Cntrl.size()]];
 
 	if( delta <= 0 ) {
 		return 0;
 	}
-	return delta * ext->Size(); // For now just multiplication of size and delta
+	return delta/delta0  + static_cast<double>(ext->Size()) / objY.size(); // For now just multiplication of size and delta
 }
 
 double CLocalTreatmentEffectOEst::GetBestSubsetEstimate(const IExtent* ext) const
@@ -55,8 +55,8 @@ JSON CLocalTreatmentEffectOEst::GetJsonQuality(const IExtent* ext) const
 {
 	std::stringstream rslt;
 	extractObjValues(ext);
-	const double delta = objValues.Test[signifObjectNum[objValues.Test.size()]]
-		- objValues.Cntrl[objValues.Cntrl.size()+1 - signifObjectNum[objValues.Cntrl.size()]];
+	const double delta = objValues.Test[signifObjectNum[objValues.Test.size()]-1]
+		- objValues.Cntrl[objValues.Cntrl.size() - signifObjectNum[objValues.Cntrl.size()]];
 	rslt << "{"
 		<< "\"Delta\":" << delta << ","
 		<< "\"N0\":" << objValues.Cntrl.size() << ","
@@ -194,15 +194,16 @@ void CLocalTreatmentEffectOEst::computeSignificantObjectNumbers()
 	assert(objY.size() == objTrt.size());
 	const int n = objY.size();
 	signifObjectNum.resize(n);
-	signifObjectNum[0]=1;
-	for( int i = 1; i < n; ++i) {
+	signifObjectNum[0]=0;
+	signifObjectNum[1]=0;
+	for( int i = 2; i < n; ++i) {
 		int j = signifObjectNum[i-1]+1;
-		for( ; j < n; ++j ) {
-			if( incompleteBeta(j, n - j + 1) < 1 -signifLevel) {
+		for( ; j < i; ++j ) {
+			if( incompleteBeta(j, i - j + 1) < 1 -signifLevel) {
 				break;
 			}
 		} 
-		assert(j < n);
+		assert(j < i);
 		signifObjectNum[i]= j - 1;
 	}
 }
@@ -235,6 +236,19 @@ void CLocalTreatmentEffectOEst::buildOrder()
 		}
 		++controlSize;
 	}
+}
+
+// Computes delta for the whole dataset
+void CLocalTreatmentEffectOEst::computeDelta0()
+{
+	const int sObjNum = signifObjectNum[minObjNum];
+	assert(sObjNum < minObjNum);
+	assert(sObjNum < controlSize);
+	assert(sObjNum < objY.size() - controlSize);
+	const double cntrlY = objY[order[minObjNum - 1 - sObjNum + 1]];
+	const double testY = objY[order[objY.size() - minObjNum + sObjNum - 1]];
+   
+	delta0=testY-cntrlY;
 }
 
 // Extracts test and control group for the extent

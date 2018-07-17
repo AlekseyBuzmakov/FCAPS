@@ -69,6 +69,8 @@ private:
 	std::vector<int> posToOrder;
 	// Size of the control group
 	int controlSize;
+	// The basic delta computed for minObjNum objects in every  group
+	double delta0;
 	// The variable are mutable since they have only local meaning, but more efficient to be here.
 	// The flag vectors indicating which objects are in the current pattern
 	mutable std::vector<bool> currentObjects;
@@ -78,6 +80,7 @@ private:
 	void computeSignificantObjectNumbers();
 	static double incompleteBeta(int i, int j);
 	void buildOrder();
+	void computeDelta0();
 	void extractObjValues(const IExtent* ext) const;
 };
 
