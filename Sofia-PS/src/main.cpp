@@ -494,7 +494,7 @@ void CThisConsoleApplication::extractObjectNames( rapidjson::Document& data )
 IContextProcessor* CThisConsoleApplication::createContextProcessor( rapidjson::Document& cb ) const
 {
 	string errorText;
-	auto_ptr<IContextProcessor> processor;
+	unique_ptr<IContextProcessor> processor;
 	processor.reset( dynamic_cast<IContextProcessor*>(
 		CreateModuleFromJSON( cb, errorText ) ) );
 
@@ -537,7 +537,7 @@ IFilter* CThisConsoleApplication::createFilter() const
 	}
 
 	string errorText;
-	auto_ptr<IFilter> filter;
+	unique_ptr<IFilter> filter;
 	filter.reset( CreateModuleFromJSON<IFilter>( fltrParams, errorText ) );
 
 	if( filter.get() == 0 ) {

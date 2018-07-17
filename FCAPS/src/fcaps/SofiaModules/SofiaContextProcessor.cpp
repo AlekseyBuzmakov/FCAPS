@@ -404,7 +404,8 @@ typedef pair<CList<const IPatternDescriptor*>::CIterator,double> CPtrnIteratorMe
 // Adjusts threshold in order to be in memory
 void CSofiaContextProcessor::adjustThreshold()
 {
-	assert(projectionPatterns.Size() <= storage.Size() && storage.Size() <= projectionPatterns.Size()+1);
+	assert(projectionPatterns.Size() <= storage.Size());
+	assert(storage.Size() <= projectionPatterns.Size()+1);
 
 	if( !shouldAdjustThld || projectionPatterns.Size() <= mpn ) {
 		return;
@@ -432,6 +433,7 @@ void CSofiaContextProcessor::adjustThreshold()
 	int i = measures.size() - 1;
 	for( ; i >= 0 && measures[i].second < thld ; --i ) {
 		projectionPatterns.Erase(measures[i].first);
+		removeProjectionPattern(*(measures[i].first));
 	}
 	assert( i < mpn );
 	assert( projectionPatterns.Size() <= mpn );

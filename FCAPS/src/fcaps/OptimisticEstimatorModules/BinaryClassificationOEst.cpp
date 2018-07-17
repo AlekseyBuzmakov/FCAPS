@@ -10,6 +10,7 @@
 
 #include <rapidjson/document.h>
 
+#include <boost/math/distributions/chi_squared.hpp>
 #include <sstream>
 
 using namespace std;
@@ -54,9 +55,22 @@ JSON CBinaryClassificationOEst::GetJsonQuality(const IExtent* ext) const
 {
 	std::stringstream rslt;
 	const DWORD curNPlus=getPositiveObjectsCount(ext);
+
+	// Computing P-value
+	const DWORD o1 = curNPlus;
+	const DWORD o0 = ext->Size() - o1;
+	//  expected counts
+	const double probability = static_cast<double>(nPlus)/classes.size();
+	const double e1 = ext->Size() * probability;  
+	const double e0 = ext->Size() - e1;
+	const double T = (e1-o1)*(e1-o1)/e1 + (e0-o0)*(e0-o0)/e0;
+	boost::math::chi_squared chi2(1);
+	const double pValue = 1-boost::math::cdf(chi2,T);
+
 	rslt << "{"
 		<< "\"Positiveness\":" << static_cast<double>(curNPlus) / ext->Size() << ","
 		<< "\"BasePositiveness\":" << static_cast<double>(nPlus) / classes.size() << ","
+		<< "\"p-Value\":" << pValue << ","
 		<< "\"Value\":" << GetValue(ext)
 		<<"}";
 	return rslt.str();
