@@ -59,8 +59,10 @@ JSON CLocalTreatmentEffectOEst::GetJsonQuality(const IExtent* ext) const
 		- objValues.Cntrl[objValues.Cntrl.size() - signifObjectNum[objValues.Cntrl.size()]];
 	rslt << "{"
 		<< "\"Delta\":" << delta << ","
+		<< "\"Delta0\":" << delta0 << ","
 		<< "\"N0\":" << objValues.Cntrl.size() << ","
 		<< "\"N1\":" << objValues.Test.size() << ","
+		<< "\"TotalSize\":" << objY.size() << ","
 		<< "\"Value\":" << GetValue(ext)
 		<<"}";
 	return rslt.str();
