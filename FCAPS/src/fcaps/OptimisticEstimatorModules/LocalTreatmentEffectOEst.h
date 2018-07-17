@@ -21,7 +21,8 @@ class CLocalTreatmentEffectOEst : public IOptimisticEstimator, public IModule {
 public:
 	CLocalTreatmentEffectOEst();
 
-	virtual bool CheckObjectNumber(DWORD n) const;
+	virtual bool CheckObjectNumber(DWORD n) const
+	    { assert(objY.size() == objTrt.size()); return objY.size() == n;}
 	// Methods of IOptimisticEstimator
 	virtual double GetValue(const IExtent* ext) const;
 	virtual double GetBestSubsetEstimate(const IExtent* ext) const;
@@ -35,6 +36,17 @@ public:
 	virtual const char* const GetName() const
 		{ return LocalTreatmentEffectOptimisticEstimator; };
 
+	// Methods of the class
+	bool operator()(int a, int b) const;
+
+private:
+	struct CObjValues {
+		// Test set of objects
+		std::vector<double> Test;
+		// Control set of objects
+		std::vector<double> Cntrl;
+	};
+
 private:
 	static const CModuleRegistrar<CLocalTreatmentEffectOEst> registrar;
 	// The filename with text classes
@@ -44,6 +56,29 @@ private:
 	// The response and the treatment of every object
 	std::vector<double> objY;
 	std::vector<bool> objTrt;
+	// The significance level for confidence interval computation
+	double signifLevel;
+	// The minimal number of objects in each group
+	int minObjNum;
+
+	// The precomputed number of objects that corresponds to the significance level
+	std::vector<int> signifObjectNum;
+	// The order of objects: first  cntrl, then test; inside every group by increasing the value.
+	std::vector<int> order;
+	// Inverse of the order. Shows at which position every object should be.
+	std::vector<int> posToOrder;
+	// Size of the control group
+	int controlSize;
+	// The variable are mutable since they have only local meaning, but more efficient to be here.
+	// The flag vectors indicating which objects are in the current pattern
+	mutable std::vector<bool> currentObjects;
+	// The object that contains Test and control objects for current pattern
+	mutable CObjValues objValues;
+
+	void computeSignificantObjectNumbers();
+	static double incompleteBeta(int i, int j);
+	void buildOrder();
+	void extractObjValues(const IExtent* ext) const;
 };
 
 #endif // LOCALTREATMENTEFFECTOEST_H
