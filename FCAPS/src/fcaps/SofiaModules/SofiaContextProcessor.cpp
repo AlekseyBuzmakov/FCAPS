@@ -91,6 +91,12 @@ void CSofiaContextProcessor::LoadParams( const JSON& json )
 			throw new CJsonException( "CSofiaContextProcessor::LoadParams", CJsonError( json, errorText ) );
 		}
 	}
+	if( p.HasMember( "MinQuality" )) {
+		const rapidjson::Value& minQ = params["Params"]["MinQuality"];
+		if( minQ.IsNumber() ) {
+			bestPattern.Q = minQ.GetDouble();
+		}
+	}
 
 	if( !p.HasMember("ProjectionChain") ) {
 		error.Data = json;
@@ -276,7 +282,11 @@ void CSofiaContextProcessor::SaveResult( const std::string& path )
 
 		saveToFile( concepts, conceptOrderFinder, path );
 	} else {
-		concepts.push_back( CPatternMeasurePair( bestPattern.Pattern, pChain->GetPatternInterest(bestPattern.Pattern) ) );
+		if(bestPattern.Pattern != 0) {
+			concepts.push_back( CPatternMeasurePair( bestPattern.Pattern, pChain->GetPatternInterest(bestPattern.Pattern) ) );
+		} else {
+			callback->ReportProgress( 1, "Nothing is found" );
+		}
 		CConceptsForOrder conceptsForOrder( *pChain, concepts );
 		CFindConceptOrder<CConceptsForOrder> conceptOrderFinder( conceptsForOrder );
 		saveToFile( concepts, conceptOrderFinder, path );
@@ -310,31 +320,31 @@ void CSofiaContextProcessor::addNewPatterns( const IProjectionChain::CPatternLis
 				// It is starting point so it is normal. Just initialization.
 				minPotential = q.OEstPotential;
 				maxPotential = q.OEstPotential;
-				bestPattern.Pattern = p;
-				bestPattern.IsProjectionPattern = true;
-				bestPattern.Q = q.OEstMeasure;
-				oestQuality.insert(std::pair<const IPatternDescriptor*,COEstQuality>(p,q));
+				if(bestPattern.Q == 0) {
+					// To be sure that this quality is worse
+					bestPattern.Q = q.OEstMeasure - 1;
+				}
 			} else {
 				// Should check if the new pattern is better than the existing ones
 				assert(minPotential <= maxPotential);
 				minPotential = min(minPotential,q.OEstPotential);
 				maxPotential = max(maxPotential,q.OEstPotential);
-				if(q.OEstPotential <= bestPattern.Q) {
-					// The potential of the pattern is less then already found pattern
-					//  no sense to store it neither to expand it
-					projectionPatterns.PopBack();
-					removeProjectionPattern(p);
-				} else {
-					// The pattern should be preserved
-					oestQuality.insert(std::pair<const IPatternDescriptor*,COEstQuality>(p,q));
-				}
-				if(q.OEstMeasure > bestPattern.Q) {
-					removeBestPattern();
-					// Should change the best pattern
-					bestPattern.Q = q.OEstMeasure;
-					bestPattern.Pattern = p;
-					bestPattern.IsProjectionPattern = true;
-				}
+			}
+			if(q.OEstPotential <= bestPattern.Q) {
+				// The potential of the pattern is less then already found pattern
+				//  no sense to store it neither to expand it
+				projectionPatterns.PopBack();
+				removeProjectionPattern(p);
+			} else {
+				// The pattern should be preserved
+				oestQuality.insert(std::pair<const IPatternDescriptor*,COEstQuality>(p,q));
+			}
+			if(q.OEstMeasure > bestPattern.Q) {
+				removeBestPattern();
+				// Should change the best pattern
+				bestPattern.Q = q.OEstMeasure;
+				bestPattern.Pattern = p;
+				bestPattern.IsProjectionPattern = true;
 			}
 		}
 	}
@@ -368,8 +378,9 @@ void CSofiaContextProcessor::removeProjectionPattern(const IPatternDescriptor* p
 void CSofiaContextProcessor::removeBestPattern()
 {
 	if(!bestPattern.IsProjectionPattern) {
-		assert(bestPattern.Pattern != 0);
-		storage.RemovePattern(bestPattern.Pattern);
+		if(bestPattern.Pattern != 0) {
+			storage.RemovePattern(bestPattern.Pattern);
+		}
 	}
 	bestPattern.Pattern = 0;
 }
