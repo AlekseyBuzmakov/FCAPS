@@ -10,7 +10,8 @@
 
 #include <rapidjson/document.h>
 
-#include <boost/math/special_functions/gamma.hpp>
+#include <boost/sort/spinsort/spinsort.hpp>
+#include <boost/math/special_functions/beta.hpp>
 #include <sstream>
 #include <math.h>
 
@@ -245,10 +246,12 @@ JSON CLocalTreatmentEffectOEst::SaveParams() const
 bool CLocalTreatmentEffectOEst::operator()(int a, int b) const
 {
 	assert(objY.size() == objTrt.size());
-	assert( 0 <= a && a <= objY.size());
-	assert( 0 <= b && b <= objY.size());
+	assert( 0 <= a && a < objY.size());
+	assert( 0 <= b && b < objY.size());
 	if(objTrt[a] < objTrt[b]) {
 		return true;
+	} else if(objTrt[a] > objTrt[b]) {
+		return false;
 	}
 	return objY[a] < objY[b];
 }
@@ -287,7 +290,7 @@ void CLocalTreatmentEffectOEst::buildOrder()
 	for(int i = 0; i < objY.size(); ++i) {
 		order[i]=i;
 	}
-	sort(order.begin(),order.end(),*this);
+	boost::sort::spinsort(order.begin(), order.end(), *this );
 	// inverted order
 	posToOrder.resize(order.size());
 	for(int i = 0; i < objY.size(); ++i) {
@@ -322,7 +325,7 @@ void CLocalTreatmentEffectOEst::extractObjValues(const IExtent* ext) const
 	assert(ext!=0);
 	
 	CPatternImage img;
-	ext->GetExtent(img);
+	CPatternImageHolder imgHolder(ext,img);
 
 	currentObjects.resize(objY.size());
 	std::fill(currentObjects.begin(),currentObjects.end(),false);
@@ -335,7 +338,7 @@ void CLocalTreatmentEffectOEst::extractObjValues(const IExtent* ext) const
 		assert(!currentObjects[posToOrder[img.Objects[i]]]);
 		currentObjects[posToOrder[img.Objects[i]]]=true;
 		cntrlSize += objTrt[img.Objects[i]];
-		assert((objTrt[img.Objects[i]]) == (posToOrder[img.Objects[i]]<controlSize));
+		assert((objTrt[img.Objects[i]]) == (posToOrder[img.Objects[i]]>=controlSize));
 	}
 
 	// Extracting double values from marked objects
@@ -347,10 +350,12 @@ void CLocalTreatmentEffectOEst::extractObjValues(const IExtent* ext) const
 		if( !currentObjects[i]) {
 			continue;
 		}
-		if( i < controlSize) {
+		if( i < cntrlSize) {
+			assert(nCntrl < objValues.Cntrl.size());
 			objValues.Cntrl[nCntrl] = objY[order[i]];
 			++nCntrl;
 		} else {
+			assert(nTest < objValues.Test.size());
 			objValues.Test[nTest] = objY[order[i]];
 			++nTest;
 		}

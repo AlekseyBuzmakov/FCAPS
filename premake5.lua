@@ -355,18 +355,14 @@ solution "Sofia-PS"
 		libdirs {
 			"boost/stage/lib/",
 		}
-
-		configuration "Debug"
+		links{ 
+			"SharedTools",
+			"SharedModulesLib"
+		}
+		filter{ "system:not windows" }
 			links{ 
-				"SharedTools",
-				"SharedModulesLib"
 			}
-
-		configuration "Release"
-			links{ 
-				"SharedTools",
-				"SharedModulesLib"
-			}
+		filter{}
 
 	project "Sofia-PS"
 		DefaultConfig("")

@@ -28,6 +28,8 @@ struct CPatternImage {
 		Objects( 0 ) {}
 };
 
+////////////////////////////////////////////////////////////////////////
+
 interface IExtent : public virtual IObject {
     // Get number of objects in the extent
     virtual DWORD Size() const = 0;
@@ -37,5 +39,20 @@ interface IExtent : public virtual IObject {
     // Free the memeory allocated with the previous method 
     virtual void ClearMemory( CPatternImage& extent ) const = 0;
 };
+
+////////////////////////////////////////////////////////////////////////
+
+class CPatternImageHolder {
+public:
+	CPatternImageHolder(const IExtent* _ext, CPatternImage& _ptrn) :
+		ext(_ext), ptrn(_ptrn)
+	{ assert(ext != 0); ext->GetExtent(ptrn);}
+	~CPatternImageHolder() {assert(ext!=0);ext->ClearMemory(ptrn);}
+
+private:
+	const IExtent* ext;
+	CPatternImage& ptrn;
+};
+
 
 #endif // EXTENT_H_INCLUDED

@@ -215,7 +215,7 @@ void CStabClsPatternProjectionChain::Preimages( const IPatternDescriptor* d, CPa
 		++ptrn.GraphCount();
 		return;
 	}
-	auto_ptr<CStabClsPatternDescription> newPtrn( new CStabClsPatternDescription( res ) );
+	unique_ptr<CStabClsPatternDescription> newPtrn( new CStabClsPatternDescription( res ) );
 	if( initializeNewPattern( ptrn, *newPtrn ) ) {
 		// The new pattern is stable.
 		//  We should add it to preimages.

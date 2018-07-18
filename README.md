@@ -40,14 +40,14 @@ Or in Windows,
 * Then build the necessary libraries.
 
 For Linux/MacOs:
-> $ ./b2 --with-system --with-filesystem --with-thread debug stage
+> $ ./b2 --with-system --with-filesystem --with-thread --with-math debug stage
 
-> $ ./b2 --with-system --with-filesystem --with-thread release stage
+> $ ./b2 --with-system --with-filesystem --with-thread --with-math release stage
 
 For Windows:
-> $ b2.exe --with-system --with-filesystem --with-thread debug stage
+> $ b2.exe --with-system --with-filesystem --with-thread --with-math debug stage
 
-> $ b2.exe --with-system --with-filesystem --with-thread release stage
+> $ b2.exe --with-system --with-filesystem --with-thread --with-math release stage
 
 The next step is to convert the project to your most loved IDE. For that run
 
