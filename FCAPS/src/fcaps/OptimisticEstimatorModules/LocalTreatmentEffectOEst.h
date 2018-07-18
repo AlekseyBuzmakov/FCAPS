@@ -45,6 +45,15 @@ private:
 		std::vector<double> Test;
 		// Control set of objects
 		std::vector<double> Cntrl;
+
+		// Used only in OEst
+
+		// Change in Goal Function when moving the position of the confidence interval by one element.
+		std::vector<double> CntrlValueChange;
+		// The closesest position in the test set corresponding to the cntrl set
+		std::vector<int> CntrlToTestPosition;
+		// The best value change in the test test if only elements starting from [i] are allowed
+		std::vector<double> BestTestValueChange;
 	};
 
 private:
@@ -60,8 +69,11 @@ private:
 	double signifLevel;
 	// The minimal number of objects in each group
 	int minObjNum;
+	// The parameters to compute the linear combianiton of delta and size
+	double alpha;
+	double beta;
 
-	// The precomputed number of objects that corresponds to the significance level
+	// The precomputed number of objects that corresponds to the significance level (1-based)
 	std::vector<int> signifObjectNum;
 	// The order of objects: first  cntrl, then test; inside every group by increasing the value.
 	std::vector<int> order;
@@ -82,6 +94,9 @@ private:
 	void buildOrder();
 	void computeDelta0();
 	void extractObjValues(const IExtent* ext) const;
+	double getValue(const double& delta, int size) const;
+	double getValueByConfInterval(int testConfIntObj, int cntrlConfIntObj) const;
+	bool checkObjValues() const;
 };
 
 #endif // LOCALTREATMENTEFFECTOEST_H
