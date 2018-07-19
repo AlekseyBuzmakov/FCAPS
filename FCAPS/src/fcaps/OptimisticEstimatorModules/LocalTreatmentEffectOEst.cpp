@@ -214,7 +214,15 @@ void CLocalTreatmentEffectOEst::LoadParams( const JSON& json )
 	if(p.HasMember("MinObjNum") && p["MinObjNum"].IsInt()) {
 		minObjNum=p["MinObjNum"].GetInt();
 	}
-	if(p.HasMember("SignificanceLevel") && p["SignificanceLevel"].IsDouble()) {
+	if(p.HasMember("Alpha") && p["Alpha"].IsNumber()) {
+		const double a =p["Alpha"].GetDouble();
+		alpha=a;
+	}
+	if(p.HasMember("Beta") && p["Beta"].IsNumber()) {
+		const double b =p["Beta"].GetDouble();
+		beta=b;
+	}
+	if(p.HasMember("SignificanceLevel") && p["SignificanceLevel"].IsNumber()) {
 		const double sl =p["SignificanceLevel"].GetDouble();
 		if( 0 < sl && sl < 1) {
 			signifLevel=sl;
@@ -236,6 +244,8 @@ JSON CLocalTreatmentEffectOEst::SaveParams() const
 		.AddMember( "Params", rapidjson::Value().SetObject()
 					.AddMember("ObjInfoFile", rapidjson::StringRef(objInfoFilePath.c_str()), alloc)
 		            .AddMember("MinObjNum",rapidjson::Value().SetInt(minObjNum), alloc)
+		            .AddMember("Alpha",rapidjson::Value().SetDouble(alpha), alloc)
+		            .AddMember("Beta",rapidjson::Value().SetDouble(beta), alloc)
 		            .AddMember("SignificanceLevel",rapidjson::Value().SetDouble(signifLevel), alloc)
 				, alloc );
 
