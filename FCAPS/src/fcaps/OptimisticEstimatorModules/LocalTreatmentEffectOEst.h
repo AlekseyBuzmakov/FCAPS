@@ -96,6 +96,7 @@ private:
 	void extractObjValues(const IExtent* ext) const;
 	double getValue(const double& delta, int size) const;
 	double getValueByConfInterval(int testConfIntObj, int cntrlConfIntObj) const;
+	double getBestValueByCntrlConfInterval(int cntrlConfIntObj) const;
 	bool checkObjValues() const;
 };
 
