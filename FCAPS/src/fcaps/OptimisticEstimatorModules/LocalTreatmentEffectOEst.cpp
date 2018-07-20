@@ -18,6 +18,62 @@
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////
+#define STR(x...) #x
+
+const char description[] =
+STR(
+	{
+	"Name":"Local Treatment Effect Optimistic Estimator",
+	"Description":"An optimistic estimator for computing upper bound of Local Treatment Effect given as a linear function of difference between confidence intervals of Test and Control groups and the total number of objects in the extent of a pattern.",
+	"Params": {
+			"$schema": "http://json-schema.org/draft-04/schema#",
+			"title": "Params of LTE OEst",
+			"type": "object",
+			"properties": {
+				"ControlLevels":{
+					"description": "Array fo strings that gives group names for the objects that correspond to the control set. All others objects are considered to be in a test set",
+					"type":"array",
+					"items": {
+						"type":"string"
+					}
+				},
+				"ObjInfoFile":{
+					"description": "The path to a file, containing the description of every object",
+					"type": "file-path",
+					"example": {
+						"description":"File contains information on Values of a response variable (Y) for every object in a dataset, and the group (Trt) the object is pelonging to. Example describes 3 objects.",
+						"json":{"Y":[1.0,2.2,-1.5], "Trt": ["Test","Test","Control"]}
+					}
+				},
+				"MinObjNum":{
+					"description": "The minimal number of objects in a control a treatment group",
+					"type": "integer",
+					"minimum": 10
+				},
+				"Alpha":{
+					"description": "The weight of distance between confidence intervals. The distance is normalized to the maximal possible distance",
+					"type": "number",
+					"minimum": 0
+				},
+				"Beta":{
+					"description": "The weight number of objects in the pattern. The number of objects is normalized to the total number of objects in the dataset",
+					"type": "number",
+					"minimum": 0
+				},
+				"SignificanceLevel":{
+					"description": "The significance level that is used to compute the confidence interval",
+					"type": "number",
+					"minimum": 0,
+					"exclusiveMinimum": true,
+					"maximum": 1
+					"exclusiveMaximum": true,
+				}
+			}
+		}
+	}
+);
+
+////////////////////////////////////////////////////////////////////
 const CModuleRegistrar<CLocalTreatmentEffectOEst> CLocalTreatmentEffectOEst::registrar(
 	                 OptimisticEstimatorModuleType, LocalTreatmentEffectOptimisticEstimator );
 
