@@ -45,11 +45,12 @@ private:
 		std::vector<double> Test;
 		// Control set of objects
 		std::vector<double> Cntrl;
+		// Low bound of the confidence interval for the test set
+		std::vector<double> TestConfLowBound;
+		// Upper bound of the confidence interval for the control set
+		std::vector<double> CntrlConfUpperBound;
 
 		// Used only in OEst
-
-		// Change in Goal Function when moving the position of the confidence interval by one element.
-		std::vector<double> CntrlValueChange;
 		// The closesest position in the test set corresponding to the cntrl set
 		std::vector<int> CntrlToTestPosition;
 		// The best value change in the test test if only elements starting from [i] are allowed
@@ -94,9 +95,9 @@ private:
 	void buildOrder();
 	void computeDelta0();
 	void extractObjValues(const IExtent* ext) const;
+	void computeConfidenceIntervalBounds() const;
 	double getValue(const double& delta, int size) const;
-	double getValueByConfInterval(int testConfIntObj, int cntrlConfIntObj) const;
-	double getBestValueByCntrlConfInterval(int cntrlConfIntObj) const;
+	double getBestValueForSubsets(int cntrlLastObject, int testFirstObject) const;
 	bool checkObjValues() const;
 };
 
