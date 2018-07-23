@@ -2,6 +2,8 @@
 
 #include "ClassifierContextProcessor.h"
 
+#include <fcaps/ComputationProcedure.h>
+
 #include <fcaps/Classifier.h>
 #include <ModuleJSONTools.h>
 

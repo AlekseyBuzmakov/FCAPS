@@ -11,6 +11,7 @@
 
 #include <ModuleTools.h>
 
+interface IComputationCallback;
 class CVectorBinarySetJoinComparator;
 
 ////////////////////////////////////////////////////////////////////
@@ -22,7 +23,7 @@ public:
 	CStabilityEstimatorContextProcessor();
 
 	// Methods of IContextProcessor
-	virtual void SetCallback( const IContextProcessorCallback * cb )
+	virtual void SetCallback( const IComputationCallback * cb )
 		 {callback = cb;}
 	virtual const std::vector<std::string>& GetObjNames() const
 		{return objectNames;}
@@ -62,7 +63,7 @@ private:
 	};
 private:
 	static const CModuleRegistrar<CStabilityEstimatorContextProcessor> registrar;
-	const IContextProcessorCallback * callback;
+	const IComputationCallback * callback;
 	std::vector<std::string> objectNames;
 
 	std::string contextPath;

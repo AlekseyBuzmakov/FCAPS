@@ -9,6 +9,7 @@
 
 #include <fcaps/ClassifierModules/details/JsonClassifierClasses.h>
 
+interface IComputationCallback;
 interface IClassifier;
 
 ////////////////////////////////////////////////////////////////////
@@ -20,7 +21,7 @@ public:
 	CClassifierContextProcessor();
 
 	// Methods of IContextProcessor
-	virtual void SetCallback( const IContextProcessorCallback * cb )
+	virtual void SetCallback( const IComputationCallback * cb )
 		 {callback = cb;}
 	virtual const std::vector<std::string>& GetObjNames() const;
 	virtual void SetObjNames( const std::vector<std::string>& );
@@ -55,7 +56,7 @@ private:
 	static const CModuleRegistrar<CClassifierContextProcessor> registrar;
 	CSharedPtr<IClassifier> classifier;
 	COutputParams outParams;
-	const IContextProcessorCallback * callback;
+	const IComputationCallback * callback;
 	std::vector<std::string> objectNames;
 
 	std::string classesPath;

@@ -13,6 +13,7 @@
 
 #include <unordered_map>
 
+interface IComputationCallback;
 interface IOptimisticEstimator;
 
 template<typename T>
@@ -41,7 +42,7 @@ public:
 	virtual void SetObjNames( const std::vector<std::string>& );
 	virtual void PassDescriptionParams( const JSON& json );
 
-	virtual void SetCallback( const IContextProcessorCallback* cb )
+	virtual void SetCallback( const IComputationCallback* cb )
 		{callback = cb;};
 
 	virtual void Prepare()
@@ -108,7 +109,7 @@ private:
 	// Chain of projections for SOFYA algo
 	CSharedPtr<IProjectionChain> pChain;
 	// Callback for progess reporting
-	const IContextProcessorCallback* callback;
+	const IComputationCallback* callback;
 	// An object that evaluates every extent and provides the upperbound estimate for possible values on extent subsets
 	CSharedPtr<IOptimisticEstimator> oest;
 

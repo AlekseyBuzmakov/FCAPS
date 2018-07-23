@@ -8,6 +8,7 @@
 
 #include <fcaps/Module.h>
 #include <ModuleTools.h>
+#include <fcaps/ComputationProcedure.h>
 #include <fcaps/ContextProcessor.h>
 #include <fcaps/Filter.h>
 
@@ -59,7 +60,7 @@ TSofiaFunction SofiaAPI GetSofiaFunction(const char* chName, int nLength)
 
 ////////////////////////////////////////////////////////////////////
 
-class CThisConsoleApplication : public CConsoleApplication, public IContextProcessorCallback {
+class CThisConsoleApplication : public CConsoleApplication, public IComputationCallback {
 public:
 	CThisConsoleApplication( int _argc, char** _argv ) :
 		CConsoleApplication( _argc, _argv ),
@@ -80,6 +81,10 @@ public:
 
 	// Methdos of IContextProcessorCallback
 	virtual void ReportProgress( const double& p, const std::string& info ) const;
+	virtual void ReportNextStage( const std::string& stageName ) const;
+	virtual void Warning(const std::string& warning) const;
+	virtual bool IsInterrupted() const
+		{return false;}
 
 private:
 	enum TState {
@@ -236,17 +241,24 @@ void CThisConsoleApplication::ReportProgress( const double& p, const std::string
 {
 	lastCtxProcessorInfo = info;
 
-	if( state == S_AddingObjects ) {
-		return;
-	}
-    GetStatusStream() << std::fixed << std::setprecision(3);
 	if( 0 <= p && p <= 1 ) {
-        GetStatusStream() << "Processing " << p*100 << "%. ";
+		GetStatusStream() << std::fixed << std::setprecision(3);
+        GetStatusStream() << "   In " << p*100 << "%. ";
 	} else {
-        GetStatusStream() << "Processing " << p << ". ";
+		GetStatusStream() << std::fixed << std::setprecision(1);
+        GetStatusStream() << "   In " << p << ". ";
 	}
 	GetStatusStream() << info << "   \r";
 	GetStatusStream().flush();
+}
+
+void CThisConsoleApplication::ReportNextStage( const std::string& stageName ) const
+{
+	GetStatusStream() << "\n== Stage '" << stageName << "' ==\n"; 
+}
+void CThisConsoleApplication::Warning(const std::string& warning) const
+{
+	GetWarningStream() << "\n[!] " << warning << "\n";
 }
 
 void CThisConsoleApplication::runContextProcessor() {

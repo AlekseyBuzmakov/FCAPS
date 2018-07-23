@@ -15,7 +15,7 @@
 
 ////////////////////////////////////////////////////////////////////////
 
-interface IContextProcessorCallback;
+interface IComputationCallback;
 
 ////////////////////////////////////////////////////////////////////
 
@@ -23,7 +23,7 @@ const char ContextProcessorModuleType[] = "ContextProcessorModules";
 
 interface IContextProcessor : public virtual IObject {
 	// Callback for progress reporting.
-	virtual void SetCallback( const IContextProcessorCallback * cb ) = 0;
+	virtual void SetCallback( const IComputationCallback * cb ) = 0;
 
 	// Get/Set object names
 	virtual const std::vector<std::string>& GetObjNames() const = 0;
@@ -43,12 +43,6 @@ interface IContextProcessor : public virtual IObject {
 
 	// Saving a result of the processor
 	virtual void SaveResult( const std::string& path ) = 0;
-};
-
-////////////////////////////////////////////////////////////////////////
-
-interface IContextProcessorCallback : public virtual IObject {
-	virtual void ReportProgress( const double& p, const std::string& info ) const = 0;
 };
 
 ////////////////////////////////////////////////////////////////////////

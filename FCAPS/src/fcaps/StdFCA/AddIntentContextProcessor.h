@@ -10,6 +10,7 @@
 #include "details/Lattice.h"
 #include "details/FCAUtils.h"
 
+interface IComputationCallback;
 interface IPatternManager;
 interface IIntentStorage;
 interface IExtentStorage;
@@ -26,7 +27,7 @@ public:
 	CAddIntentContextProcessor();
 
 	// Methods of IContextProcessor
-	virtual void SetCallback( const IContextProcessorCallback * cb )
+	virtual void SetCallback( const IComputationCallback * cb )
 		{callback = cb;}
 	virtual const std::vector<std::string>& GetObjNames() const;
 	virtual void SetObjNames( const std::vector<std::string>& names );
@@ -47,7 +48,7 @@ public:
 
 private:
 	static const CModuleRegistrar<CAddIntentContextProcessor> registrar;
-	const IContextProcessorCallback * callback;
+	const IComputationCallback * callback;
 	CSharedPtr<IPatternManager> cmp;
 	CSharedPtr<IIntentStorage> intStorage;
 	CSharedPtr<IExtentStorage> extStorage;

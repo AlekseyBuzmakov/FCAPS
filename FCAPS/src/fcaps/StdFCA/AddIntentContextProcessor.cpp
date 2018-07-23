@@ -4,8 +4,10 @@
 
 #include "details/AddIntentLatticeBuilder.h"
 #include "details/ExtentImpl.h"
-#include <fcaps/storages/VectorIntentStorage.h>
+#include <fcaps/ComputationProcedure.h>
 #include <fcaps/PatternManager.h>
+
+#include <fcaps/storages/VectorIntentStorage.h>
 
 #include <ModuleTools.h>
 #include <ModuleJSONTools.h>

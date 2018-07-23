@@ -1,6 +1,8 @@
 // Initial software, Aleksey Buzmakov, Copyright (c) INRIA and University of Lorraine, GPL v2 license, 2011-2015, v0.7
 
 #include <fcaps/SofiaModules/SofiaContextProcessor.h>
+
+#include <fcaps/ComputationProcedure.h>
 #include <fcaps/OptimisticEstimator.h>
 
 #include <fcaps/storages/CachedIntentStorage.h>
@@ -14,6 +16,68 @@
 #include <rapidjson/document.h>
 
 using namespace std;
+
+////////////////////////////////////////////////////////////////////
+#define STR(x...) #x
+
+const char description[] =
+STR(
+	{
+	"Name":"Algorithm SOFIA for finding DELTA-stable patterns",
+	"Description":"An algorithm that finds DELTA-stable patterns by passing from smaller projections of the dataset to larger ones. Algorithm is also able to automatically adjust the threshold of DELTA-measure in order to limit the requiered memory and have polynomial computational complexity. Optimistic estimators can also be used with SOFIA. In this case only the best found is reported.",
+	"Params": {
+			"$schema": "http://json-schema.org/draft-04/schema#",
+			"title": "Params of SOFIA Context processor",
+			"type": "object",
+			"properties": {
+				"DefualtThld":{
+					"description": "The initial threshold for DELTA-measure (or any other projection-antimonotonic measure).",
+					"type":"number"
+				},
+				"MaxPatternNumber" :{
+					"description": "The maximal number of patterns that should be stored at any iteration of the algorithm. Used only when 'AdjustThreshold' is true.",
+					"type":"number"
+					"minimumu":0,
+					"exclusiveMinimum":true
+				},
+				"FindPartialOrder":{
+					"description": "A flag indicating if the partial order of patterns should be found",
+					"type":"boolean"
+				},
+				"AdjustThreshold":{
+					"description": "A flag indicating if the threshold should be adjusted in orderder to ensure polynomiality and memory finity",
+					"type":"boolean"
+				},
+				"OutputParams":{
+					"description": "The set of parameters controlling what should be printed out as the result",
+					"type": "object",
+					"properties": {
+						"OutExtent":{
+							"description": "A flag indicating if the extent should be printed or (if false) only the support is reported",
+							"type":"boolean"
+						},
+						"OutIntent":{
+							"description": "A flag indicating if the intent should be reported",
+							"type":"boolean"
+						}
+					}
+				},
+				"OptimisticEstimator":{
+					"description": "The object that defines the optimistic estimator for the goal function",
+					"type": "@OptimisticEstimatorModules"
+				},
+				"OEstMinQuality":{
+					"description": "The minimal quality of the pattern that is considederd interesting to be found",
+					"type": "number"
+				},
+				"ProjectionChain":{
+					"description": "The object that defines the projection chain that is related to both the patterns and the measure to compute.",
+					"type": "@ProjectionChainModules"
+				}
+			}
+		}
+	}
+);
 
 ////////////////////////////////////////////////////////////////////
 CModuleRegistrar<CSofiaContextProcessor> CSofiaContextProcessor::registrar(
@@ -91,8 +155,8 @@ void CSofiaContextProcessor::LoadParams( const JSON& json )
 			throw new CJsonException( "CSofiaContextProcessor::LoadParams", CJsonError( json, errorText ) );
 		}
 	}
-	if( p.HasMember( "MinQuality" )) {
-		const rapidjson::Value& minQ = params["Params"]["MinQuality"];
+	if( p.HasMember( "OEstMinQuality" )) {
+		const rapidjson::Value& minQ = params["Params"]["OEstMinQuality"];
 		if( minQ.IsNumber() ) {
 			bestPattern.Q = minQ.GetDouble();
 		}

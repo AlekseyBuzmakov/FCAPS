@@ -2,6 +2,7 @@
 
 #include "StabilityEstimatorContextProcessor.h"
 
+#include <fcaps/ComputationProcedure.h>
 #include <fcaps/SharedModulesLib/VectorBinarySetDescriptor.h>
 
 #include <JSONTools.h>
