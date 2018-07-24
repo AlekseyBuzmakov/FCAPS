@@ -5,7 +5,10 @@
 
 #include <fcaps/ComputationProcedure.h>
 
+#include <ListWrapper.h>
 #include <ModuleTools.h>
+
+#include <rapidjson/document.h>
 
 ////////////////////////////////////////////////////////////////////
 
@@ -14,7 +17,7 @@ interface IContextProcessor;
 
 ////////////////////////////////////////////////////////////////////
 
-const char ContextBasedComputationProcedure[] = "ContextBasedComputationProcedure";
+const char ContextBasedComputationProcedure[] = "ContextBasedComputationProcedureModule";
 
 class CContextBasedComputationProcedure : public IComputationProcedure, public IModule {
 public:
@@ -49,6 +52,11 @@ private:
 	std::string contextFilePath;
 	// Maximal number of objects to process
 	DWORD maxObjectNumber;
+	// The indices of objects that should be processed
+	CList<DWORD> indexes;
+
+	void readDataJson( rapidjson::Document& data ) const;
+	void extractObjectNames( rapidjson::Document& data );
 };
 
 #endif // CCONTEXTBASEDCOMPUTATIONPROCEDURE_H

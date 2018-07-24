@@ -8,16 +8,15 @@
 
 #include <fcaps/Module.h>
 #include <ModuleTools.h>
+
 #include <fcaps/ComputationProcedure.h>
-#include <fcaps/ContextProcessor.h>
 #include <fcaps/Filter.h>
 
 #include <Library.h>
 #include <ModuleJSONTools.h>
 
 #include <JSONTools.h>
-
-#include <ListWrapper.h>
+#include <StdTools.h>
 
 #include <rapidjson/document.h>
 
@@ -66,7 +65,6 @@ public:
 		CConsoleApplication( _argc, _argv ),
 		state( S_AddingObjects ),
 		writeOutput(false),
-		maxObjsCount( -1 ),
 		pathToModules( "./modules/" )
 	{
 	}
@@ -79,7 +77,7 @@ public:
 	virtual std::string GetCmdLineDescription( const std::string& progName ) const;
 	virtual int Execute();
 
-	// Methdos of IContextProcessorCallback
+	// Methdos of IComputationProcedureCallback
 	virtual void ReportProgress( const double& p, const std::string& info ) const;
 	virtual void ReportNextStage( const std::string& stageName ) const;
 	virtual void Warning(const std::string& warning) const;
@@ -97,16 +95,11 @@ private:
 	};
 private:
 	TState state;
-	string dataPath;
 	string cbPath;
 	string fltrPath;
 	string outBaseName;
 	bool writeOutput;
 
-	DWORD maxObjsCount;
-	CList<DWORD> indexes;
-
-	vector<string> objNames;
 	mutable string lastCtxProcessorInfo;
 
 	string pathToModules;
@@ -118,12 +111,10 @@ private:
 	void loadModule(const string& name);
 	void extractModules( const JSON& description ) const;
 
-	void runContextProcessor();
+	void runComputationProcedure();
 
-	void readContextProcessorJson( rapidjson::Document& cb ) const;
-	void readDataJson( rapidjson::Document& data ) const;
-	void extractObjectNames( rapidjson::Document& data );
-	IContextProcessor* createContextProcessor( rapidjson::Document& cb ) const;
+	void readComputationProcedureJson( rapidjson::Document& cb ) const;
+	IComputationProcedure* createComputationProcedure( rapidjson::Document& cb ) const;
 
 	void runFilters();
 	IFilter* createFilter() const;
@@ -131,36 +122,13 @@ private:
 
 bool CThisConsoleApplication::ProcessParam( const std::string& param, const std::string& value )
 {
-	if ( param == "-data" ) {
-		dataPath = value;
-	} else if ( param == "-CP"
-		|| param == "-CB"
-		|| param == "-PM" )
-	{
+	if ( param == "-CP" ) {
 		cbPath = value;
 	} else if( param == "-fltr" ) {
 		fltrPath = value;
 	} else if ( param == "-out" ) {
 		outBaseName = value;
 		writeOutput = true;
-	} else if ( param == "-n" ) {
-		maxObjsCount = lexical_cast<DWORD>( value );
-	} else if ( param == "-index" ) {
-		indexes.Clear();
-		vector<string> indexesStr;
-		split( indexesStr, value, is_any_of( ","), token_compress_on );
-		for( size_t i = 0; i < indexesStr.size(); ++i ) {
-			if( indexesStr[i].empty() ) {
-				continue;
-			}
-			const DWORD nextIndex = lexical_cast<DWORD>( indexesStr[i] );
-			if( !indexes.IsEmpty() && indexes.Back() >= nextIndex ) {
-				indexes.Clear();
-				GetInfoStream() << "Not sorted indexes -- ignored\n";
-				return true;
-			}
-			indexes.PushBack( nextIndex );
-		}
 	} else if (param == "-M") {
 		pathToModules = value;
 	} else {
@@ -182,12 +150,15 @@ bool CThisConsoleApplication::ProcessOption( const std::string& option )
 bool CThisConsoleApplication::FinalizeParams()
 {
 	loadModules();
+	if( outBaseName.empty() ) {
+		outBaseName = string("fcaps-result-") +StdExt::to_string(time(NULL))+ ".json";
+	}
 	return true;
 }
 
 bool CThisConsoleApplication::AreParamsCorrect() const
 {
-	return !dataPath.empty() && (!cbPath.empty() || !fltrPath.empty() )
+	return (!cbPath.empty() || !fltrPath.empty() )
 		&& CConsoleApplication::AreParamsCorrect();
 }
 
@@ -195,34 +166,31 @@ std::string CThisConsoleApplication::GetCmdLineDescription( const std::string& p
 {
 	return progName + " -data:{Path} [-CP:{Path}][-fltr:{PATH}] [OPTIONS]\n"
 	"OPTIONS = \n"
-	"\t[-out:{Path} -n:{Num} -index:{Index Set} -M:{Path}]\n"
+	"\t[-out:{Path} -M:{Path}]\n"
 	">>Name of the output is {output file}-patterns\n"
 
-	" -data -- Path to the data in JSON format (see ./JSON-Examples).\n"
 	" -CP -- Path to params of Concept Processor in JSON (see JSON-Specification).\n"
-	" \t[aliases: -CB,-PM]\n"
 	" -fltr -- Path to params of the filter applied to the lattice\n"
 	" -out -- Base path of the result. Suffixes can be added.\n"
-	" -n -- the number of objects to process\n"
-	" -index -- add only objects with requested indexes (e.g. '-index:1,2,6')\n"
 	" -M -- the path to the folder with modules\n"
 	;
 }
 
 int CThisConsoleApplication::Execute()
 {
-	GetInfoStream() << "Processing\n\t\"" << dataPath << "\"\n";
+	GetInfoStream() << "Starting computations\n";
 	if( !cbPath.empty() ) {
-		GetInfoStream() << "with params from\n\t\"" << cbPath << "\"\n";
+		GetInfoStream() << "  with params from\n\t\"" << cbPath << "\"\n";
 	}
 	if( !fltrPath.empty() ) {
-		GetInfoStream() << "with filters from\n\t\"" << fltrPath << "\"\n";
+		GetInfoStream() << "  with filters from\n\t\"" << fltrPath << "\"\n";
 	}
+	GetInfoStream() << "Output is saved to\n"
+	                << "\t" << outBaseName << "\n";
+	
 	try{
 		if( !cbPath.empty() ) {
-			runContextProcessor();
-		} else {
-			outBaseName = dataPath;
+			runComputationProcedure();
 		}
 		if( !fltrPath.empty() && !outBaseName.empty() ) {
 			runFilters();
@@ -261,78 +229,22 @@ void CThisConsoleApplication::Warning(const std::string& warning) const
 	GetWarningStream() << "\n[!] " << warning << "\n";
 }
 
-void CThisConsoleApplication::runContextProcessor() {
-
-	rapidjson::Document cb;
-	readContextProcessorJson( cb );
+void CThisConsoleApplication::runComputationProcedure() {
 
 	string cbFullPath;
 	RelativePathes::BaseName(cbPath,cbFullPath);
 	RelativePathes::CSearchPath cbPathSwitcher( cbFullPath );
 
-	rapidjson::Document data;
-	readDataJson( data );
+	rapidjson::Document cb;
+	readComputationProcedureJson( cb );
 
-	extractObjectNames( data );
+	CSharedPtr<IComputationProcedure> compProcedure ( createComputationProcedure(cb) );
+	compProcedure->SetCallback( this );
 
-	CSharedPtr<IContextProcessor> processor ( createContextProcessor(cb) );
-	processor->SetCallback( this );
-
-	string dataParams;
-	if( data[0].HasMember("Params") ) {
-		CreateStringFromJSON(data[0]["Params"], dataParams);
-		processor->PassDescriptionParams( dataParams );
-	}
-
-	// Preparation
-	GetStatusStream() << "Preparation...                               \r" << flush;
-	state=S_Prepare;
-	processor->Prepare();
+	time_t start = time( NULL );
+	compProcedure->Run();
 
 	//Iterate objects.
-	GetStatusStream() << "Adding objects...                               \r" << flush;
-	state = S_AddingObjects;
-	time_t start = time( NULL );
-	string objectJson;
-	const rapidjson::Value& dataBody=data[1]["Data"];
-
-	CStdIterator<CList<DWORD>::CConstIterator, false> index( indexes );
-	DWORD objNum = 0;
-	for( size_t i = 0; i < dataBody.Size(); ++i ) {
-		// Select objects with good indices.
-		if( !indexes.IsEmpty() ) {
-			if( index.IsEnd() ) {
-				break;
-			}
-			i = *index;
-			++index;
-		}
-		// Cut if have processed to much.
-		if( objNum >= maxObjsCount ) {
-			break;
-		}
-
-		CreateStringFromJSON( dataBody[i], objectJson );
-		try{
-			processor->AddObject( i, objectJson );
-			++objNum;
-		} catch( CException* e ) {
-			GetWarningStream() << "Object " << i << " has a bad description -> IGNORED\n";
-			printException( *e );
-			delete e;
-			continue;
-		}
-
-		const time_t end = time( NULL );
-		GetStatusStream() << "\rAdded " << objNum << "th object. "
-			<< lastCtxProcessorInfo << " "
-			<< "Time is " << end - start << flush;
-	}
-	GetStatusStream() << "\rAdded all objects.                                       \n";
-
-	state = S_ProcessingAllAditions;
-	processor->ProcessAllObjectsAddition();
-
 	const time_t end = time( NULL );
 	GetInfoStream() << "\nProcessing time is " << end - start << "                                 \n";
 	GetInfoStream() << lastCtxProcessorInfo << "\n";
@@ -340,19 +252,8 @@ void CThisConsoleApplication::runContextProcessor() {
 	// Output base path
 	if( writeOutput ) {
 		state = S_SavingResults;
-		if( outBaseName.empty() ) {
-			outBaseName = dataPath;
-			const size_t ext = outBaseName.find_last_of( "." );
-			if( ext != string::npos ) {
-				outBaseName = outBaseName.substr(0,ext);
-			}
-			outBaseName += ".out.json";
-		}
 		const time_t startOutput = time( NULL );
-		GetStatusStream() << "\nProducing output...\r" << flush;
-
-		processor->SaveResult( outBaseName );
-
+		compProcedure->SaveResult(outBaseName);
 		const time_t endOutput = time( NULL );
 		GetInfoStream() << "Output produced " << endOutput - startOutput << " seconds\n";
 	}
@@ -443,82 +344,35 @@ void CThisConsoleApplication::extractModules( const JSON& description ) const
 	}
 }
 
-void CThisConsoleApplication::readContextProcessorJson( rapidjson::Document& cb ) const
+void CThisConsoleApplication::readComputationProcedureJson( rapidjson::Document& cb ) const
 {
 	CJsonError jsonError;
 	if( !ReadJsonFile( cbPath, cb, jsonError ) ) {
-		throw new CJsonException( "ContextProcessorJson", jsonError );
+		throw new CJsonException( "ComputationProcedureJson", jsonError );
 	}
 	if( !cb.IsObject() ) {
-		throw new CTextException( "ContextProcessorJson", "JSON params of CB are not in an json-object" );
+		throw new CTextException( "ComputationProcedureJson", "JSON params of CB are not in an json-object" );
 	}
 	if( !cb.HasMember( "Params" ) ) {
 		cb.AddMember( "Params", rapidjson::Value().SetObject(), cb.GetAllocator() );
 	}
 }
-void CThisConsoleApplication::readDataJson( rapidjson::Document& data ) const
-{
-	CJsonError jsonError;
-	if( !ReadJsonFile( dataPath, data, jsonError ) ) {
-		throw new CJsonException( "readDataJson", jsonError );
-	}
-	if( !data.IsArray() || data.Size() < 2 ) {
-		throw new CTextException( "readDataJson", "JSON data are not in an 2-sized json-array" );
-	}
-	if( !data[1].HasMember( "Data") ) {
-		throw new CTextException( "readDataJson", "No DATA[1].Data found" );
-	}
-	if( !data[1]["Data"].IsArray() ) {
-		throw new CTextException( "readDataJson", "DATA[1].Data should be an array" );
-	}
-}
 
-void CThisConsoleApplication::extractObjectNames( rapidjson::Document& data )
-{
-	const rapidjson::Value& dataParams = data[0u];
-	if( !dataParams.IsObject() ) {
-		GetWarningStream() << "DATA[0] is not an object\n";
-		return;
-	}
-
-	if( !dataParams.HasMember( "ObjNames" ) || !dataParams["ObjNames"].IsArray() ) {
-		return;
-	}
-
-	const rapidjson::Value& objNamesArray = dataParams["ObjNames"];
-	objNames.reserve( objNamesArray.Size() );
-	for( int i = 0; i < objNamesArray.Size(); ++i) {
-		const rapidjson::Value& name = objNamesArray[i];
-		if( !name.IsString() ) {
-			GetWarningStream() << "The " << i << "th object name is not a string -- ignored.\n";
-			objNames.push_back( StdExt::to_string(i) );
-			continue;
-		}
-		objNames.push_back( name.GetString() );
-	}
-
-	if( data[1]["Data"].Size() != objNames.size() ) {
-		GetWarningStream() << "The number of objects (" << data[1]["Data"].Size() << ")"
-			<< " does not correspond to the number of object names (" << objNames.size() << ").\n";
-	}
-}
-
-IContextProcessor* CThisConsoleApplication::createContextProcessor( rapidjson::Document& cb ) const
+IComputationProcedure* CThisConsoleApplication::createComputationProcedure( rapidjson::Document& cb ) const
 {
 	string errorText;
-	unique_ptr<IContextProcessor> processor;
-	processor.reset( dynamic_cast<IContextProcessor*>(
+	unique_ptr<IComputationProcedure> cp;
+	cp.reset( dynamic_cast<IComputationProcedure*>(
 		CreateModuleFromJSON( cb, errorText ) ) );
 
-	if( processor.get() == 0 ) {
+	if( cp.get() == 0 ) {
 		if( errorText.empty() ) {
-			throw new CTextException( "execute", "CB given by params is not a Context Processor.");
+			throw new CTextException( "execute", "CB given by params is not a Computation Procedure.");
 		} else {
 			throw new CTextException( "execute",  errorText );
 		}
 	}
-	processor->SetObjNames( objNames );
-	return processor.release();
+	return cp.release();
 }
 
 void CThisConsoleApplication::runFilters()
@@ -531,7 +385,8 @@ void CThisConsoleApplication::runFilters()
 	const time_t start = time( NULL );
 
 	CSharedPtr<IFilter> filter ( createFilter() );
-	filter->SetDataFile( dataPath.c_str() );
+	// data is not available now. Probably filters should extract this information somehow
+	// filter->SetDataFile( dataPath.c_str() );
 	filter->SetInputFile( outBaseName.c_str() );
 	filter->Process();
 
@@ -545,7 +400,7 @@ IFilter* CThisConsoleApplication::createFilter() const
 	rapidjson::Document fltrParams;
 	CJsonFile file(fltrPath);
 	if( !file.Read(  fltrParams, jsonError ) ) {
-		throw new CJsonException( "ContextProcessorJson", jsonError );
+		throw new CJsonException( "ComputationProcedureJson", jsonError );
 	}
 
 	string errorText;
