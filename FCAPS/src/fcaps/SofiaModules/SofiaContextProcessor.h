@@ -33,9 +33,15 @@ public:
 	virtual void LoadParams( const JSON& );
 	virtual JSON SaveParams() const;
 	virtual const char* const GetType() const
-		{ return ContextProcessorModuleType; };
+		{ return Type(); };
 	virtual const char* const GetName() const
-		{ return SofiaContextProcessor; };
+		{ return Name(); };
+	// For CModuleRegistrar
+	static const char* const Type()
+		{ return ContextProcessorModuleType;}
+	static const char* const Name()
+		{ return SofiaContextProcessor; }
+	static const char* const Desc();
 
 	// Methods of IContextProcessor
 	virtual const std::vector<std::string>& GetObjNames() const;

@@ -30,7 +30,7 @@ IModule* CreateModuleFromJSON( const rapidjson::Value& moduleJson, std::string& 
 	std::string paramsJSON = "{}";
 	CreateStringFromJSON( moduleJson, paramsJSON );
 
-	auto_ptr<IModule> result( CreateModule( moduleJson["Type"].GetString(), moduleJson["Name"].GetString(), paramsJSON ) );
+	unique_ptr<IModule> result( CreateModule( moduleJson["Type"].GetString(), moduleJson["Name"].GetString(), paramsJSON ) );
 	if( result.get() == 0 ) {
 		errorText += string( "No Module found with type '" ) + moduleJson["Type"].GetString() + "'"
 			" and name '" + moduleJson["Name"].GetString() + "'";
@@ -52,7 +52,8 @@ JSON EnumerateRegisteredModulesToJSON()
 		result += "{";
 		result = result + "\"Type\":\"" + regs[i].Type + "\",";
 		result = result + "\"Name\":\"" + regs[i].Name + "\",";
-		result = result + "\"Func\":" + StdExt::to_string(reinterpret_cast<size_t>(regs[i].Func));
+		result = result + "\"Func\":" + StdExt::to_string(reinterpret_cast<size_t>(regs[i].Func)) + ",";
+		result = result + "\"Desc\":" + regs[i].Desc;
 		result += "}";
 	}
 	result += "]\n";

@@ -36,7 +36,7 @@ STR(
 				},
 				"MaxPatternNumber" :{
 					"description": "The maximal number of patterns that should be stored at any iteration of the algorithm. Used only when 'AdjustThreshold' is true.",
-					"type":"number"
+					"type":"number",
 					"minimumu":0,
 					"exclusiveMinimum":true
 				},
@@ -80,8 +80,11 @@ STR(
 );
 
 ////////////////////////////////////////////////////////////////////
-CModuleRegistrar<CSofiaContextProcessor> CSofiaContextProcessor::registrar(
-	ContextProcessorModuleType, SofiaContextProcessor );
+CModuleRegistrar<CSofiaContextProcessor> CSofiaContextProcessor::registrar;
+const char* const CSofiaContextProcessor::Desc()
+{
+	return description;
+}
 
 CSofiaContextProcessor::CSofiaContextProcessor() :
 	callback(0),

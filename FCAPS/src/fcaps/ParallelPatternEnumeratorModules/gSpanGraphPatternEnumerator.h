@@ -39,9 +39,16 @@ public:
 	virtual void LoadParams( const JSON& );
 	virtual JSON SaveParams() const;
 	virtual const char* const GetType() const
-	{ return PatternEnumeratorByCallbackModuleType; }
+		{ return Type(); };
 	virtual const char* const GetName() const
-	{ return gSpanGraphPatternEnumeratorModule; }
+		{ return Name(); };
+	// For CModuleRegistrar
+	static const char* const Type()
+		{ return PatternEnumeratorByCallbackModuleType;}
+	static const char* const Name()
+		{ return gSpanGraphPatternEnumeratorModule; }
+	static const char* const Desc()
+		{ return "{}"; }
 
 private:
 	class CLabelMap {

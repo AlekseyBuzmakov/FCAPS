@@ -42,9 +42,16 @@ public:
 	virtual void LoadParams( const JSON& );
 	virtual JSON SaveParams() const;
 	virtual const char* const GetType() const
-		{ return registrar.GetType(); }
+		{ return Type(); };
 	virtual const char* const GetName() const
-		{ return registrar.GetName(); }
+		{ return Name(); };
+	// For CModuleRegistrar
+	static const char* const Type()
+		{ return ContextProcessorModuleType;}
+	static const char* const Name()
+		{ return StabilityEstimatorContextProcessorModule; }
+	static const char* const Desc()
+		{ return "{}"; }
 
 private:
 	enum TDataType {

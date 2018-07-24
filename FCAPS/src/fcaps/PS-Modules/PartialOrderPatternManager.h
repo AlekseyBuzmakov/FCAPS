@@ -82,10 +82,16 @@ public:
 	virtual void LoadParams( const JSON& );
 	virtual JSON SaveParams() const;
 	virtual const char* const GetType() const
-        {return PatternManagerModuleType; }
+		{ return Type(); };
 	virtual const char* const GetName() const
-        { return PartialOrderPatternManager; }
-
+		{ return Name(); };
+	// For CModuleRegistrar
+	static const char* const Type()
+		{ return PatternManagerModuleType;}
+	static const char* const Name()
+		{ return PartialOrderPatternManager; }
+	static const char* const Desc()
+		{ return "{}"; }
 
 	// Initialization
 	//  _strElemenstCmp -- the comparator for string elements.

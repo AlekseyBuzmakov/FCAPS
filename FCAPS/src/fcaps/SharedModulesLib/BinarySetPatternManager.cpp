@@ -227,7 +227,7 @@ inline CBinarySetPatternDescriptor* CBinarySetDescriptorsComparatorBase::UnionSe
 	 const CBinarySetPatternDescriptor& first, const CBinarySetPatternDescriptor& second ) const
 {
 	CBinarySetPatternDescriptor* result = NewPattern();
-	auto_ptr<CBinarySetPatternDescriptor> resultPattern( result );
+	unique_ptr<CBinarySetPatternDescriptor> resultPattern( result );
 
 	PARALLEL_LIST_ITERATION_BEGIN( CBinarySetPatternDescriptor::CAttrsList, CBinarySetPatternDescriptor::CAttrsList::CConstIterator, first.GetAttribs(), second.GetAttribs(), firstIter, lastIter );
 		result->AddSortedNextAttribNumber( *firstIter < *lastIter ? *firstIter : *lastIter );
@@ -246,7 +246,7 @@ CBinarySetPatternDescriptor* CBinarySetDescriptorsComparatorBase::IntersectSets(
 	 const CBinarySetPatternDescriptor& first, const CBinarySetPatternDescriptor& second ) const
 {
 	CBinarySetPatternDescriptor* result = NewPattern();
-	auto_ptr<CBinarySetPatternDescriptor> resultPattern( result );
+	unique_ptr<CBinarySetPatternDescriptor> resultPattern( result );
 	PARALLEL_LIST_ITERATION_BEGIN( CBinarySetPatternDescriptor::CAttrsList, CBinarySetPatternDescriptor::CAttrsList::CConstIterator, first.GetAttribs(), second.GetAttribs(), firstIter, lastIter );
 		if( *firstIter == *lastIter ) {
 			result->AddSortedNextAttribNumber( *firstIter );
@@ -288,7 +288,7 @@ CBinarySetPatternDescriptor* CBinarySetDescriptorsComparatorBase::LoadRWPattern(
 			string( "No 'Inds' member found in pattern description <<\n" ) + json + "\n>>" );
 	}
 
-	auto_ptr<CBinarySetPatternDescriptor> pattern( NewPattern() );
+	unique_ptr<CBinarySetPatternDescriptor> pattern( NewPattern() );
 	assert( pattern.get() != 0 );
 
 	const rapidjson::Value& indsJson = patternJson[jsonInds];

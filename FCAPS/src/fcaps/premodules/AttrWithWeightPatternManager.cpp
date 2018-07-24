@@ -18,7 +18,7 @@ const IPatternDescriptor* CAttrWithWeightPatternComparator::CalculateSimilarity(
 	const CAttrWithWeightPatternDescriptor& first = debug_cast<const CAttrWithWeightPatternDescriptor&>( *firstPtrn );
 	const CAttrWithWeightPatternDescriptor& second = debug_cast<const CAttrWithWeightPatternDescriptor&>( *secondPtrn );
 
-	auto_ptr<CAttrWithWeightPatternDescriptor> result( new CAttrWithWeightPatternDescriptor );
+	unique_ptr<CAttrWithWeightPatternDescriptor> result( new CAttrWithWeightPatternDescriptor );
 	if( first.GetAttr() != second.GetAttr() || first.GetWeight() == 0 || second.GetWeight() == 0 ) {
 		result->SetWeight( 0 );
 		return result.release();

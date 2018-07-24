@@ -32,9 +32,16 @@ public:
 	virtual void LoadParams( const JSON& );
 	virtual JSON SaveParams() const;
 	virtual const char* const GetType() const
-		{ return OptimisticEstimatorModuleType; };
+		{ return Type(); };
 	virtual const char* const GetName() const
-		{ return BinaryClassificationOptimisticEstimator; };
+		{ return Name(); };
+	// For CModuleRegistrar
+	static const char* const Type()
+		{ return OptimisticEstimatorModuleType;}
+	static const char* const Name()
+		{ return BinaryClassificationOptimisticEstimator; }
+	static const char* const Desc()
+		{ return "{}"; }
 
 private:
 	static const CModuleRegistrar<CBinaryClassificationOEst> registrar;

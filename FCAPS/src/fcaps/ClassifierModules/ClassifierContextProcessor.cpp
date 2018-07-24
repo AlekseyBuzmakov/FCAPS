@@ -14,8 +14,7 @@ using namespace boost;
 
 ////////////////////////////////////////////////////////////////////
 
-const CModuleRegistrar<CClassifierContextProcessor> CClassifierContextProcessor::registrar(
-	ContextProcessorModuleType, ClassifierContextProcessorModule );
+const CModuleRegistrar<CClassifierContextProcessor> CClassifierContextProcessor::registrar;
 
 CClassifierContextProcessor::CClassifierContextProcessor() :
 	callback( 0 )

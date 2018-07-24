@@ -29,9 +29,16 @@ public:
 	virtual void LoadParams( const JSON& );
 	virtual JSON SaveParams() const;
 	virtual const char* const GetType() const
-		{ return ProjectionChainModuleType; };
+		{ return Type(); };
 	virtual const char* const GetName() const
-		{ return CosineBinClsPatternsProjectionChain; };
+		{ return Name(); };
+	// For CModuleRegistrar
+	static const char* const Type()
+		{ return ProjectionChainModuleType;}
+	static const char* const Name()
+		{ return CosineBinClsPatternsProjectionChain; }
+	static const char* const Desc()
+		{ return "{}"; }
 
 private:
 	static CModuleRegistrar<CCosineBinClsPatternsProjectionChain> registar;

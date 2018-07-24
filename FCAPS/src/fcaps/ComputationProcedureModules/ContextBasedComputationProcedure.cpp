@@ -29,13 +29,13 @@ STR(
 				},
 				"MaxObjectNumber" :{
 					"description": "The maximal number of objects to process",
-					"type":"integer"
-					"minimum":1,
+					"type":"integer",
+					"minimum":1
 				},
 				"Indices" :{
 					"description": "The zero-based indices of objects that should be processed",
-					"type":"integer"
-					"minimum":0,
+					"type":"integer",
+					"minimum":0
 				},
 				"ContextProcessor":{
 					"description": "The object that defines the context processor that performs the actual computations.",
@@ -53,7 +53,7 @@ const CModuleRegistrar<CContextBasedComputationProcedure> CContextBasedComputati
 
 const char* const CContextBasedComputationProcedure::Desc()
 {
-	return "{}";
+	return description;
 }
 ////////////////////////////////////////////////////////////////////
 

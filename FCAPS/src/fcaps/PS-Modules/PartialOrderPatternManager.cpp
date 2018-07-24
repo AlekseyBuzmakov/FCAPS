@@ -58,7 +58,7 @@ const CPartialOrderPatternDescriptor* CPartialOrderPatternManager::LoadPattern( 
 			string("The JSON is not an array (\"") + json + "\")" );
 	}
 
-	auto_ptr<CPartialOrderPatternDescriptor> result( new CPartialOrderPatternDescriptor( elemsCmp ) );
+	unique_ptr<CPartialOrderPatternDescriptor> result( new CPartialOrderPatternDescriptor( elemsCmp ) );
 	for( size_t i = 0; i < ptrnJSON.Size(); ++i ) {
 		JSON elemJson;
 		CreateStringFromJSON( ptrnJSON[i], elemJson );
@@ -87,7 +87,7 @@ const CPartialOrderPatternDescriptor* CPartialOrderPatternManager::CalculateSimi
 	const CPartialOrderPatternDescriptor& ptrn1 = debug_cast<const CPartialOrderPatternDescriptor&>( *first );
 	const CPartialOrderPatternDescriptor& ptrn2 = debug_cast<const CPartialOrderPatternDescriptor&>( *second );
 
-	auto_ptr<CPartialOrderPatternDescriptor> result( NewPattern() );
+	unique_ptr<CPartialOrderPatternDescriptor> result( NewPattern() );
 
 	CStdIterator<CElementSet::CConstIterator, false> el1( ptrn1.GetElements() );
 	CStdIterator<CElementSet::CConstIterator, false> el2;

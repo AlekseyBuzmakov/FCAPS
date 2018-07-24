@@ -32,9 +32,15 @@ public:
 	virtual void LoadParams( const JSON& );
 	virtual JSON SaveParams() const;
 	virtual const char* const GetType() const
-		{ return OptimisticEstimatorModuleType; };
+		{ return Type(); };
 	virtual const char* const GetName() const
-		{ return LocalTreatmentEffectOptimisticEstimator; };
+		{ return Name(); };
+	// For CModuleRegistrar
+	static const char* const Type()
+		{ return OptimisticEstimatorModuleType;}
+	static const char* const Name()
+		{ return LocalTreatmentEffectOptimisticEstimator; }
+	static const char* const Desc();
 
 	// Methods of the class
 	bool operator()(int a, int b) const;

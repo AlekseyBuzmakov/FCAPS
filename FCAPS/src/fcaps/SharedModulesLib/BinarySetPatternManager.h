@@ -93,7 +93,12 @@ public:
 	virtual void LoadParams( const JSON& );
 	virtual JSON SaveParams() const;
 	virtual const char* const GetType() const
-		{ return PatternManagerModuleType; };
+		{ return Type(); };
+	// For CModuleRegistrar
+	static const char* const Type()
+		{ return PatternManagerModuleType;}
+	static const char* const Desc()
+		{ return "{}"; }
 
 	// Methods of IPatternManager.
 	virtual TPatternType GetPatternsType() const
@@ -179,6 +184,9 @@ class CBinarySetDescriptorsComparator : public CBinarySetDescriptorsComparatorBa
 public:
 	// Methods of IModule
 	virtual const char* const GetName() const
+		{ return Name(); };
+	// CModuleRegistrar
+	static const char* const Name()
 		{ return BinarySetDescriptorsComparator; }
 	// Methods of IPatternManager.
 	virtual const CBinarySetPatternDescriptor* CalculateSimilarity(
@@ -198,6 +206,9 @@ class CUnionBinarySetDescriptorsComparator : public CBinarySetDescriptorsCompara
 public:
 	// Methods of IModule
 	virtual const char* const GetName() const
+		{ return Name(); };
+	// CModuleRegistrar
+	static const char* const Name()
 		{ return UnionBinarySetDescriptorsComparator; }
 	// Methods of IPatternManager.
 	virtual const CBinarySetPatternDescriptor* CalculateSimilarity(

@@ -28,9 +28,16 @@ public:
 	virtual void LoadParams( const JSON& );
 	virtual JSON SaveParams() const;
 	virtual const char* const GetType() const
-		{ return ClassifierModuleType; };
+		{ return Type(); };
 	virtual const char* const GetName() const
-		{ return CAEPByDongClassifier; };
+		{ return Name(); };
+	// For CModuleRegistrar
+	static const char* const Type()
+		{ return ClassifierModuleType;}
+	static const char* const Name()
+		{ return CAEPByDongClassifier; }
+	static const char* const Desc()
+		{ return "{}"; }
 
 	// Methods of IClassifier
 	virtual void PassDescriptionParams( const JSON& json );

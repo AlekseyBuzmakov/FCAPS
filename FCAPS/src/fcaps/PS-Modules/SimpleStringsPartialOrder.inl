@@ -43,7 +43,7 @@ void CStringsPartialOrderComparator<TSymb>::LoadElements( const JSON& json, CEle
 	}
 	// Loading elements
 	CList<const CStringPartialOrderElement<TSymb>*> result;
-	std::auto_ptr< CStringPartialOrderElement<TSymb> > nexTSymb( new CStringPartialOrderElement<TSymb> );
+	std::unique_ptr< CStringPartialOrderElement<TSymb> > nexTSymb( new CStringPartialOrderElement<TSymb> );
 	for( size_t i = 0; i < patternJSON.Size(); ++i ) {
 		const TSymb& el = LoadSymb( patternJSON[i] );
 		if( cutOnEmptyElems && IsMostGeneralSymb( el ) ) {
@@ -98,7 +98,7 @@ void CStringsPartialOrderComparator<TSymb>::FindAllParents(
 	const int lastIntersection = str1size - minStrLength;
 	int j = -str2size + minStrLength;
 	for( ; j <= lastIntersection; ++j ) {
-		std::auto_ptr< CStringPartialOrderElement<TSymb> > newElem( new CStringPartialOrderElement<TSymb> );
+		std::unique_ptr< CStringPartialOrderElement<TSymb> > newElem( new CStringPartialOrderElement<TSymb> );
 		CString& intersection = newElem->String();
 		intersectStrings( str1, str2, j, intersection );
 #ifdef DEBUG_INFO
@@ -222,7 +222,7 @@ void CStringsPartialOrderComparator<TSymb>::splitString( const CString& str,  CL
 		if( !isFinish && !IsMostGeneralSymb( str[i] ) ) {
 			tmpStr.PushBack( str[i] );
 		} else if( tmpStr.Size() >= minStrLength ) {
-			std::auto_ptr< CStringPartialOrderElement<TSymb> > next( new CStringPartialOrderElement<TSymb> );
+			std::unique_ptr< CStringPartialOrderElement<TSymb> > next( new CStringPartialOrderElement<TSymb> );
 			next->String().reserve( tmpStr.Size() );
 			next->String().insert( next->String().begin(), tmpStr.Begin(), tmpStr.End() );
 			parents.PushBack( next.release() );

@@ -35,9 +35,16 @@ public:
 	virtual void LoadParams( const JSON& );
 	virtual JSON SaveParams() const;
 	virtual const char* const GetType() const
-	{ return PatternEnumeratorModuleType; }
+		{ return Type(); };
 	virtual const char* const GetName() const
-	{ return ParallelPatternEnumeratorModule; }
+		{ return Name(); };
+	// For CModuleRegistrar
+	static const char* const Type()
+		{ return PatternEnumeratorModuleType;}
+	static const char* const Name()
+		{ return ParallelPatternEnumeratorModule; }
+	static const char* const Desc()
+		{ return "{}"; }
 
 	// A special function to run a new thread.
 	void RunAlgoThread();

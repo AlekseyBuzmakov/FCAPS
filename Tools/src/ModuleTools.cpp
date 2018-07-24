@@ -14,7 +14,16 @@ using namespace boost;
 
 ////////////////////////////////////////////////////////////////////
 
-typedef unordered_map<string,CreateFunc> CTypedModuleCollection;
+struct CModuleInfo {
+	CreateFunc Func;
+	string Desc;
+
+	CModuleInfo() :
+		Func(0) {}
+	CModuleInfo( CreateFunc f, const string& desc) :
+		Func(f), Desc(desc) {}
+};
+typedef unordered_map<string,CModuleInfo> CTypedModuleCollection;
 typedef unordered_map<string, CTypedModuleCollection> CModuleCollection;
 
 CModuleCollection& getModuleCollection()
@@ -45,8 +54,8 @@ IModule* CreateModule( const string& type, const string& name, const JSON& param
 		if( fnd == typedCollection.end() ) {
 			return 0;
 		}
-		CreateFunc createFunc = fnd->second;
-		auto_ptr<IModule> newModule( createFunc() );
+		CreateFunc createFunc = fnd->second.Func;
+		unique_ptr<IModule> newModule( createFunc() );
 		assert( newModule.get() != 0 );
 		newModule->LoadParams( params );
 		return newModule.release();
@@ -63,12 +72,12 @@ TExternalCreateModuleFunc SwitchToExternalFunction( TExternalCreateModuleFunc f 
 
 ////////////////////////////////////////////////////////////////////
 
-void RegisterModule(const std::string& type, const std::string& name, CreateFunc func )
+void RegisterModule(const std::string& type, const std::string& name, CreateFunc func, const std::string& desc)
 {
 	CModuleCollection& collection = getModuleCollection();
 	CTypedModuleCollection& typedCollection = collection[type];
 	assert( typedCollection.find( name ) == typedCollection.end() );
-	typedCollection[name]=func;
+	typedCollection.insert(std::make_pair(name, CModuleInfo(func, desc)));
 }
 int GetModuleNumber()
 {
@@ -91,7 +100,8 @@ void EnumerateModuleRegistrations( std::vector<CModuleRegistration>& regs )
 		for( ; !reg.IsEnd(); ++reg, ++i ) {
 			regs[i].Type = type;
 			regs[i].Name = reg->first;
-			regs[i].Func = reg->second;
+			regs[i].Func = reg->second.Func;
+			regs[i].Desc = reg->second.Desc;
 		}
 	}
 }

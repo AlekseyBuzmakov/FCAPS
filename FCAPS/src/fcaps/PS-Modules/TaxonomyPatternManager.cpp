@@ -56,7 +56,7 @@ const CTaxonomyElementDescriptor* CTaxonomyPatternManager::CalculateSimilarity(
 	assert( lca != 0 );
 	const CTaxonomyElementDescriptor& frst = getTaxonomyElement( first );
 	const CTaxonomyElementDescriptor& scnd = getTaxonomyElement( second );
-	auto_ptr<CTaxonomyElementDescriptor> rslt( new CTaxonomyElementDescriptor( lca->GetParent( frst.id, scnd.id ) ) );
+	unique_ptr<CTaxonomyElementDescriptor> rslt( new CTaxonomyElementDescriptor( lca->GetParent( frst.id, scnd.id ) ) );
 	return rslt.release();
 }
 

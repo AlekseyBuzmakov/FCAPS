@@ -32,9 +32,16 @@ public:
 	virtual void LoadParams( const JSON& );
 	virtual JSON SaveParams() const;
 	virtual const char* const GetType() const
-		{ return PartialOrderElementsComparatorModuleType; };
+		{ return Type(); };
 	virtual const char* const GetName() const
+		{ return Name(); };
+	// For CModuleRegistrar
+	static const char* const Type()
+		{ return PartialOrderElementsComparatorModuleType;}
+	static const char* const Name()
 		{ return GeneralStringPartialOrderComparator; }
+	static const char* const Desc()
+		{ return "{}"; }
 
 	// Set comparator of elements in strings.
 	void Initialize( const CSharedPtr<IPatternManager>& _elemsCmp )

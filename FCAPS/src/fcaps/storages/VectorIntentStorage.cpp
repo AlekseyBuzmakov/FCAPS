@@ -24,7 +24,7 @@ CVectorIntentStorage::~CVectorIntentStorage()
 TIntentId CVectorIntentStorage::LoadObject( const JSON& json )
 {
 	assert( cmp != 0 );
-	auto_ptr<const IPatternDescriptor> ptrn( cmp->LoadObject( json ) );
+	unique_ptr<const IPatternDescriptor> ptrn( cmp->LoadObject( json ) );
 	if( ptrn.get() == 0 ) {
 		return -1;
 	}
@@ -43,7 +43,7 @@ JSON CVectorIntentStorage::SavePattern( TIntentId id ) const
 TIntentId CVectorIntentStorage::LoadPattern( const JSON& json )
 {
 	assert( cmp != 0 );
-	auto_ptr<const IPatternDescriptor> ptrn( cmp->LoadPattern( json ) );
+	unique_ptr<const IPatternDescriptor> ptrn( cmp->LoadPattern( json ) );
 	if( ptrn.get() == 0 ) {
 		return -1;
 	}

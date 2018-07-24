@@ -42,9 +42,16 @@ public:
 	virtual void LoadParams( const JSON& json );
 	virtual JSON SaveParams() const;
 	virtual const char* const GetType() const
-		{return ContextProcessorModuleType;}
+		{ return Type(); };
 	virtual const char* const GetName() const
-		{return AddIntentContextProcessorModule;}
+		{ return Name(); };
+	// For CModuleRegistrar
+	static const char* const Type()
+		{ return ContextProcessorModuleType;}
+	static const char* const Name()
+		{ return AddIntentContextProcessorModule; }
+	static const char* const Desc()
+		{ return "{}"; }
 
 private:
 	static const CModuleRegistrar<CAddIntentContextProcessor> registrar;

@@ -120,7 +120,7 @@ const CTreeSetPatternDescriptor* CTreeSetDescriptorsComparator::CalculateSimilar
 //	}
 
 	// In resultIndexes now result antichain. We should create new pattern.
-	auto_ptr<CTreeSetPatternDescriptor> patternRW( new CTreeSetPatternDescriptor );
+	unique_ptr<CTreeSetPatternDescriptor> patternRW( new CTreeSetPatternDescriptor );
 	patternRW->AddList( resultIndexes );
 
 #ifdef DEBUG_CMP
@@ -335,7 +335,7 @@ const CTreeSetPatternDescriptor* CTreeSetDescriptorsComparator::loadPattern( con
 	const rapidjson::Value& names = doc["Names"];
 	assert( names.IsArray() );
 
-	auto_ptr<CTreeSetPatternDescriptor> ptrn( new CTreeSetPatternDescriptor );
+	unique_ptr<CTreeSetPatternDescriptor> ptrn( new CTreeSetPatternDescriptor );
 	for( DWORD i = 0; i < names.Size(); ++i ) {
 		if( !names[i].IsString() ) {
 			throw new CTextException( "CTreeSetDescriptorsComparator::loadPattern", "A name in 'Names' is not a string" );

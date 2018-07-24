@@ -65,8 +65,8 @@ STR(
 					"type": "number",
 					"minimum": 0,
 					"exclusiveMinimum": true,
-					"maximum": 1
-					"exclusiveMaximum": true,
+					"maximum": 1,
+					"exclusiveMaximum": true
 				}
 			}
 		}
@@ -76,6 +76,10 @@ STR(
 ////////////////////////////////////////////////////////////////////
 const CModuleRegistrar<CLocalTreatmentEffectOEst> CLocalTreatmentEffectOEst::registrar(
 	                 OptimisticEstimatorModuleType, LocalTreatmentEffectOptimisticEstimator );
+const char* const CLocalTreatmentEffectOEst::Desc()
+{
+	return description;
+}
 
 CLocalTreatmentEffectOEst::CLocalTreatmentEffectOEst() :
 	signifLevel(0.01),

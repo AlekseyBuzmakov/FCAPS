@@ -48,7 +48,7 @@ CIntervalPatternManager::CIntervalPatternManager() :
 
 const CIntervalPatternDescriptor* CIntervalPatternManager::LoadObject( const JSON& json )
 {
-	auto_ptr<CIntervalPatternDescriptor> ptrn( NewPattern() );
+	unique_ptr<CIntervalPatternDescriptor> ptrn( NewPattern() );
 	JsonIntervalPattern::LoadPattern(json,ptrn->Intervals());
 	if( intsCount == -1 ) {
 		intsCount = ptrn->Intervals().size();
@@ -63,7 +63,7 @@ JSON CIntervalPatternManager::SavePattern( const IPatternDescriptor* p ) const
 }
 const CIntervalPatternDescriptor* CIntervalPatternManager::LoadPattern( const JSON& json )
 {
-	auto_ptr<CIntervalPatternDescriptor> ptrn( NewPattern() );
+	unique_ptr<CIntervalPatternDescriptor> ptrn( NewPattern() );
 	JsonIntervalPattern::LoadPattern(json,ptrn->Intervals());
 	if( intsCount == -1 ) {
 		intsCount = ptrn->Intervals().size();
@@ -79,7 +79,7 @@ const CIntervalPatternDescriptor* CIntervalPatternManager::CalculateSimilarity(
 	const CIntervalPatternDescriptor& p1 = Pattern(first);
 	const CIntervalPatternDescriptor& p2 = Pattern(second);
 	assert(p1.Intervals().size() == p2.Intervals().size() );
-	auto_ptr<CIntervalPatternDescriptor> res(NewPattern());
+	unique_ptr<CIntervalPatternDescriptor> res(NewPattern());
 	res->Intervals().resize(p1.Intervals().size());
 	for( DWORD i = 0; i < p1.Intervals().size(); ++i ) {
 		res->Intervals()[i].first = min( p1.Intervals()[i].first, p2.Intervals()[i].first );

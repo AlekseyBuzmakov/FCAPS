@@ -93,7 +93,7 @@ JSON CBinarySetDescriptorsWithDependenciesComparator::SaveParams() const
 
 const CBinarySetPatternDescriptor* CBinarySetDescriptorsWithDependenciesComparator::LoadObject( const JSON& json )
 {
-	auto_ptr<CBinarySetPatternDescriptor> result( LoadRWPattern( json ) );
+	unique_ptr<CBinarySetPatternDescriptor> result( LoadRWPattern( json ) );
 
 	convertAttributes( *result, toNewAttrs );
 	projectDescription( *result );
@@ -112,7 +112,7 @@ JSON CBinarySetDescriptorsWithDependenciesComparator::SavePattern( const IPatter
 
 const CBinarySetPatternDescriptor* CBinarySetDescriptorsWithDependenciesComparator::LoadPattern( const JSON& json )
 {
-	auto_ptr<CBinarySetPatternDescriptor> result( LoadRWPattern( json ) );
+	unique_ptr<CBinarySetPatternDescriptor> result( LoadRWPattern( json ) );
 
 	convertAttributes( *result, toNewAttrs );
 
@@ -129,7 +129,7 @@ const CBinarySetPatternDescriptor* CBinarySetDescriptorsWithDependenciesComparat
 	const CBinarySetPatternDescriptor& second = debug_cast<const CBinarySetPatternDescriptor&>( *secondPattern );
 
 
-	auto_ptr<CBinarySetPatternDescriptor> result( IntersectSets( first, second ) );
+	unique_ptr<CBinarySetPatternDescriptor> result( IntersectSets( first, second ) );
 
 	projectDescription( *result );
 

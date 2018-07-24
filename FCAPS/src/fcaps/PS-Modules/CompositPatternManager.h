@@ -66,9 +66,16 @@ public:
 	virtual void LoadParams( const JSON& );
 	virtual JSON SaveParams() const;
 	virtual const char* const GetType() const
-		{ return PatternManagerModuleType; };
+		{ return Type(); };
 	virtual const char* const GetName() const
-		{ return CompositPatternManager; };
+		{ return Name(); };
+	// For CModuleRegistrar
+	static const char* const Type()
+		{ return PatternManagerModuleType;}
+	static const char* const Name()
+		{ return CompositPatternManager; }
+	static const char* const Desc()
+		{ return "{}"; }
 
 private:
 	static const CModuleRegistrar<CCompositPatternManager> registrar;

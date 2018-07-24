@@ -145,9 +145,16 @@ public:
 	virtual void LoadParams( const JSON& );
 	virtual JSON SaveParams() const;
 	virtual const char* const GetType() const
-		{ return PartialOrderElementsComparatorModuleType; };
+		{ return Type(); };
 	virtual const char* const GetName() const
-		{ return DwordStringPartialOrderComparator; };
+		{ return Name(); };
+	// For CModuleRegistrar
+	static const char* const Type()
+		{ return PartialOrderElementsComparatorModuleType;}
+	static const char* const Name()
+		{ return DwordStringPartialOrderComparator; }
+	static const char* const Desc()
+		{ return "{}"; }
 
 protected:
     // Methods of CStringsPartialOrderComparator<DWORD>
@@ -169,9 +176,16 @@ public:
 	virtual void LoadParams( const JSON& );
 	virtual JSON SaveParams() const;
 	virtual const char* const GetType() const
-		{ return PartialOrderElementsComparatorModuleType; };
+		{ return Type(); };
 	virtual const char* const GetName() const
-		{ return CharStringPartialOrderComparator; };
+		{ return Name(); };
+	// For CModuleRegistrar
+	static const char* const Type()
+		{ return PartialOrderElementsComparatorModuleType;}
+	static const char* const Name()
+		{ return CharStringPartialOrderComparator; }
+	static const char* const Desc()
+		{ return "{}"; }
 
 protected:
     // Methods of CStringsPartialOrderComparator<DWORD>

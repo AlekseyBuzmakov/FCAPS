@@ -71,7 +71,7 @@ const CCompositePatternDescriptor* CCompositPatternManager::CalculateSimilarity(
 	const CCompositePatternDescriptor& scnd = getCompositPattern( second );
 	assert( scnd.ptrns.size() == cmps.size() );
 
-	auto_ptr<CCompositePatternDescriptor> result( new CCompositePatternDescriptor );
+	unique_ptr<CCompositePatternDescriptor> result( new CCompositePatternDescriptor );
 	result->ptrns.reserve( cmps.size() );
 	for( size_t i = 0; i < cmps.size(); ++i ) {
 		result->ptrns.push_back( cmps[i].CalculateSimilarity( frst.ptrns[i], scnd.ptrns[i] ) );
@@ -169,7 +169,7 @@ void CCompositPatternManager::LoadParams( const JSON& json )
 		if( !pms[i].IsObject() ) {
 			continue;
 		}
-		auto_ptr<IPatternManager> newPM(
+		unique_ptr<IPatternManager> newPM(
 			dynamic_cast<IPatternManager*>( CreateModuleFromJSON( pms[i], errorText ) ) );
 		if( newPM.get() == 0 ) {
 			stringstream destStr;
@@ -242,12 +242,12 @@ const CCompositePatternDescriptor* CCompositPatternManager::loadPattern( const J
 			 + StdExt::to_string( cmps.size() ) + "elements " + "('" + json + "')" );
 	}
 
-	auto_ptr<CCompositePatternDescriptor> compositPattern( new CCompositePatternDescriptor );
+	unique_ptr<CCompositePatternDescriptor> compositPattern( new CCompositePatternDescriptor );
 	compositPattern->ptrns.reserve( cmps.size() );
 	for( size_t i = 0; i < cmps.size(); ++i ) {
 		JSON internalPattern;
 		CreateStringFromJSON( patternJSON[i], internalPattern );
-		auto_ptr<const IPatternDescriptor> internalPatternObj( cmps[i].LoadPattern( internalPattern ) );
+		unique_ptr<const IPatternDescriptor> internalPatternObj( cmps[i].LoadPattern( internalPattern ) );
 		if( internalPatternObj.get() == 0 ) {
 			throw new CTextException( "CCompositPatternManager::loadPattern",
 				string("The ") + StdExt::to_string( cmps.size() ) + "th component of the JSON cannot be parsed"

@@ -31,7 +31,7 @@ TExternalCreateModuleFunc SwitchToExternalFunction( TExternalCreateModuleFunc  f
 // Type of function creating a new module
 typedef IModule* (*CreateFunc)();
 // Function to register a new module, normally used from CModuleRegistrar
-void RegisterModule(const std::string& type, const std::string& name, CreateFunc func );
+void RegisterModule(const std::string& type, const std::string& name, CreateFunc func, const std::string& desc = std::string("{}") );
 // Get the number of registered modules
 int GetModuleNumber();
 // Enumerating of registered modules
@@ -39,6 +39,7 @@ struct CModuleRegistration{
 	std::string Type;
 	std::string Name;
 	CreateFunc Func;
+	std::string Desc;
 
 	CModuleRegistration() :
 		Func(0) {}
@@ -49,8 +50,10 @@ void EnumerateModuleRegistrations( std::vector<CModuleRegistration>& regs );
 template<typename ModuleClass>
 class CModuleRegistrar {
 public:
+	CModuleRegistrar() :
+		type( ModuleClass::Type() ), name( ModuleClass::Name() ) { RegisterModule( ModuleClass::Type(), ModuleClass::Name(), &createModule, ModuleClass::Desc() ); }
 	CModuleRegistrar( const std::string& t, const std::string& n ) :
-		type( t ), name( n ) { RegisterModule( type, name, &createModule ); }
+		type( t ), name( n ) { RegisterModule( t, n, &createModule, ModuleClass::Desc() ); }
 
 	const char* const GetType() const
 		 { return type.c_str(); }
