@@ -1,0 +1,39 @@
+{
+	"Type": "ComputationProcedureModules",
+	"Name": "ContextBasedComputationProcedureModule",
+	"Params": {
+		"ContextFilePath":"trt-effect-example.json",
+		"ContextProcessor": {
+			"Type" : "ContextProcessorModules",
+			"Name" : "SofiaContextProcessorModule",
+			"Params" : {
+				"ProjectionChain" : {	
+					"Type" : "ProjectionChainModules",
+					"Name" : "StabBinClsPatternsProjectionChainModule",
+					"Params": {
+						"IntentWritingMode":"Names"
+					}
+				},
+				"OptimisticEstimator": {
+					"Type" : "OptimisticEstimatorModules",
+					"Name" : "LocalTreatmentEffectOptimisticEstimatorModule",
+					"Params": {
+						"ControlLevels":["test"],
+						"ObjInfoFile":"y-trt.json",
+						"Alpha": 1,
+						"Beta": 1
+					}
+				},
+				"MinQuality": 0,
+				"DefualtThld": 1,
+				"MaxPatternNumber": 800,
+				"AdjustThreshold": false,
+				"FindPartialOrder": true,
+				"OutputParams" : {
+					"OutExtent": false,
+					"OutIntent": true
+				}
+			}
+		}
+	}
+}

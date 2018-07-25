@@ -1,0 +1,32 @@
+{
+	"Type": "ComputationProcedureModules",
+	"Name": "ContextBasedComputationProcedureModule",
+	"Params": {
+		"ContextFilePath":"context.json",
+		"ContextProcessor": {
+			"Type": "ContextProcessorModules",
+			"Name": "AddIntentContextProcessorModule",
+			"Params": {
+				"PatternManager": {
+					"Type" : "PatternManagerModules",
+					"Name" : "BinarySetJoinPatternManagerModule",
+					"Params" : {
+						"UseNames" : true,
+						"UseInds" : false
+					}
+				},
+				"OutputParams": {
+					"MinExtentSize" : 2,
+					"MinLift" : 1,
+					"MinStab" : 1,
+					"OutExtent" : true,
+					"OutSupport" : false,
+					"OutOrder" : true,
+					"OutStability" : true,
+					"OutStabEstimation" : true,
+					"IsStabilityInLog" : true
+				}
+			}
+		}
+	}
+}

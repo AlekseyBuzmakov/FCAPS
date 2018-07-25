@@ -1,0 +1,7 @@
+[{
+"NodesCount":1,"ArcsCount":0,"Top":[0],"Bottom":[0],
+"Params":{"Type":"ContextProcessorModules","Name":"SofiaContextProcessorModule","Params":{"Thld":1.0,"MaxPatternNumber":800,"AdjustThreshold":false,"FindPartialOrder":true,"OutputParams":{"OutExtent":false,"OutIntent":true},"ProjectionChain":{"Type":"ProjectionChainModules","Name":"StabBinClsPatternsProjectionChainModule","Params":{"IntentWritingMode":"Names","AttrOrder":"desc","AttrNames":["X1","X2"],"alpha":0.5}},"OptimisticEstimator":{"Type":"OptimisticEstimatorModules","Name":"LocalTreatmentEffectOptimisticEstimatorModule","Params":{"ObjInfoFile":"y-trt.json","MinObjNum":100,"Alpha":1.0,"Beta":1.0,"SignificanceLevel":0.01,"ControlLevels":["test"]}}}}
+},{"Nodes":[
+  {"Ext":1000,"Int":{"Count":0,"Names":[]},"PatternQuality":{"Delta":0.2023,"Delta0":3.0311,"N0":527,"N1":473,"TotalSize":1000,"Value":1.06674},"Interest":491}
+]{"Arcs":[
+]}]
