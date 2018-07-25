@@ -44,6 +44,7 @@ struct CModuleRegistration{
 	CModuleRegistration() :
 		Func(0) {}
 };
+void EnumerateModuleRegistrations( const std::string& type, std::vector<CModuleRegistration>& regs );
 void EnumerateModuleRegistrations( std::vector<CModuleRegistration>& regs );
 
 // Class for registering a module. Should be used as static member of ModuleClass.

@@ -89,20 +89,28 @@ int GetModuleNumber()
 	}
 	return result;
 }
+void EnumerateModuleRegistrations( const std::string& type, std::vector<CModuleRegistration>& regs )
+{
+	CModuleCollection& collection = getModuleCollection();
+	CStdIterator<CTypedModuleCollection::const_iterator> reg( collection[type] );
+	for( ; !reg.IsEnd(); ++reg ) {
+		CModuleRegistration newReg;
+		newReg.Type = type;
+		newReg.Name = reg->first;
+		newReg.Func = reg->second.Func;
+		newReg.Desc = reg->second.Desc;
+		regs.push_back(newReg);
+	}
+}
 void EnumerateModuleRegistrations( std::vector<CModuleRegistration>& regs )
 {
 	CModuleCollection& collection = getModuleCollection();
-	regs.resize(GetModuleNumber());
+	regs.clear();
+	regs.reserve(GetModuleNumber());
 	CStdIterator<CModuleCollection::const_iterator> itr( collection );
-	for(int i = 0; !itr.IsEnd(); ++itr ) {
+	for(; !itr.IsEnd(); ++itr ) {
 		const string& type = itr->first;
-		CStdIterator<CTypedModuleCollection::const_iterator> reg( itr->second );
-		for( ; !reg.IsEnd(); ++reg, ++i ) {
-			regs[i].Type = type;
-			regs[i].Name = reg->first;
-			regs[i].Func = reg->second.Func;
-			regs[i].Desc = reg->second.Desc;
-		}
+		EnumerateModuleRegistrations( type, regs );
 	}
 }
 

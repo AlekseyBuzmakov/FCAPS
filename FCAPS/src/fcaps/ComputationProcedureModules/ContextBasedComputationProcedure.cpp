@@ -34,12 +34,15 @@ STR(
 				},
 				"Indices" :{
 					"description": "The zero-based indices of objects that should be processed",
-					"type":"integer",
-					"minimum":0
+					"type":"array",
+					"items": {
+						"type": "integer",
+						"minimum":0
+					}
 				},
 				"ContextProcessor":{
 					"description": "The object that defines the context processor that performs the actual computations.",
-					"type": "@ContextProcessorModuleType"
+					"type": "@ContextProcessorModules"
 				}
 			}
 		}
@@ -48,8 +51,7 @@ STR(
 
 
 ////////////////////////////////////////////////////////////////////
-const CModuleRegistrar<CContextBasedComputationProcedure> CContextBasedComputationProcedure::registrar(
-	                                 ComputationProcedureModuleType,ContextBasedComputationProcedure);
+const CModuleRegistrar<CContextBasedComputationProcedure> CContextBasedComputationProcedure::registrar;
 
 const char* const CContextBasedComputationProcedure::Desc()
 {
