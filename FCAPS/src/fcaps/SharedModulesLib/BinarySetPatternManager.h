@@ -98,7 +98,8 @@ public:
 	static const char* const Type()
 		{ return PatternManagerModuleType;}
 	static const char* const Desc()
-		{ return "{}"; }
+		{ return "{}";}
+	static const char* const ParamsDesc();
 
 	// Methods of IPatternManager.
 	virtual TPatternType GetPatternsType() const
@@ -188,6 +189,7 @@ public:
 	// CModuleRegistrar
 	static const char* const Name()
 		{ return BinarySetDescriptorsComparator; }
+	static const char* const Desc();
 	// Methods of IPatternManager.
 	virtual const CBinarySetPatternDescriptor* CalculateSimilarity(
 		const IPatternDescriptor* first, const IPatternDescriptor* second );
@@ -210,6 +212,7 @@ public:
 	// CModuleRegistrar
 	static const char* const Name()
 		{ return UnionBinarySetDescriptorsComparator; }
+	static const char* const Desc();
 	// Methods of IPatternManager.
 	virtual const CBinarySetPatternDescriptor* CalculateSimilarity(
 		const IPatternDescriptor* first, const IPatternDescriptor* second );

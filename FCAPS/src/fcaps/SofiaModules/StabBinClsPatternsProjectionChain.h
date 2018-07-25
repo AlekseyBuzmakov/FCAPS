@@ -35,8 +35,7 @@ public:
 		{ return ProjectionChainModuleType;}
 	static const char* const Name()
 		{ return StabBinClsPatternsProjectionChain; }
-	static const char* const Desc()
-		{ return "{}"; }
+	static const char* const Desc();
 
 protected:
 	class CStabPatternDescription : public CPatternDescription {

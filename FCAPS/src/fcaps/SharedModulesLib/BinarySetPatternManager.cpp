@@ -83,6 +83,38 @@ void CBinarySetPatternDescriptor::AddList( const CAttrsList& listToAdd )
 }
 
 ////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+#define STR(x...) #x
+
+#define PARAMS \
+STR(\
+	"$schema": "http://json-schema.org/draft-04/schema#",\
+	"title": "Params of SOFIA Context processor",\
+	"type": "object",\
+	"properties": {\
+		"AttrNames":{\
+			"description": "A set of attribute names in the corresponding order",\
+			"type":"array",\
+			"items":{\
+				"type":"string"\
+			}\
+		},\
+		"UseInds":{\
+			"description": "Should write pattern attributes by their indices",\
+			"type":"boolean"\
+		},\
+		"UseNames":{\
+			"description": "Should write pattern attributes by their names",\
+			"type":"boolean"\
+		}\
+	}\
+)
+
+////////////////////////////////////////////////////////////////////
+const char* const CBinarySetDescriptorsComparatorBase::ParamsDesc()
+{
+	return  PARAMS;
+}
 
 const char CBinarySetDescriptorsComparatorBase::jsonAttrNames[] = "AttrNames";
 const char CBinarySetDescriptorsComparatorBase::jsonUseInds[] = "UseInds";
@@ -350,6 +382,22 @@ JSON CBinarySetDescriptorsComparatorBase::savePattern( const IPatternDescriptor*
 
 ////////////////////////////////////////////////////////////////////
 
+const char* const CBinarySetDescriptorsComparator::Desc()
+{
+	return STR({
+		"Name":"Join Binary Set Pattern Manager",
+		"Description":"Defines a pattern manager based on binary attributes and intersection as similarity operation",
+		"Params":{
+			"$schema": "http://json-schema.org/draft-04/schema#",
+			"title": "Params of SOFIA Context processor",
+			"type": "object",
+			"properties": {
+				) PARAMS STR(
+			}
+		}
+	});
+}
+
 const CBinarySetPatternDescriptor* CBinarySetDescriptorsComparator::CalculateSimilarity(
 	const IPatternDescriptor* firstPattern, const IPatternDescriptor* secondPattern )
 {
@@ -390,6 +438,21 @@ TCompareResult CBinarySetDescriptorsComparator::fastCompare( DWORD firstSize, DW
 
 ////////////////////////////////////////////////////////////////////
 
+const char* const CUnionBinarySetDescriptorsComparator::Desc()
+{
+	return STR({
+		"Name":"Union Binary Set Pattern Manager",
+		"Description":"Defines a pattern manager based on binary attributes and union as the similarity operation",
+		"Params":{
+			"$schema": "http://json-schema.org/draft-04/schema#",
+			"title": "Params of SOFIA Context processor",
+			"type": "object",
+			"properties": {
+				) PARAMS STR(
+			}
+		}
+	});
+}
 const CBinarySetPatternDescriptor* CUnionBinarySetDescriptorsComparator::CalculateSimilarity(
 	const IPatternDescriptor* firstPattern, const IPatternDescriptor* secondPattern )
 {

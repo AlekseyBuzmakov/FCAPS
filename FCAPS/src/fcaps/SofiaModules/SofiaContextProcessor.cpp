@@ -80,11 +80,14 @@ STR(
 );
 
 ////////////////////////////////////////////////////////////////////
+
 CModuleRegistrar<CSofiaContextProcessor> CSofiaContextProcessor::registrar;
 const char* const CSofiaContextProcessor::Desc()
 {
 	return description;
 }
+
+////////////////////////////////////////////////////////////////////
 
 CSofiaContextProcessor::CSofiaContextProcessor() :
 	callback(0),

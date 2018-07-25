@@ -74,8 +74,7 @@ public:
 		{ return PatternManagerModuleType;}
 	static const char* const Name()
 		{ return CompositPatternManager; }
-	static const char* const Desc()
-		{ return "{}"; }
+	static const char* const Desc();
 
 private:
 	static const CModuleRegistrar<CCompositPatternManager> registrar;

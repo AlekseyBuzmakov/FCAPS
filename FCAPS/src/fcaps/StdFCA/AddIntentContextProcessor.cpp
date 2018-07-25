@@ -16,9 +16,80 @@
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////
+#define STR(x...) #x
 
-const CModuleRegistrar<CAddIntentContextProcessor> CAddIntentContextProcessor::registrar(
-	ContextProcessorModuleType, AddIntentContextProcessorModule );
+const char description[] =
+STR(
+	{
+	"Name":"AddIntent algorithm for Pattern Structures",
+	"Description":"Implements AddIntent algorithm allowing for dealing with different pattern structures",
+	"Params": {
+			"$schema": "http://json-schema.org/draft-04/schema#",
+			"title": "Params of SOFIA Context processor",
+			"type": "object",
+			"properties": {
+				"PatternManager":{
+					"description": "The object describes how the data should be read and how the similarity on this data is defined. Basically it defines the semilattice of descriptions.",
+					"type": "@PatternManagerModules"
+				},
+				"OutputParams":{
+					"description": "The set of parameters controlling what should be printed out as the result",
+					"type": "object",
+					"properties": {
+						"MinExtentSize":{
+							"description": "The minimal size of concept extent for reporting the concept.",
+							"type":"integer",
+							"minimum": 1
+						},
+						"MinLift":{
+							"description": "The minimum DELTA-measure for reported concept",
+							"type":"integer",
+							"minimum":1
+						},
+						"MinStab":{
+							"description": "The minimum stability of a concept to be reported",
+							"type":"number"
+						},
+						"OutExtent":{
+							"description": "A flag indicating if the extent should be reported",
+							"type":"boolean"
+						},
+						"OutSupport":{
+							"description": "A flag indicating if the support of concept should be reported",
+							"type":"boolean"
+						},
+						"OutOrder":{
+							"description": "A flag indicating if the order of filtered concepts should be found and reported",
+							"type":"boolean"
+						},
+						"OutStabEstimation":{
+							"description": "A flag indicating if stability estimate should be reported",
+							"type":"boolean"
+						},
+						"OutStability":{
+							"description": "A flag indicating if the stability should be computed and reported",
+							"type":"boolean"
+						},
+						"IsStabilityInLog":{
+							"description": "A flag indicating if stability should be reported in log scale (more readable for stability close to one)",
+							"type":"boolean"
+						}
+					}
+				}
+			}
+		}
+	}
+);
+
+////////////////////////////////////////////////////////////////////
+
+const CModuleRegistrar<CAddIntentContextProcessor> CAddIntentContextProcessor::registrar;
+const char* const CAddIntentContextProcessor::Desc()
+{
+	return description;
+}
+
+////////////////////////////////////////////////////////////////////
 
 CAddIntentContextProcessor::CAddIntentContextProcessor() :
 	callback( 0 ),

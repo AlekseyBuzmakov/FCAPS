@@ -50,8 +50,7 @@ public:
 		{ return ContextProcessorModuleType;}
 	static const char* const Name()
 		{ return AddIntentContextProcessorModule; }
-	static const char* const Desc()
-		{ return "{}"; }
+	static const char* const Desc();
 
 private:
 	static const CModuleRegistrar<CAddIntentContextProcessor> registrar;

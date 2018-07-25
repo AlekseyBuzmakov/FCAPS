@@ -7,6 +7,7 @@
 
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
+#include <rapidjson/prettywriter.h>
 
 #include <boost/lexical_cast.hpp>
 
@@ -113,11 +114,16 @@ bool ReadJsonString( const std::string& str, rapidjson::Document& doc, CJsonErro
 	return true;
 }
 
-void CreateStringFromJSON( const rapidjson::Value& json, JSON& result )
+void CreateStringFromJSON( const rapidjson::Value& json, JSON& result, bool pretty )
 {
 	rapidjson::StringBuffer buffer;
-	rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-	json.Accept(writer);
+	if( !pretty ) {
+		rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+		json.Accept(writer);
+	} else {
+		rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+		json.Accept(writer);
+	}
 	result = buffer.GetString();
 }
 

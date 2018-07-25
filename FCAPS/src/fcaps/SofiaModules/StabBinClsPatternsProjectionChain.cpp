@@ -9,9 +9,57 @@
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////
+#define STR(x...) #x
 
-CModuleRegistrar<CStabBinClsPatternsProjectionChain> CStabBinClsPatternsProjectionChain::registar
-	(ProjectionChainModuleType, StabBinClsPatternsProjectionChain);
+const char description[] =
+STR(
+	{
+	"Name":"Binary Projection Chain for Delta Measure",
+	"Description":"This projection chain is used by sofia for dealing with binary data. It defines projection that corresponds to the first n attributes of the dataset. The projection is didicated to finding DELTA-stable patterns.",
+	"Params": {
+			"$schema": "http://json-schema.org/draft-04/schema#",
+			"title": "Params of Binary Projection Chain for Delta Measure",
+			"type": "object",
+			"properties": {
+				"alpha":{
+					"description": "The probability from Robsutness (Tatti 2014) that an object is removed from the dataset. Smaller number indicates more focus towards large subdatasets",
+					"type":"number",
+					"minimum":0,
+					"exclusiveMinimum": true,
+					"maximum":1,
+					"exclusiveMaximum": true
+				},
+				"IntentWritingMode" :{
+					"description": "The option specify how the intent should be written. As indices, as names or both.",
+					"type":"string",
+					"enum":["Indices","Names","Both"]
+				},
+				"AttrNames":{
+					"description": "A set of attribute names in the corresponding order",
+					"type":"array",
+					"items":{
+						"type":"string"
+					}
+				},
+				"AttrOrder" :{
+					"description": "The order of attribute addition by the projection: random, none (initial order), and ascending and descending order in terms of attribute support. Descending order is typically the most efficient.",
+					"type":"string",
+					"enum":["desc","asc","none","rand"]
+				}
+			}
+		}
+	}
+);
+
+////////////////////////////////////////////////////////////////////
+
+CModuleRegistrar<CStabBinClsPatternsProjectionChain> CStabBinClsPatternsProjectionChain::registar;
+
+const char* const CStabBinClsPatternsProjectionChain::Desc()
+{
+	return description;
+}
+////////////////////////////////////////////////////////////////////
 
 CStabBinClsPatternsProjectionChain::CStabBinClsPatternsProjectionChain() :
 	stabApprox( ExtCmp() )

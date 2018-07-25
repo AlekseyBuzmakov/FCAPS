@@ -42,8 +42,41 @@ size_t CCompositePatternDescriptor::Hash() const
 }
 
 ////////////////////////////////////////////////////////////////////
+#define STR(x...) #x
 
-const CModuleRegistrar<CCompositPatternManager> CCompositPatternManager::registrar( PatternManagerModuleType, CompositPatternManager );
+const char description[] =
+STR(
+	{
+	"Name":"Composite Pattern Manager",
+	"Description":"Combines any number of other pattern managers into one as direct product",
+	"Params": {
+			"$schema": "http://json-schema.org/draft-04/schema#",
+			"title": "Params of Binary Projection Chain for Delta Measure",
+			"type": "object",
+			"properties": {
+				"PMs":{
+					"description": "A set of attribute names in the corresponding order",
+					"type":"array",
+					"items":{
+						"type":"@PatternManagerModules"
+					}
+				}
+			}
+		}
+	}
+);
+
+////////////////////////////////////////////////////////////////////
+
+const CModuleRegistrar<CCompositPatternManager> CCompositPatternManager::registrar;
+
+const char* const CCompositPatternManager::Desc()
+{
+	return description;
+}
+////////////////////////////////////////////////////////////////////
+
+
 
 CCompositPatternManager::CCompositPatternManager()
 {

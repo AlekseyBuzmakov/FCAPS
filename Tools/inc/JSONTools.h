@@ -45,7 +45,7 @@ struct CJsonError {
 bool ReadJsonString( const std::string& str, rapidjson::Document& doc, CJsonError& errorText );
 
 // Create string from JSON
-void CreateStringFromJSON( const rapidjson::Value& json, JSON& result );
+void CreateStringFromJSON( const rapidjson::Value& json, JSON& result, bool pretty = false );
 
 // Read JSON document to an object.
 bool ReadJsonFile( const std::string& path, rapidjson::Document& doc, CJsonError& errorText );

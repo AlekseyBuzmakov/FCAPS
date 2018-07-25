@@ -454,14 +454,14 @@ void CThisConsoleApplication::startInteractiveMode() const
 {
 	askForModule("Computation Procedure", ComputationProcedureModuleType, interactiveParams);
 	JSON result;
-	CreateStringFromJSON( interactiveParams, result );
+	CreateStringFromJSON( interactiveParams, result, true );
 	CDestStream dst(cbPath);
 	dst << result;
 }
 void CThisConsoleApplication::addUniqueMember(rapidjson::Value& obj, const string& name, rapidjson::Value& val) const
 {
 	if(!obj.HasMember(name.c_str())) {
-		obj.AddMember(rapidjson::Value(name.c_str()),val.Move(),ipAlloc);
+		obj.AddMember(rapidjson::Value(name.c_str(), ipAlloc),val.Move(),ipAlloc);
 	} else {
 		obj[name.c_str()] = val.Move();
 	}
@@ -492,9 +492,9 @@ void CThisConsoleApplication::askForModule(const string& name, const string& mod
 	}
 	assert( 0 <= opt && opt < modules.size());
 	const CModuleRegistration& module = modules[opt];
-	addUniqueMembere(res,"Type", rapidjson::Value().SetString(module.Type.c_str(), ipAlloc));
-	addUniqueMembere(res,"Name", rapidjson::Value().SetString(module.Name.c_str(),  ipAlloc), ipAlloc)
-	addUniqueMembere(res,"Params", rapidjson::Value().SetObject(), ipAlloc);
+	addUniqueMember(res,"Type", rapidjson::Value().SetString(module.Type.c_str(), ipAlloc));
+	addUniqueMember(res,"Name", rapidjson::Value().SetString(module.Name.c_str(),  ipAlloc));
+	addUniqueMember(res,"Params", rapidjson::Value().SetObject());
 	askForModuleParams(module,res["Params"]);
 }
 int CThisConsoleApplication::getOpt(int size) const
@@ -747,7 +747,7 @@ void CThisConsoleApplication::askForValue(const string& name, const rapidjson::V
 	} else if( type == "number"){
 		CNumberLimits<double> limits;
 		fillLimits(d, limits);
-		const int value = askForNumber(name, description,limits);
+		const double value = askForNumber(name, description,limits);
 		res.SetDouble(value);
 	} else if( type == "string"){
 		string result;
