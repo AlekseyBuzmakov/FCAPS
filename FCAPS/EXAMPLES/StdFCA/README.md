@@ -1,10 +1,10 @@
 # An example of a lattice from a binary context
 
-Here we provide an example of json file for a lattice built from a binary context. The binary context corresponds to a well known example on ['Live in Water'](http://www.upriss.org.uk/fca/examples.html). This lattice is built with the settings from [the example on AddIntentContextProcessorModule](https://github.com/AlekseyBuzmakov/FCAPS/blob/master/FCAPS/EXAMPLES/AddIntentContextProcessor-for-StandardFCA.md) for the context that [exemplifies a binary context](https://github.com/AlekseyBuzmakov/FCAPS/blob/master/FCAPS/EXAMPLES/context-for-StandardFCA.md) with the following command line:
+Here we provide an example of json file for a lattice built from a binary context. The binary context corresponds to a well known example on ['Live in Water'](http://www.upriss.org.uk/fca/examples.html). This lattice is built with the settings from [a special file](https://github.com/AlekseyBuzmakov/FCAPS/blob/master/FCAPS/EXAMPLES/StdFCA/params.md). The dataset is given by the context file ([see further for more details](https://github.com/AlekseyBuzmakov/FCAPS/blob/master/FCAPS/EXAMPLES/StdFCA/context.md)). The computation starts with the following command:
 
-$sofia-ps -CB:[settings.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/EXAMPLES/AddIntentContextProcessor-for-StandardFCA.json) -data:[context.json](https://github.com/AlekseyBuzmakov/FCAPS/raw/master/FCAPS/EXAMPLES/context-for-StandardFCA.json) -out
+$sofia-ps -CP:[params.json](https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/EXAMPLES/StdFCA/params.json) -out
 
-An image of the lattice is shown on the following picture ([ref](http://www.upriss.org.uk/fca/examples.html)).
+The result lattice image is taken from the following [site](http://www.upriss.org.uk/fca/examples.html).
 ![A lattice visualisation](resourses.md/liveinwater-lattice.png)
 
 ```json
