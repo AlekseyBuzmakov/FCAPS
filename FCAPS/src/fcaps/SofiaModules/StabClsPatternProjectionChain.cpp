@@ -76,7 +76,8 @@ void CStabClsPatternProjectionChain::SetObjNames( const std::vector<std::string>
 void CStabClsPatternProjectionChain::AddObject( DWORD objectNum, const JSON& intent )
 {
 	assert( enumerator != 0 );
-	enumerator->AddObject( objectNum, intent );
+	// TODO: from 2018-08-01 patterns are loaded from a separate file
+	assert(false);
 	++objectCount;
 }
 void CStabClsPatternProjectionChain::UpdateInterestThreshold( const double& t )
@@ -148,8 +149,8 @@ bool CStabClsPatternProjectionChain::NextProjection()
 	CPatternImage img;
 	CSharedPtr<CVectorBinarySetDescriptor> nextImageCandidate;
 	while( true ) {
-        const bool res = enumerator->GetNextPattern( isStablePtrnFound ? CPU_Expand : CPU_Reject, img );
-        if( !res ) {
+        const TNextPatternStatut res = enumerator->GetNextPattern( isStablePtrnFound ? CPU_Expand : CPU_Reject, img );
+        if( res == NPS_None ) {
             return false;
         }
         /* Cannot ignore unstable results, since it could make unstable existing patterns */

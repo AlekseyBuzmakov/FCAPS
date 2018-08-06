@@ -80,12 +80,7 @@ CParallelPatternEnumerator::~CParallelPatternEnumerator()
 {
 }
 
-void CParallelPatternEnumerator::AddObject( DWORD objectNum, const JSON& intent )
-{
-	assert( peByCallback != 0 );
-	peByCallback->AddObject(objectNum,intent);
-}
-bool CParallelPatternEnumerator::GetNextPattern( TCurrentPatternUsage usage, CPatternImage& pattern )
+TNextPatternStatut CParallelPatternEnumerator::GetNextPattern( TCurrentPatternUsage usage, CPatternImage& pattern )
 {
     if( !isAlgoRun ) {
         createAlgoThread();
@@ -242,7 +237,7 @@ bool CParallelPatternEnumerator::registerPattern( const CPatternImage& ptrn )
 	return syncData->currPatternUsage == CPU_Expand;
 }
 // Takes the next pattern. Function is used to put together with registerPattern.
-inline bool CParallelPatternEnumerator::getNextPattern( TCurrentPatternUsage usage, CPatternImage& pattern )
+inline TNextPatternStatut CParallelPatternEnumerator::getNextPattern( TCurrentPatternUsage usage, CPatternImage& pattern )
 {
 	boost::unique_lock<boost::mutex> lock( syncData->Access );
 
@@ -257,7 +252,7 @@ inline bool CParallelPatternEnumerator::getNextPattern( TCurrentPatternUsage usa
 		syncData->HasNewPattern.wait(lock);
 	}
 	if( syncData->DataState == CSyncData::DS_End ) {
-		return false;
+		return NPS_None;
 	}
 	assert( syncData->DataState == CSyncData::DS_Ready );
 
@@ -272,5 +267,5 @@ inline bool CParallelPatternEnumerator::getNextPattern( TCurrentPatternUsage usa
 	syncData->PatternImage.Objects = 0;
 	syncData->PatternImage.ImageSize = 0;
 
-	return true;
+	return NPS_New; // TODO sometimes it is not New
 }

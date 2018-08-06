@@ -29,13 +29,6 @@ typedef bool (*PECReportPatternCallback)( PECDataRef data, const CPatternImage& 
 
 interface IPatternEnumeratorByCallback : public virtual IObject {
 	/**
-	 * Add context to the projection chain iteratively.
-	 * @param objectNum is the ID of the object.
-	 * @param intent is the json description of the intent of this object.
-	 */
-	virtual void AddObject( DWORD objectNum, const JSON& intent ) = 0;
-
-	/**
 	 * Run the algorithm that will envoke callback every time a new pattern is found
 	 * @param callback is the callback function that is run every time a new pattern is found
 	 * @param data is an arbitrary data that is directly passed to the callback function

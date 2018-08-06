@@ -85,64 +85,64 @@ CgSpanGraphPatternEnumerator::~CgSpanGraphPatternEnumerator()
     }
 }
 
-void CgSpanGraphPatternEnumerator::AddObject( DWORD objectNum, const JSON& intent )
-{
-    if( !inputStream.is_open() ) {
-        inputStream.open( inputPath );
-    }
-	CJsonError errorText;
-	rapidjson::Document graph;
-	if( !ReadJsonString( intent, graph, errorText ) ) {
-		throw new CJsonException( "CgSpanGraphPatternEnumerator::AddObject", errorText );
-	}
+// void CgSpanGraphPatternEnumerator::AddObject( DWORD objectNum, const JSON& intent )
+// {
+//     if( !inputStream.is_open() ) {
+//         inputStream.open( inputPath );
+//     }
+// 	CJsonError errorText;
+// 	rapidjson::Document graph;
+// 	if( !ReadJsonString( intent, graph, errorText ) ) {
+// 		throw new CJsonException( "CgSpanGraphPatternEnumerator::AddObject", errorText );
+// 	}
 
-	if( !graph.IsArray() || graph.Size() < 2 ) {
-		errorText.Data = intent;
-		errorText.Error = "Graph object should be an array with >= 2 elements.";
-		throw new CJsonException( "CgSpanGraphPatternEnumerator::AddObject", errorText );
-	}
-	assert( inputStream.is_open() );
+// 	if( !graph.IsArray() || graph.Size() < 2 ) {
+// 		errorText.Data = intent;
+// 		errorText.Error = "Graph object should be an array with >= 2 elements.";
+// 		throw new CJsonException( "CgSpanGraphPatternEnumerator::AddObject", errorText );
+// 	}
+// 	assert( inputStream.is_open() );
 
-	origObjIDs.push_back( objectNum );
+// 	origObjIDs.push_back( objectNum );
 
-	inputStream << "t # " << objectNum << "\n";
+// 	inputStream << "t # " << objectNum << "\n";
 
-	if( !graph[1].HasMember("Nodes") || !graph[1]["Nodes"].IsArray() ) {
-		errorText.Data = intent;
-		errorText.Error = "First element of the graph object should have an array of vertices called 'Nodes'";
-		throw new CJsonException( "CgSpanGraphPatternEnumerator::AddObject", errorText );
-	}
-	const rapidjson::Value& nodes = graph[1]["Nodes"];
-	for( DWORD i = 0; i < nodes.Size(); ++i ) {
-		const rapidjson::Value& node = nodes[i];
-		if( !node.IsObject() || !node.HasMember("L") || !node["L"].IsString() ) {
-			errorText.Data = intent;
-			errorText.Error = "Every node should be labeled. The label is stored in property 'L' of the node object.";
-			throw new CJsonException( "CgSpanGraphPatternEnumerator::AddObject", errorText );
-		}
-		inputStream << "v " << i << " " << vertexLabelMap.GetId( node["L"].GetString() ) << "\n";
-	}
+// 	if( !graph[1].HasMember("Nodes") || !graph[1]["Nodes"].IsArray() ) {
+// 		errorText.Data = intent;
+// 		errorText.Error = "First element of the graph object should have an array of vertices called 'Nodes'";
+// 		throw new CJsonException( "CgSpanGraphPatternEnumerator::AddObject", errorText );
+// 	}
+// 	const rapidjson::Value& nodes = graph[1]["Nodes"];
+// 	for( DWORD i = 0; i < nodes.Size(); ++i ) {
+// 		const rapidjson::Value& node = nodes[i];
+// 		if( !node.IsObject() || !node.HasMember("L") || !node["L"].IsString() ) {
+// 			errorText.Data = intent;
+// 			errorText.Error = "Every node should be labeled. The label is stored in property 'L' of the node object.";
+// 			throw new CJsonException( "CgSpanGraphPatternEnumerator::AddObject", errorText );
+// 		}
+// 		inputStream << "v " << i << " " << vertexLabelMap.GetId( node["L"].GetString() ) << "\n";
+// 	}
 
-	if( !graph[2].HasMember("Arcs") || !graph[2]["Arcs"].IsArray() ) {
-		errorText.Data = intent;
-		errorText.Error = "Second element of the graph object should have an array of edges called 'Arcs'";
-		throw new CJsonException( "CgSpanGraphPatternEnumerator::AddObject", errorText );
-	}
-	const rapidjson::Value& arcs = graph[2]["Arcs"];
-	for( DWORD i = 0; i < arcs.Size(); ++i ) {
-		const rapidjson::Value& arc = arcs[i];
-		if( !arc.IsObject()
-		    || !arc.HasMember("S") || !arc["S"].IsUint()
-		    || !arc.HasMember("D") || !arc["D"].IsUint()
-		    || !arc.HasMember("L") || !arc["L"].IsString() )
-		{
-			errorText.Data = intent;
-			errorText.Error = "Every arc should have source ('S') and destination ('D') node id and should be labeled ('L').";
-			throw new CJsonException( "CgSpanGraphPatternEnumerator::AddObject", errorText );
-		}
-		inputStream << "e " << arc["S"].GetUint() << " " << arc["D"].GetUint() << " " << edgeLabelMap.GetId( arc["L"].GetString() ) << "\n";
-	}
-}
+// 	if( !graph[2].HasMember("Arcs") || !graph[2]["Arcs"].IsArray() ) {
+// 		errorText.Data = intent;
+// 		errorText.Error = "Second element of the graph object should have an array of edges called 'Arcs'";
+// 		throw new CJsonException( "CgSpanGraphPatternEnumerator::AddObject", errorText );
+// 	}
+// 	const rapidjson::Value& arcs = graph[2]["Arcs"];
+// 	for( DWORD i = 0; i < arcs.Size(); ++i ) {
+// 		const rapidjson::Value& arc = arcs[i];
+// 		if( !arc.IsObject()
+// 		    || !arc.HasMember("S") || !arc["S"].IsUint()
+// 		    || !arc.HasMember("D") || !arc["D"].IsUint()
+// 		    || !arc.HasMember("L") || !arc["L"].IsString() )
+// 		{
+// 			errorText.Data = intent;
+// 			errorText.Error = "Every arc should have source ('S') and destination ('D') node id and should be labeled ('L').";
+// 			throw new CJsonException( "CgSpanGraphPatternEnumerator::AddObject", errorText );
+// 		}
+// 		inputStream << "e " << arc["S"].GetUint() << " " << arc["D"].GetUint() << " " << edgeLabelMap.GetId( arc["L"].GetString() ) << "\n";
+// 	}
+// }
 
 void CgSpanGraphPatternEnumerator::Run( PECReportPatternCallback callback, PECDataRef data )
 {

@@ -24,14 +24,21 @@ enum TCurrentPatternUsage {
     CPU_EnumCount
 };
 
+// Shows the relation of the next pattern to the previous one.
+enum TNextPatternStatut {
+	// No next pattern is found. The end of the procedure
+	NPS_None = 0,
+	// New pattern has no relation to the previous one
+	NPS_New,
+	// New pattern is a more concrete pattern than the previous one
+	NPS_Expanded,
+
+	NPS_EnumCount
+};
+
 interface IPatternEnumerator : public virtual IObject {
-	// Add context to the projection chain iteratively.
-	//  objectNum -- number of the object.
-	virtual void AddObject( DWORD objectNum, const JSON& intent ) = 0;
-    // // Returns an empty pattern, i.e., a pattern that is covered by any other pattern
-    // virtual void GetEmptyPattern( CPatternImage& pattern ) = 0;
     // Returns the next pattern.
-    virtual bool GetNextPattern( TCurrentPatternUsage usage, CPatternImage& pattern ) = 0;
+    virtual TNextPatternStatut GetNextPattern( TCurrentPatternUsage usage, CPatternImage& pattern ) = 0;
     // Clear memory in the pattern
     virtual void ClearMemory( CPatternImage& pattern ) = 0;
 };

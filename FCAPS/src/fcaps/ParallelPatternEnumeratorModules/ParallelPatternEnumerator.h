@@ -27,8 +27,7 @@ public:
     ~CParallelPatternEnumerator();
 
 	// Methods of IPatternEnumerator
-	virtual void AddObject( DWORD objectNum, const JSON& intent );
-    virtual bool GetNextPattern( TCurrentPatternUsage usage, CPatternImage& pattern );
+    virtual TNextPatternStatut GetNextPattern( TCurrentPatternUsage usage, CPatternImage& pattern );
     virtual void ClearMemory( CPatternImage& pattern );
 
 	// Methods of IModule
@@ -66,7 +65,7 @@ private:
 
 	void createAlgoThread();
 	bool registerPattern( const CPatternImage& ptrn );
-    bool getNextPattern( TCurrentPatternUsage usage, CPatternImage& pattern );
+    TNextPatternStatut getNextPattern( TCurrentPatternUsage usage, CPatternImage& pattern );
 };
 
 ////////////////////////////////////////////////////////////////////////

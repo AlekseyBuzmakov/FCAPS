@@ -32,7 +32,6 @@ public:
     ~CGastonGraphPatternEnumerator();
 
 	// Methods of IPatternEnumeratorByCallback
-	virtual void AddObject( DWORD objectNum, const JSON& intent );
 	virtual void Run( PECReportPatternCallback callback, PECDataRef data = 0 );
 
 	// Methods of IModule
