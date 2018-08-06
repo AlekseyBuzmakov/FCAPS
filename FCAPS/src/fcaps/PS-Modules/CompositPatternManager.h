@@ -29,8 +29,6 @@ public:
 	~CCompositePatternDescriptor();
 
 	// Methods of IPatternDescriptor
-	virtual TPatternType GetType() const
-		{ return PT_Composit; }
 	virtual bool IsMostGeneral() const;
 	virtual size_t Hash() const;
 
@@ -45,9 +43,6 @@ public:
 	CCompositPatternManager();
 
 	// Methods of IPatternManagerr
-	virtual TPatternType GetPatternsType() const
-		{ return PT_Composit; }
-
 	virtual const CCompositePatternDescriptor* LoadObject( const JSON& );
 	virtual JSON SavePattern( const IPatternDescriptor* ) const;
 	virtual const CCompositePatternDescriptor* LoadPattern( const JSON& );

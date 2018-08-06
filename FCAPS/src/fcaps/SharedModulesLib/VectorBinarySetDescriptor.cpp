@@ -36,7 +36,7 @@ const CVectorBinarySetDescriptor* CVectorBinarySetJoinComparator::LoadObject( co
 }
 JSON CVectorBinarySetJoinComparator::SavePattern( const IPatternDescriptor* ptrn ) const
 {
-	assert( ptrn != 0 && ptrn->GetType() == PT_VectorBinarySet );
+	assert( ptrn != 0 && dynamic_cast<const CVectorBinarySetDescriptor*>(ptrn) != 0  );
 
 	const CVectorBinarySetDescriptor& pattern = debug_cast<const CVectorBinarySetDescriptor&>( *ptrn );
 	CList<DWORD> attrs;
@@ -318,7 +318,7 @@ void CVectorBinarySetJoinComparator::EnumValues( const CVectorBinarySetDescripto
 // Casts pointer to pattern interface to the reference to the pattern object
 inline const CVectorBinarySetDescriptor& CVectorBinarySetJoinComparator::getVectorBinarySet( const IPatternDescriptor* ptrn )
 {
-	assert( ptrn != 0 && ptrn->GetType() == PT_VectorBinarySet );
+	assert( ptrn != 0 && dynamic_cast<const CVectorBinarySetDescriptor*>(ptrn) != 0  );
 	return debug_cast<const CVectorBinarySetDescriptor&>( *ptrn );
 }
 

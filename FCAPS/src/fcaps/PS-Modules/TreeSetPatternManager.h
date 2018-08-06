@@ -35,8 +35,6 @@ public:
 	CTreeSetPatternDescriptor() {}
 
 	//Methods of IPatternDescriptor
-	virtual TPatternType GetType() const
-		{ return PT_TreeSet; }
 	virtual bool IsMostGeneral() const
 		{ return data.IsMostGeneral(); /*TODO*/ }
 	virtual size_t Hash() const
@@ -72,9 +70,6 @@ public:
 	CTreeSetDescriptorsComparator();
 
 	// Methods of IPatternManager
-	virtual TPatternType GetPatternsType() const
-		{ return PT_TreeSet; }
-
 	virtual const CTreeSetPatternDescriptor* LoadObject( const JSON& json );
 	virtual JSON SavePattern( const IPatternDescriptor* ptrn ) const;
 	virtual const CTreeSetPatternDescriptor* LoadPattern( const JSON& json );

@@ -18,8 +18,6 @@ const char IntervalPatternManagerModule[] = "IntervalPatternManagerModule";
 class CIntervalPatternDescriptor : public IPatternDescriptor {
 public:
 	// Methods of IPatternDescriptor
-	virtual TPatternType GetType() const
-		{ return PT_Intervals; }
 	virtual bool IsMostGeneral() const
 		{return false;}
 	virtual size_t Hash() const;
@@ -37,9 +35,6 @@ private:
 class CIntervalPatternManager : public IPatternManager, public IModule {
 public:
 	CIntervalPatternManager();
-
-	virtual TPatternType GetPatternsType() const
-		{ return PT_Intervals; }
 
 	virtual const CIntervalPatternDescriptor* LoadObject( const JSON& );
 	virtual JSON SavePattern( const IPatternDescriptor* ) const;

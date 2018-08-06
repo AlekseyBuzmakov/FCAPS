@@ -188,7 +188,6 @@ CIntervalPatternDescriptor* CIntervalPatternManager::NewPattern()
 }
 const CIntervalPatternDescriptor& CIntervalPatternManager::Pattern( const IPatternDescriptor* p )
 {
-	assert( p != 0 );
-	assert( p->GetType() == PT_Intervals );
+	assert( p != 0 && dynamic_cast<const CIntervalPatternDescriptor*>(p) != 0  );
 	return debug_cast<const CIntervalPatternDescriptor&>(*p);
 }

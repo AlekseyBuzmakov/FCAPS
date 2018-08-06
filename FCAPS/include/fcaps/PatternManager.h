@@ -3,11 +3,12 @@
 // Author: Aleksey Buzmakov
 // Description: Interface of abstruct pattern
 
-#ifndef PatternDescriptor_h
-#define PatternDescriptor_h
+#ifndef PATTERNMANAGER_H
+#define PATTERNMANAGER_H
 #include <common.h>
 #include <fcaps/BasicTypes.h>
 #include <fcaps/CompareResults.h>
+#include <fcaps/PatternDescriptor.h>
 
 ////////////////////////////////////////////////////////////////////
 
@@ -15,43 +16,8 @@ const char PatternManagerModuleType[] = "PatternManagerModules";
 
 ////////////////////////////////////////////////////////////////////
 
-// The type of the pattern used in the object
-enum TPatternType {
-	PT_Other = 0,
-	PT_LessGeneralDescriptor,
-	PT_BinarySet,
-	PT_VectorBinarySet,
-	PT_PartialOrder,
-	PT_TreeSet,
-	PT_StringSet,
-	PT_AttrWithWeight,
-	PT_Composit,
-	PT_TaxonomyElement,
-	PT_Intervals,
-
-	PT_EnumCount // Fictive constant to count size of enum
-				// all the numbers above this is a user defined format
-};
-
-////////////////////////////////////////////////////////////////////
-
-// Object-data for pattern.
-interface IPatternDescriptor : public virtual IObject {
-	// Type of that pattern.
-	virtual TPatternType GetType() const = 0;
-	// Is the descriptor most general, i.e. describes all the objects.
-	virtual bool IsMostGeneral() const = 0;
-	//Get hash of the pattern.
-	virtual size_t Hash() const = 0;
-};
-
-////////////////////////////////////////////////////////////////////
-
 // Interface to the object to compare patterns.
 interface IPatternManager : public virtual IObject {
-	// Get types of pattern object works with.
-	virtual TPatternType GetPatternsType() const = 0;
-
 	// Load object description from JSON
 	virtual const IPatternDescriptor* LoadObject( const JSON& ) = 0;
 
@@ -166,5 +132,5 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////
-#endif // PatternDescriptor_h
+#endif // PATTERNMANAGER_H
 

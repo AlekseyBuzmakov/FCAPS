@@ -30,8 +30,7 @@ const CPartialOrderPatternDescriptor* CPartialOrderPatternManager::LoadObject( c
 }
 JSON CPartialOrderPatternManager::SavePattern( const IPatternDescriptor* p ) const
 {
-    assert( p != 0 );
-    assert( p->GetType() == PT_PartialOrder );
+	assert( p != 0 && dynamic_cast<const CPartialOrderPatternDescriptor*>(p) != 0  );
     const CPartialOrderPatternDescriptor& d = debug_cast<const CPartialOrderPatternDescriptor&>( *p );
     JSON result;
     result += "[";
@@ -79,10 +78,8 @@ const CPartialOrderPatternDescriptor* CPartialOrderPatternManager::LoadPattern( 
 const CPartialOrderPatternDescriptor* CPartialOrderPatternManager::CalculateSimilarity(
 	const IPatternDescriptor* first, const IPatternDescriptor* second )
 {
-	assert( first != 0 );
-	assert( second != 0 );
-	assert( first->GetType() == PT_PartialOrder );
-	assert( second->GetType() == PT_PartialOrder );
+	assert( first != 0 && dynamic_cast<const CPartialOrderPatternDescriptor*>(first) != 0  );
+	assert( second != 0 && dynamic_cast<const CPartialOrderPatternDescriptor*>(second) != 0  );
 	assert( elemsCmp != 0 );
 	const CPartialOrderPatternDescriptor& ptrn1 = debug_cast<const CPartialOrderPatternDescriptor&>( *first );
 	const CPartialOrderPatternDescriptor& ptrn2 = debug_cast<const CPartialOrderPatternDescriptor&>( *second );
@@ -115,10 +112,8 @@ TCompareResult CPartialOrderPatternManager::Compare(
 	const IPatternDescriptor* first, const IPatternDescriptor* second,
 	DWORD interestingResults, DWORD possibleResults )
 {
-	assert( first != 0 );
-	assert( second != 0 );
-	assert( first->GetType() == PT_PartialOrder );
-	assert( second->GetType() == PT_PartialOrder );
+	assert( first != 0 && dynamic_cast<const CPartialOrderPatternDescriptor*>(first) != 0  );
+	assert( second != 0 && dynamic_cast<const CPartialOrderPatternDescriptor*>(second) != 0  );
 	assert( elemsCmp != 0 );
 	const CPartialOrderPatternDescriptor& ptrn1 = debug_cast<const CPartialOrderPatternDescriptor&>( *first );
 	const CPartialOrderPatternDescriptor& ptrn2 = debug_cast<const CPartialOrderPatternDescriptor&>( *second );

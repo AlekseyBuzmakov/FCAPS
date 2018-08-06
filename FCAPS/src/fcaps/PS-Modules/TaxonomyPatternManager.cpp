@@ -126,7 +126,7 @@ JSON CTaxonomyPatternManager::SaveParams() const
 
 inline const CTaxonomyElementDescriptor& CTaxonomyPatternManager::getTaxonomyElement( const IPatternDescriptor* ptrn )
 {
-	assert( ptrn != 0 && ptrn->GetType() == PT_TaxonomyElement );
+	assert( ptrn != 0 && dynamic_cast<const CTaxonomyElementDescriptor*>(ptrn) != 0  );
 	return debug_cast<const CTaxonomyElementDescriptor&>( *ptrn );
 }
 

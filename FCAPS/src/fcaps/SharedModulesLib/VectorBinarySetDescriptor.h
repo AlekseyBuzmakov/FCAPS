@@ -14,8 +14,6 @@ class CVectorBinarySetDescriptor : public IPatternDescriptor {
 	friend class CVectorBinarySetJoinComparator;
 public:
 	// Methods of IPatternDescriptor
-	virtual TPatternType GetType() const
-		{ return PT_VectorBinarySet; };
 	virtual bool IsMostGeneral() const
 		{ return size == 0; };
 	virtual size_t Hash() const
@@ -43,9 +41,6 @@ public:
 	CVectorBinarySetJoinComparator();
 
 	// Methods of IPatternManager.
-	virtual TPatternType GetPatternsType() const
-		{ return PT_VectorBinarySet; }
-
 	virtual const CVectorBinarySetDescriptor* LoadObject( const JSON& json );
 	virtual JSON SavePattern( const IPatternDescriptor* ptrn ) const;
 	virtual const CVectorBinarySetDescriptor* LoadPattern( const JSON& json );

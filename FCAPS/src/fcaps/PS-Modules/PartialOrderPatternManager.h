@@ -29,8 +29,6 @@ public:
 		{}
 
 	// Methods of IPatternDescriptor
-	virtual TPatternType GetType() const
-		{ return PT_PartialOrder; }
 	virtual bool IsMostGeneral() const
 		{ return elements.IsEmpty(); }
 	virtual size_t Hash() const
@@ -61,9 +59,6 @@ public:
 		{}
 
 	// Methods of IPatternManager
-	virtual TPatternType GetPatternsType() const
-		{ return PT_PartialOrder; }
-
 	virtual const CPartialOrderPatternDescriptor* LoadObject( const JSON& );
 	virtual JSON SavePattern( const IPatternDescriptor* ) const;
 	virtual const CPartialOrderPatternDescriptor* LoadPattern( const JSON& );

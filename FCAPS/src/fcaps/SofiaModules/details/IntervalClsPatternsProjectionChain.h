@@ -49,7 +49,6 @@ protected:
 		CPatternDescription( const CSharedPtr<const CVectorBinarySetDescriptor>& e ) :
 			extent(e) {}
 		// Methdos of IPatternDescriptor
-		virtual TPatternType GetType() const { return PT_Other; }
 		virtual bool IsMostGeneral() const { /*TODO?*/return false; };
 		virtual size_t Hash() const { return extent->Hash(); }
 

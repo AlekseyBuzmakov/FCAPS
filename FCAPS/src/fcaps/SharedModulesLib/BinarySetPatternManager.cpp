@@ -216,8 +216,8 @@ TCompareResult CBinarySetDescriptorsComparatorBase::Compare(
 	const IPatternDescriptor* secondPattern,
 	DWORD interestingResults, DWORD possibleResults )
 {
-	assert( firstPattern != 0 && firstPattern->GetType() == PT_BinarySet  );
-	assert( secondPattern!= 0 && secondPattern->GetType() == PT_BinarySet );
+	assert( firstPattern != 0 && dynamic_cast<const CBinarySetPatternDescriptor*>(firstPattern) != 0  );
+	assert( secondPattern != 0 && dynamic_cast<const CBinarySetPatternDescriptor*>(secondPattern) != 0  );
 
 	const CBinarySetPatternDescriptor& first = debug_cast<const CBinarySetPatternDescriptor&>( *firstPattern );
 	const CBinarySetPatternDescriptor& second = debug_cast<const CBinarySetPatternDescriptor&>( *secondPattern );
@@ -227,14 +227,14 @@ TCompareResult CBinarySetDescriptorsComparatorBase::Compare(
 
 void CBinarySetDescriptorsComparatorBase::FreePattern( const IPatternDescriptor * patternInt )
 {
-	assert( patternInt != 0 && patternInt->GetType() == PT_BinarySet );
+	assert( patternInt != 0 && dynamic_cast<const CBinarySetPatternDescriptor*>(patternInt) != 0  );
 	const CBinarySetPatternDescriptor& pattern = debug_cast<const CBinarySetPatternDescriptor&>( *patternInt );
 	delete &pattern;
 }
 
 void CBinarySetDescriptorsComparatorBase::Write( const IPatternDescriptor* patternInt, std::ostream& dst ) const
 {
-	assert( patternInt != 0 && patternInt->GetType() == PT_BinarySet );
+	assert( patternInt != 0 && dynamic_cast<const CBinarySetPatternDescriptor*>(patternInt) != 0  );
 
 	const CBinarySetPatternDescriptor& pattern = debug_cast<const CBinarySetPatternDescriptor&>( *patternInt );
 	dst << "{";
@@ -336,7 +336,7 @@ CBinarySetPatternDescriptor* CBinarySetDescriptorsComparatorBase::LoadRWPattern(
 
 JSON CBinarySetDescriptorsComparatorBase::savePattern( const IPatternDescriptor* ptrn ) const
 {
-	assert( ptrn != 0 && ptrn->GetType() == PT_BinarySet );
+	assert( ptrn != 0 && dynamic_cast<const CBinarySetPatternDescriptor*>(ptrn) != 0  );
 
 	const CBinarySetPatternDescriptor& pattern = debug_cast<const CBinarySetPatternDescriptor&>( *ptrn );
 	const CBinarySetPatternDescriptor::CAttrsList& attrs = pattern.GetAttribs();
@@ -401,8 +401,8 @@ const char* const CBinarySetDescriptorsComparator::Desc()
 const CBinarySetPatternDescriptor* CBinarySetDescriptorsComparator::CalculateSimilarity(
 	const IPatternDescriptor* firstPattern, const IPatternDescriptor* secondPattern )
 {
-	assert( firstPattern != 0 && firstPattern->GetType() == PT_BinarySet  );
-	assert( secondPattern!= 0 && secondPattern->GetType() == PT_BinarySet );
+	assert( firstPattern != 0 && dynamic_cast<const CBinarySetPatternDescriptor*>(firstPattern) != 0  );
+	assert( secondPattern != 0 && dynamic_cast<const CBinarySetPatternDescriptor*>(secondPattern) != 0  );
 
 	const CBinarySetPatternDescriptor& first = debug_cast<const CBinarySetPatternDescriptor&>( *firstPattern );
 	const CBinarySetPatternDescriptor& second = debug_cast<const CBinarySetPatternDescriptor&>( *secondPattern );
@@ -456,7 +456,7 @@ const char* const CUnionBinarySetDescriptorsComparator::Desc()
 const CBinarySetPatternDescriptor* CUnionBinarySetDescriptorsComparator::CalculateSimilarity(
 	const IPatternDescriptor* firstPattern, const IPatternDescriptor* secondPattern )
 {
-	assert( firstPattern->GetType() == PT_BinarySet && firstPattern->GetType() == PT_BinarySet );
+	assert( firstPattern != 0 && dynamic_cast<const CBinarySetPatternDescriptor*>(firstPattern) != 0  );
 
 	const CBinarySetPatternDescriptor& first = debug_cast<const CBinarySetPatternDescriptor&>( *firstPattern );
 	const CBinarySetPatternDescriptor& second = debug_cast<const CBinarySetPatternDescriptor&>( *secondPattern );

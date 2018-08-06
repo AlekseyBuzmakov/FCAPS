@@ -23,8 +23,6 @@ public:
 public:
 	CStabClsPatternDescription(const CSharedPtr<const CVectorBinarySetDescriptor>& ext):
 		extent( ext ), dMeasure(0), graphCount( 0 ), minGraphSupport(-1) {};
-	virtual TPatternType GetType() const
-	{return PT_Other;};
 	virtual bool IsMostGeneral() const
 	{return false /*TODO*/;}
 	virtual size_t Hash() const

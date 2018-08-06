@@ -25,8 +25,6 @@ public:
 		id( _id ) {};
 
 	// Methods of IPatternDescriptor
-	virtual TPatternType GetType() const
-		{ return PT_TaxonomyElement; }
 	virtual bool IsMostGeneral() const
 		{ return id == 0; }
 	virtual size_t Hash() const
@@ -43,9 +41,6 @@ public:
 	CTaxonomyPatternManager();
 
 	// Methods of IPatternManager
-	virtual TPatternType GetPatternsType() const
-		{ return PT_TaxonomyElement; }
-
 	virtual const CTaxonomyElementDescriptor* LoadObject( const JSON& json );
 	virtual JSON SavePattern( const IPatternDescriptor* ptrn ) const;
 	virtual const CTaxonomyElementDescriptor* LoadPattern( const JSON& json );

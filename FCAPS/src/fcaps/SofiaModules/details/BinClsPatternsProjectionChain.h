@@ -68,7 +68,6 @@ protected:
 		CPatternDescription( const CVectorBinarySetJoinComparator& _cmp, const CSharedPtr<const CVectorBinarySetDescriptor>& e ) :
 			cmp(_cmp), extent(e), nextOptimAttr(-1) {}
 		// Methdos of IPatternDescriptor
-		virtual TPatternType GetType() const { return PT_Other; }
 		virtual bool IsMostGeneral() const { /*TODO?*/return false; };
 		virtual size_t Hash() const { return extent->Hash(); }
 

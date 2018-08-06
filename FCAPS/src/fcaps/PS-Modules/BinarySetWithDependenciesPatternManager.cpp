@@ -103,7 +103,7 @@ const CBinarySetPatternDescriptor* CBinarySetDescriptorsWithDependenciesComparat
 
 JSON CBinarySetDescriptorsWithDependenciesComparator::SavePattern( const IPatternDescriptor* ptrnInt ) const
 {
-	assert( ptrnInt != 0 && ptrnInt->GetType() == PT_BinarySet  );
+	assert( ptrnInt != 0 && dynamic_cast<const CBinarySetPatternDescriptor*>(ptrnInt) != 0  );
 
 	CBinarySetPatternDescriptor ptrn( debug_cast<const CBinarySetPatternDescriptor&>( *ptrnInt ) );
 	convertAttributes( ptrn, toOldAttrs );
@@ -122,8 +122,8 @@ const CBinarySetPatternDescriptor* CBinarySetDescriptorsWithDependenciesComparat
 const CBinarySetPatternDescriptor* CBinarySetDescriptorsWithDependenciesComparator::CalculateSimilarity(
 	const IPatternDescriptor* firstPattern, const IPatternDescriptor* secondPattern )
 {
-	assert( firstPattern != 0 && firstPattern->GetType() == PT_BinarySet  );
-	assert( secondPattern!= 0 && secondPattern->GetType() == PT_BinarySet );
+	assert( firstPattern != 0 && dynamic_cast<const CBinarySetPatternDescriptor*>(firstPattern) != 0  );
+	assert( secondPattern != 0 && dynamic_cast<const CBinarySetPatternDescriptor*>(secondPattern) != 0  );
 
 	const CBinarySetPatternDescriptor& first = debug_cast<const CBinarySetPatternDescriptor&>( *firstPattern );
 	const CBinarySetPatternDescriptor& second = debug_cast<const CBinarySetPatternDescriptor&>( *secondPattern );

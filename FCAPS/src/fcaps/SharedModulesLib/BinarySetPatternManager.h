@@ -42,8 +42,6 @@ public:
 	~CBinarySetPatternDescriptor();
 
 	//Methods of IPatternDescriptor
-	virtual TPatternType GetType() const
-		{ return PT_BinarySet; }
 	virtual bool IsMostGeneral() const
 		{ return attribsSet.IsEmpty(); }
 	virtual size_t Hash() const;
@@ -102,9 +100,6 @@ public:
 	static const char* const ParamsDesc();
 
 	// Methods of IPatternManager.
-	virtual TPatternType GetPatternsType() const
-		{ return PT_BinarySet; }
-
 	virtual const CBinarySetPatternDescriptor* LoadObject( const JSON& json );
 	virtual JSON SavePattern( const IPatternDescriptor* ptrn ) const;
 	virtual const CBinarySetPatternDescriptor* LoadPattern( const JSON& json );
