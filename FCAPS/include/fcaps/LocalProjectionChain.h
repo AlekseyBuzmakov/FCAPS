@@ -29,8 +29,10 @@ interface ILocalProjectionChain : public virtual IObject {
 	virtual double GetPatternInterest( const IPatternDescriptor* p ) = 0;
 
 	// Compare patterns.
-	virtual bool AreEqual(const IPatternDescriptor* p, const IPatternDescriptor* q) const = 0;
-	virtual bool IsSmaller(const IPatternDescriptor* p, const IPatternDescriptor* q) const = 0;
+
+	// TODO: probably will be used later
+	// virtual bool AreEqual(const IPatternDescriptor* p, const IPatternDescriptor* q) const = 0;
+	// virtual bool IsSmaller(const IPatternDescriptor* p, const IPatternDescriptor* q) const = 0;
 	//  a linear order of patterns including IsSmaller order
 	virtual bool IsTopoSmaller(const IPatternDescriptor* p, const IPatternDescriptor* q) const = 0;
 

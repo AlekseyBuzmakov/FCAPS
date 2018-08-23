@@ -27,6 +27,8 @@ public:
     ~CParallelPatternEnumerator();
 
 	// Methods of IPatternEnumerator
+	virtual int GetObjectNumber() const
+		{ /* TODO */ return 0;}
     virtual TNextPatternStatut GetNextPattern( TCurrentPatternUsage usage, CPatternImage& pattern );
     virtual void ClearMemory( CPatternImage& pattern );
 

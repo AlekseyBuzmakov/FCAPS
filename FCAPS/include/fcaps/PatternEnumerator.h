@@ -37,6 +37,8 @@ enum TNextPatternStatut {
 };
 
 interface IPatternEnumerator : public virtual IObject {
+	// Returns the total number of objects in the dataset
+	virtual int GetObjectNumber() const = 0;
     // Returns the next pattern.
     virtual TNextPatternStatut GetNextPattern( TCurrentPatternUsage usage, CPatternImage& pattern ) = 0;
     // Clear memory in the pattern

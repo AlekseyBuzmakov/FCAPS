@@ -1,0 +1,49 @@
+// Initial software, Aleksey Buzmakov, Copyright (c) National Research University Higher School of Economics, GPL v2 license, 2018, v0.8
+// A module that pass over a pattern space in breath first order expanding in the direction of the most promissing patterns
+
+#ifndef STABILITYCbOLOCALPROJECTIONCHAIN_H
+#define STABILITYCbOLOCALPROJECTIONCHAIN_H
+
+#include <fcaps/ComputationProcedure.h>
+#include <fcaps/LocalProjectionChain.h>
+
+#include <ListWrapper.h>
+#include <ModuleTools.h>
+
+#include <rapidjson/document.h>
+
+#include <set>
+
+////////////////////////////////////////////////////////////////////
+
+interface IPatternDescriptor;
+
+////////////////////////////////////////////////////////////////////
+
+const char StabilityCbOLocalProjectionChain[] = "StabilityCbOLocalProjectionChainModule";
+
+class CStabilityCbOLocalProjectionChain : public IComputationProcedure, public IModule {
+public:
+	CStabilityCbOLocalProjectionChain();
+	// Methods of IComputationProcedure
+
+	// Methods of IModule
+	virtual void LoadParams( const JSON& );
+	virtual JSON SaveParams() const;
+	virtual const char* const GetType() const
+		{ return Type(); };
+	virtual const char* const GetName() const
+		{ return Name(); };
+
+	// For CModuleRegistrar
+	static const char* const Type()
+		{ return ComputationProcedureModuleType;}
+	static const char* const Name()
+		{ return StabilityCbOLocalProjectionChain; }
+	static const char* const Desc();
+
+private:
+	static const CModuleRegistrar<CStabilityCbOLocalProjectionChain> registrar;
+};
+
+#endif // STABILITYCbOLOCALPROJECTIONCHAIN_H
