@@ -6,18 +6,26 @@
 
 #include <fcaps/LocalProjectionChain.h>
 
-#include <ListWrapper.h>
+#include <fcaps/PatternManager.h>
+
+// #include <ListWrapper.h>
 #include <ModuleTools.h>
 
-#include <rapidjson/document.h>
+// #include <rapidjson/document.h>
 
-#include <set>
+// #include <set>
 
 ////////////////////////////////////////////////////////////////////
 
 interface IPatternDescriptor;
-interface IPatternEnumerator;
+interface IContextAttributes;
 
+////////////////////////////////////////////////////////////////////
+class CPattern;
+class CBinarySetDescriptorsComparator;
+class CVectorBinarySetJoinComparator;
+class CVectorBinarySetDescriptor;
+class CBinarySetPatternDescriptor;
 ////////////////////////////////////////////////////////////////////
 
 const char StabilityCbOLocalProjectionChain[] = "StabilityCbOLocalProjectionChainModule";
@@ -59,9 +67,27 @@ public:
 private:
 	static const CModuleRegistrar<CStabilityCbOLocalProjectionChain> registrar;
 	// Object that enumerates attribute extents
-	CSharedPtr<IPatternEnumerator> enumerator;
+	CSharedPtr<IContextAttributes> attrs;
 	// The threshold for delta measure
 	double thld;
+	// Comparator for extents
+	CSharedPtr<CVectorBinarySetJoinComparator> extCmp;
+	CPatternDeleter extDeleter;
+	// Comparator for intents;
+	CSharedPtr<CBinarySetDescriptorsComparator> intCmp;
+	CPatternDeleter intDeleter;
+
+	const CPattern& to_pattern(const IPatternDescriptor* d) const;
+	const CPattern* newPattern(
+		const CSharedPtr<const CVectorBinarySetDescriptor>& ext,
+		const CSharedPtr<CBinarySetPatternDescriptor>& intent,
+	int nextAttr, DWORD delta, int clossestAttr = 0);
+	void getAttributeImg(int a, CSharedPtr<const CVectorBinarySetDescriptor>& rslt);
+	const CPattern* initializeNewPattern(
+		const CPattern& parent,
+		int genAttr,
+		const CSharedPtr<const CVectorBinarySetDescriptor>& ext);
+	DWORD getAttributeDelta(int a, const CSharedPtr<const CVectorBinarySetDescriptor>& ext);
 };
 
 #endif // STABILITYCbOLOCALPROJECTIONCHAIN_H

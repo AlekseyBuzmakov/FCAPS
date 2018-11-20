@@ -20,7 +20,7 @@ struct CPatternImage {
 	// The cardinality of the image, known as support.
     int ImageSize;
 	// The image (the set of objects) of the pattern.
-    int* Objects;
+    const int* Objects;
 
 	CPatternImage() :
 		PatternId( -1 ),

@@ -19,15 +19,17 @@ void CBinClsPatternsProjectionChain::CPatternDescription::GetExtent( CPatternIma
 
 	ext.PatternId = -1;
 	ext.ImageSize = extent->Size();
-	ext.Objects = new int[ext.ImageSize];
+	unique_ptr<int[]> objects(new int[ext.ImageSize]);
+	ext.Objects = objects.get(); 
 	CList<DWORD> values;
 	cmp.EnumValues(*extent, values);
 	auto itr=values.Begin();
 	DWORD i = 0;
 	for(; itr != values.End(); ++itr, ++i) {
 		assert(i < ext.ImageSize);
-		ext.Objects[i]=*itr;
+		objects[i]=*itr;
 	}
+	objects.release(); 
 	assert( i == ext.ImageSize);
 }
 void CBinClsPatternsProjectionChain::CPatternDescription::ClearMemory( CPatternImage& ext ) const

@@ -16,6 +16,8 @@ interface IPatternDescriptor : public virtual IObject {
 	virtual bool IsMostGeneral() const = 0;
 	//Get hash of the pattern.
 	virtual size_t Hash() const = 0;
+	// Get TopoValue of the pattern, i.e., given paterns p and q, if p<q then p.TopoValue() < q.TopoValue(); if p == q, then p.TopoValue() = q.TopoValue(); if p<>q, then any TopoValues are correct
+	// virtual double TopoValue() const = 0;
 };
 
 ////////////////////////////////////////////////////////////////////

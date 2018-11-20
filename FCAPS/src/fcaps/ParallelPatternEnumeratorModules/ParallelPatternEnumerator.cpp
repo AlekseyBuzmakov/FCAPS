@@ -221,7 +221,7 @@ bool CParallelPatternEnumerator::registerPattern( const CPatternImage& ptrn )
 
 	pi.ImageSize = ptrn.ImageSize;
 	pi.Objects = new int[pi.ImageSize];
-	memcpy(pi.Objects, ptrn.Objects, pi.ImageSize * sizeof( pi.Objects[0] ));
+	memcpy(const_cast<int*>(pi.Objects), ptrn.Objects, pi.ImageSize * sizeof( pi.Objects[0] ));
 
 	syncData->DataState = CSyncData::DS_Ready;
 	syncData->HasNewPattern.notify_one();

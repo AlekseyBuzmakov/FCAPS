@@ -210,20 +210,22 @@ void CBestPatternFirstComputationProcedure::LoadParams( const JSON& json )
 
 JSON CBestPatternFirstComputationProcedure::SaveParams() const
 {
-	// TODO
 	rapidjson::Document params;
 	rapidjson::MemoryPoolAllocator<>& alloc = params.GetAllocator();
 	params.SetObject()
 		.AddMember( "Type", rapidjson::StringRef(Type()), alloc )
 		.AddMember( "Name", rapidjson::StringRef(Name()), alloc )
 		.AddMember( "Params", rapidjson::Value().SetObject()
-			.AddMember( "MaxObjectNumber", rapidjson::Value().SetInt( mpn ), alloc ),
+			.AddMember( "DefualtThld", rapidjson::Value().SetDouble( thld ), alloc )
+			.AddMember( "MaxObjectNumber", rapidjson::Value().SetInt( mpn ), alloc )
+			.AddMember( "AdjustThreshold", rapidjson::Value().SetBool( shouldAdjustThld ), alloc )
+			.AddMember( "OEstMinQuality", rapidjson::Value().SetDouble( best.Quality ), alloc ),
 		alloc );
-
-	IModule* m = dynamic_cast<IModule*>(lpChain.get());
 
 	JSON cpParams;
 	rapidjson::Document cpParamsDoc;
+
+	IModule* m = dynamic_cast<IModule*>(lpChain.get());
     assert( m!=0);
 	if( m != 0 ) {
 		cpParams = m->SaveParams();
@@ -231,6 +233,16 @@ JSON CBestPatternFirstComputationProcedure::SaveParams() const
 		const bool rslt = ReadJsonString( cpParams, cpParamsDoc, error );
 		assert(rslt);
 		params["Params"].AddMember("LocalProjectionChain", cpParamsDoc.Move(), alloc );
+	}
+
+	m = dynamic_cast<IModule*>(oest.get());
+    assert( m!=0);
+	if( m != 0 ) {
+		cpParams = m->SaveParams();
+		CJsonError error;
+		const bool rslt = ReadJsonString( cpParams, cpParamsDoc, error );
+		assert(rslt);
+		params["Params"].AddMember("OptimisticEstimator", cpParamsDoc.Move(), alloc );
 	}
 
 	JSON result;
