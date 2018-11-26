@@ -422,6 +422,35 @@ solution "Sofia-PS"
 			}
 		filter{}
 
+	project "ContextAttributesModules"
+		DefaultConfig("modules")
+		kind "SharedLib"
+		language "C++"
+		includedirs { 
+			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
+			"rapidjson/include",
+			"FCAPS/include/", 
+			"FCAPS/src/", 
+			"Tools/inc/", 
+			"Sofia-PS/inc/"
+		}
+		files{ "FCAPS/src/fcaps/ContextAttributesModules/**.h", "FCAPS/src/fcaps/ContextAttributesModules/**.cpp" }
+		filter{ "system:windows" }
+			files{ "FCAPS/src/fcaps/ContextAttributesModules/**.def" }
+		filter{}
+
+		libdirs {
+			"boost/stage/lib/",
+		}
+		links{ 
+			"SharedTools",
+			"SharedModulesLib"
+		}
+		filter{ "system:not windows" }
+			links{ 
+			}
+		filter{}
+
 	project "Sofia-PS"
 		DefaultConfig("")
 		kind "ConsoleApp"
