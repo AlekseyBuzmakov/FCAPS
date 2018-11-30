@@ -155,7 +155,18 @@ void CRemoveExpectedBinPatterns::Process()
 	// Computing P-value for every found concept
 	for( int i = 0; i < concepts.size(); ++i ) {
 		std::cout << "Concept " << i << " \r";
-		const DWORD support = nodes[i]["Ext"].GetUint();
+		if(!nodes[i].HasMember("Ext")
+		   || (!nodes[i]["Ext"].IsObject() || !nodes[i]["Ext"].HasMember("Count") || !nodes[i]["Ext"]["Count"].IsUint())
+			&& !nodes[i]["Ext"].IsUint())
+		{
+			throw CTextException(place, "Extent is not found in the concept");	
+		}
+		DWORD support = 0;
+		if(nodes[i]["Ext"].IsUint()) {
+			support = nodes[i]["Ext"].GetUint();
+		} else {
+			support = nodes[i]["Ext"]["Count"].GetUint();
+		}
 		double pvalue = 1;
 
 		const CList<DWORD>& curr = concepts[i]->GetAttribs();
@@ -167,7 +178,12 @@ void CRemoveExpectedBinPatterns::Process()
 			const CList<DWORD>& parent = concepts[parentIndex]->GetAttribs();
 
 			assert(parent.Size() < curr.Size());
-			const DWORD supportParent = nodes[parentIndex]["Ext"].GetUint();
+			DWORD supportParent = 0;
+			if(nodes[i]["Ext"].IsUint()) {
+				supportParent = nodes[parentIndex]["Ext"].GetUint();
+			} else {
+				supportParent = nodes[parentIndex]["Ext"]["Count"].GetUint();
+			}
 			assert(supportParent > support);
 
 			// To save additional attributes in the current node
@@ -317,7 +333,7 @@ void CRemoveExpectedBinPatterns::LoadParams( const JSON& json )
 	assert( string( doc["Type"].GetString() ) == LatticeFilterModuleType );
 	assert( string( doc["Name"].GetString() ) == RemoveExpectedBinPatterns );
 	if( !(doc.HasMember( "Params" ) && doc["Params"].IsObject()) ) {
-		error.Error = "Params is not found. Necessary for significance level.";
+		error.Error = "Params is not found. Necessary for significance level and Context.";
 		throw new CJsonException(place, error);
 	}
 	const rapidjson::Value& params=doc["Params"];
@@ -328,6 +344,12 @@ void CRemoveExpectedBinPatterns::LoadParams( const JSON& json )
 		throw new CJsonException(place, error);
 	} else {
 		significance = params["Significance"].GetDouble();
+	}
+	if( !params.HasMember("Context") || !params["Context"].IsString() ) {
+		error.Error = "'Context' not found";
+		throw new CJsonException(place, error);
+	} else {
+		dataFile = params["Context"].GetString();
 	}
 
 	if( params.HasMember("FindPartialOrder") && params["FindPartialOrder"].IsBool() ) {
@@ -349,6 +371,8 @@ JSON CRemoveExpectedBinPatterns::SaveParams() const
 		.AddMember( "Name", RemoveExpectedBinPatterns, alloc )
 		.AddMember( "Params", rapidjson::Value().SetObject()
 			.AddMember( "Significance", rapidjson::Value().SetDouble(significance), alloc)
+			.AddMember( "Context", rapidjson::Value().SetString(
+				rapidjson::StringRef(dataFile.c_str())), alloc )
 			.AddMember( "FindPartialOrder", rapidjson::Value().SetBool(findPartialOrder), alloc)
 			.AddMember( "OutSuffix", rapidjson::Value().SetString(
 				rapidjson::StringRef(outSuffix.c_str())), alloc ),
