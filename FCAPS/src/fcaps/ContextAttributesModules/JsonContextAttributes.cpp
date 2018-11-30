@@ -166,11 +166,11 @@ void CJsonContextAttributes::loadContext()
 		throw new CJsonException( "CJsonContextAttributes::LoadParams", error );
 	}
 	if(!jsonContext.IsArray() || jsonContext.Size() < 2
-	   || !jsonContext[2].IsObject() || !jsonContext[2].HasMember("Data") || !jsonContext[2]["Data"].IsArray())
+	   || !jsonContext[1].IsObject() || !jsonContext[1].HasMember("Data") || !jsonContext[1]["Data"].IsArray())
 	{
 		throw new CTextException( "CJsonContextAttributes::LoadParams", "Not a context File: Data is not found" );
 	}
-	const rapidjson::Value& jsonObjs = jsonContext[2]["Data"];
+	const rapidjson::Value& jsonObjs = jsonContext[1]["Data"];
 	objectNum = jsonObjs.Size();
 
 	vector< CList<int> > attrs;
@@ -207,6 +207,7 @@ void CJsonContextAttributes::loadContext()
 		sort( attrOrder.begin(), attrOrder.end(), sorter );
 	}
 	// Converting attributes to CPatternImage
+	attributes.resize(attrs.size());
 	for(int i = 0; i < attrOrder.size(); ++i) {
 		const int a = attrOrder[i];
 		assert(0 <= a && a < attrs.size());
@@ -219,7 +220,7 @@ void CJsonContextAttributes::loadContext()
 		for(int j = 0; itr != end; ++itr, ++j ) {
 			assert( j < attributes[i].Image.ImageSize);
 			const int obj = *itr;
-			assert( 0 < obj && obj < objectNum);
+			assert( 0 <= obj && obj < objectNum);
 			objects[j] = obj;
 		}
 	}
