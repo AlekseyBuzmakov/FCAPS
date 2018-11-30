@@ -40,8 +40,7 @@ public:
 		{ return OptimisticEstimatorModuleType;}
 	static const char* const Name()
 		{ return BinaryClassificationOptimisticEstimator; }
-	static const char* const Desc()
-		{ return "{}"; }
+	static const char* const Desc();
 
 private:
 	static const CModuleRegistrar<CBinaryClassificationOEst> registrar;

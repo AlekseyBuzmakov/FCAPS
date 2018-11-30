@@ -16,8 +16,46 @@
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////
+#define STR(x...) #x
+
+const char description[] =
+STR(
+	{
+	"Name":"Local Treatment Effect Optimistic Estimator",
+	"Description":"An optimistic estimator for computing upper bound of Local Treatment Effect given as a linear function of difference between confidence intervals of Test and Control groups and the total number of objects in the extent of a pattern.",
+	"Params": {
+			"$schema": "http://json-schema.org/draft-04/schema#",
+			"title": "Params of LTE OEst",
+			"type": "object",
+			"properties": {
+				"TargetClasses":{
+					"description": "Array fo strings that gives the classes that would be all together considered as a traget class",
+					"type":"array",
+					"items": {
+						"type":"string"
+					}
+				},
+				"Classes":{
+					"description": "The path to a file, containing the class labels for every object",
+					"type": "file-path",
+					"example": {
+						"description":"The file contains an array of string labels for every object",
+						"json":["+","-","-","+","-"]
+					}
+				}
+			}
+		}
+	}
+);
+
+////////////////////////////////////////////////////////////////////
 const CModuleRegistrar<CBinaryClassificationOEst> CBinaryClassificationOEst::registrar(
 	                 OptimisticEstimatorModuleType, BinaryClassificationOptimisticEstimator );
+
+const char* const CBinaryClassificationOEst::Desc()
+{
+	return description;
+}
 
 CBinaryClassificationOEst::CBinaryClassificationOEst() :
 	nPlus(0)

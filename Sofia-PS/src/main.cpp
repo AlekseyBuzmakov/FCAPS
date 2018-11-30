@@ -780,8 +780,16 @@ void CThisConsoleApplication::askForValue(const string& name, const rapidjson::V
 		rapidjson::Value::ConstMemberIterator itr = d.FindMember("example");
 		if( itr != d.MemberEnd() ) {
 			JSON ex;
-			CreateStringFromJSON( itr->value, ex );
-			description += "\n    FILE EXAMPLE: " + ex;
+			auto exMember = itr->value.FindMember("description");
+			if( exMember != itr->value.MemberEnd() ) {
+				CreateStringFromJSON( exMember->value, ex );
+				description += "\n    FILE FORMAT: " + ex;
+			}
+			exMember = itr->value.FindMember("json");
+			if( exMember != itr->value.MemberEnd() ) {
+				CreateStringFromJSON( exMember->value, ex );
+				description += "\n    FILE EXAMPLE: " + ex;
+			}
 		}
 		string result;
 		askForFilePath(name, description, result);
