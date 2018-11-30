@@ -709,6 +709,26 @@ void fillLimits(const rapidjson::Value& d, CNumberLimits<T>& limits)
 		}
 	}
 }
+bool askForBool(const string& name, const string& desc)
+{
+	cout << "Deciding on '" << name << "'" << endl;
+	cout << desc << endl;
+	string cmd;
+	do{
+		cout << "Type (t)rue or (f)alse:" << flush;
+		cin >> cmd;
+		if(cmd== "q") {
+			throw  new CTextException("InteractiveMode", "Interactive mode has been canceled.");
+		}
+		if( cmd == "t" || cmd == "true") {
+			return true;
+		}
+		if( cmd == "f" || cmd == "false") {
+			return false;
+		}
+		cout << " [!] bad option" << endl;
+	} while(true);
+}
 void askForString(const string& name, const string& desc, string& result)
 {
 	cout << "Deciding on '" << name << "'" << endl;
@@ -749,6 +769,9 @@ void CThisConsoleApplication::askForValue(const string& name, const rapidjson::V
 		fillLimits(d, limits);
 		const double value = askForNumber(name, description,limits);
 		res.SetDouble(value);
+	} else if( type == "boolean"){
+		const bool value = askForBool(name, description);
+		res.SetBool(value);
 	} else if( type == "string"){
 		string result;
 		askForString(name, description, result);
