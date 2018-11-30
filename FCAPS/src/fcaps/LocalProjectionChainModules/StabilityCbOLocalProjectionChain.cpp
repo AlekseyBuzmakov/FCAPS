@@ -115,11 +115,11 @@ private:
 		auto itr=values.Begin();
 		DWORD i = 0;
 		for(; itr != values.End(); ++itr, ++i) {
-			assert(i < ext.ImageSize);
+			assert(i < img.ImageSize);
 			objects[i]=*itr;
 		}
 		objects.release(); 
-		assert( i == ext.ImageSize);
+		assert( i == img.ImageSize);
 	}
 };
 

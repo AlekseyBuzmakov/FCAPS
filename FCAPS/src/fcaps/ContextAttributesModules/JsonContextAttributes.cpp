@@ -72,13 +72,13 @@ void CJsonContextAttributes::LoadParams( const JSON& json )
 		throw new CJsonException("CJsonContextAttributes::LoadParams", error);
 	}
 	// Reading class labels information
-	if(!(params.HasMember("ContextFilePath") && params["ContextFilePath"].IsString())) {
+	if(!(params["Params"].HasMember("ContextFilePath") && params["Params"]["ContextFilePath"].IsString())) {
 		error.Data = json;
 		error.Error = "Params.ContextFilePath is not found or is not a file name.";
 		throw new CJsonException("CJsonContextAttributes::LoadParams", error);
 	}
 
-	filePath = params["ContextFilePath"].GetString();
+	filePath = params["Params"]["ContextFilePath"].GetString();
 
 	loadContext();
 
