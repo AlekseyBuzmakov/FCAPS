@@ -65,6 +65,7 @@ const std::vector<std::string>& CBinClsPatternsProjectionChain::GetObjNames() co
 void CBinClsPatternsProjectionChain::SetObjNames( const std::vector<std::string>& names )
 {
 	extCmp->SetNames( names );
+	extCmp->SetWriteNames(true);
 }
 
 void CBinClsPatternsProjectionChain::UpdateInterestThreshold( const double& t )

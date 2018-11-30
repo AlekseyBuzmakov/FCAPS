@@ -611,6 +611,7 @@ void CSofiaContextProcessor::saveToFile(
 			printConceptToJson( concepts[i], dst );
 		}
 		dst << "\n]";
+	dst << "},";
 
 	// Arcs of the poset
 	dst << "{";
