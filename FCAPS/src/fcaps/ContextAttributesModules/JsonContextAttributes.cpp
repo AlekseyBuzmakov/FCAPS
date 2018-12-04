@@ -57,6 +57,25 @@ CJsonContextAttributes::~CJsonContextAttributes()
 	}
 }
 
+JSON CJsonContextAttributes::DescribeAttributeSet(int* attrsSet, int attrsCount)
+{
+	assert(attrsSet != 0);
+
+	std::stringstream rslt;
+	rslt << "{" << "\"Count\":" << attrsCount << ", "
+	     << "\"Names\":[";
+	for( int i = 0; i < attrsCount; ++i) {
+		if( i != 0 ) {
+			rslt << ",";
+		}
+		const int attr = attrsSet[i];
+		assert(0 <= attr && attr < attributes.size());
+		rslt << "\"" << attributes[i].Name << "\"";
+	}
+	rslt << "]}";
+	return rslt.str();
+}
+
 void CJsonContextAttributes::LoadParams( const JSON& json )
 {
 	CJsonError error;
@@ -170,6 +189,7 @@ void CJsonContextAttributes::loadContext()
 	{
 		throw new CTextException( "CJsonContextAttributes::LoadParams", "Not a context File: Data is not found" );
 	}
+
 	const rapidjson::Value& jsonObjs = jsonContext[1]["Data"];
 	objectNum = jsonObjs.Size();
 
@@ -195,6 +215,10 @@ void CJsonContextAttributes::loadContext()
 			
 	}
 
+	// For names retrieval of the attributes
+	const bool hasAttrNames = jsonContext[0].HasMember("Params") && jsonContext[0]["Params"].HasMember("AttrNames")
+		&& jsonContext[0]["Params"]["AttrNames"].IsArray();
+
 	// Attributes are collected.
 	// Sorting attributes
 	vector<DWORD> attrOrder;
@@ -213,6 +237,11 @@ void CJsonContextAttributes::loadContext()
 		assert(0 <= a && a < attrs.size());
 		attributes[i].Image.PatternId = i;
 		attributes[i].Image.ImageSize = attrs[a].Size();
+		if(hasAttrNames && a < jsonContext[0]["Params"]["AttrNames"].Size() && jsonContext[0]["Params"]["AttrNames"][a].IsString()) {
+			attributes[i].Name = jsonContext[0]["Params"]["AttrNames"][a].GetString();
+		} else {
+			attributes[i].Name = StdExt::to_string(a);
+		}
 		int* objects = new int[attributes[i].Image.ImageSize];
 		attributes[i].Image.Objects = objects;
 		auto itr = attrs[a].Begin();

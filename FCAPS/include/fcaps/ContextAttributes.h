@@ -28,6 +28,9 @@ interface IContextAttributes : public virtual IObject {
     virtual int GetNextAttribute(int a) = 0;
     // Returns the number of the next (larger) attribute that is not a specification of the given attribute
     virtual int GetNextNonChildAttribute(int a) = 0;
+
+    // Describing a set of attributes
+    virtual JSON DescribeAttributeSet(int* attrsSet, int attrsCount) = 0;
 };
 
 #endif // PATTERNENUMERATOR_H_INCLUDED

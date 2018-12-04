@@ -126,7 +126,7 @@ private:
 ////////////////////////////////////////////////////////////////////
 
 CStabilityCbOLocalProjectionChain::CStabilityCbOLocalProjectionChain() :
-	thld(0),
+	thld(1),
 	extCmp(new CVectorBinarySetJoinComparator),
 	extDeleter(extCmp),
 	intCmp(new CBinarySetDescriptorsComparator),
@@ -203,7 +203,7 @@ double CStabilityCbOLocalProjectionChain::GetInterestThreshold() const
 }
 void CStabilityCbOLocalProjectionChain::UpdateInterestThreshold( const double& _thld )
 {
-	thld = thld;
+	thld = max(1.0,_thld);
 }
 double CStabilityCbOLocalProjectionChain::GetPatternInterest( const IPatternDescriptor* p )
 {
@@ -238,7 +238,7 @@ bool CStabilityCbOLocalProjectionChain::Preimages( const IPatternDescriptor* d, 
 	CSharedPtr<const CVectorBinarySetDescriptor> nextImage;
 	while(attrs->HasAttribute(a)){
 		// Getting next attribute
-		getAttributeImg(p.NextAttribute(),nextImage);
+		getAttributeImg(a,nextImage);
 
 		// Computing the only possible preimage
 		CSharedPtr<const CVectorBinarySetDescriptor> res(
@@ -276,7 +276,7 @@ bool CStabilityCbOLocalProjectionChain::Preimages( const IPatternDescriptor* d, 
 		break;
 	}
 	p.SetNextAttribute(a);
-	return attrs->HasAttribute(a);
+	return p.Delta() >= thld && attrs->HasAttribute(a);
 }
 int CStabilityCbOLocalProjectionChain::GetExtentSize( const IPatternDescriptor* d ) const
 {
@@ -288,7 +288,19 @@ JSON CStabilityCbOLocalProjectionChain::SaveExtent( const IPatternDescriptor* d 
 }
 JSON CStabilityCbOLocalProjectionChain::SaveIntent( const IPatternDescriptor* d ) const
 {
-	return intCmp->SavePattern( &to_pattern(d).Intent() );
+	const CPattern& p = to_pattern(d);
+	const auto attrs = p.Intent().GetAttribs();
+	int* attributes = new int[attrs.Size()];
+	auto itr = attrs.Begin();
+	auto end = attrs.End();
+	for(int i = 0; itr != end; ++itr, ++i ) {
+		assert(i < attrs.Size());
+		attributes[i] = static_cast<int>(*itr);
+	}
+	JSON rslt = this->attrs->DescribeAttributeSet(attributes, attrs.Size());
+	delete[] attributes;
+
+	return rslt;
 }
 
 const CPattern& CStabilityCbOLocalProjectionChain::to_pattern(const IPatternDescriptor* d) const
@@ -324,8 +336,13 @@ const CPattern* CStabilityCbOLocalProjectionChain::initializeNewPattern(
 {
 	// If delta is zero, then the attribute is in the intent.
 	// However, according to canonical order it should not be there. Thus, such a pattern should also be ignored.
-	DWORD delta = getAttributeDelta(parent.ClosestChild(), ext);
-	int minAttr = parent.ClosestChild();
+	assert(thld >= 1);
+	DWORD delta = ext->Size();
+	int minAttr = genAttr + 1;
+	if( parent.ClosestChild() < genAttr ) {
+		getAttributeDelta(parent.ClosestChild(), ext);
+		minAttr = parent.ClosestChild();
+	}
 
 	auto intentItr = parent.Intent().GetAttribs().Begin();
 	auto intentEnd = parent.Intent().GetAttribs().End();
@@ -334,12 +351,12 @@ const CPattern* CStabilityCbOLocalProjectionChain::initializeNewPattern(
 		while(intentItr != intentEnd && a > *intentItr) {
 			const DWORD ia = *intentItr;
 			++intentItr;
-			assert(ia < *intentItr);
+			assert(intentItr == intentEnd || ia < *intentItr);
 		}
 		if(intentItr != intentEnd && a == *intentItr) {
 			continue;
 		}
-		const DWORD aDelta = getAttributeDelta(parent.ClosestChild(), ext);
+		const DWORD aDelta = getAttributeDelta(a, ext);
 		if(aDelta < delta) {
 			delta = aDelta;
 			minAttr = a;

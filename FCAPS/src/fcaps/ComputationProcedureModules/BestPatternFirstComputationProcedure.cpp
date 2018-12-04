@@ -34,7 +34,7 @@ STR(
 				},
 				"MaxPatternNumber" :{
 					"description": "The maximal number of patterns that should be stored at any iteration of the algorithm. Used only when 'AdjustThreshold' is true.",
-					"type":"number",
+					"type":"integer",
 					"minimumu":0,
 					"exclusiveMinimum":true
 				},
@@ -104,22 +104,27 @@ void CBestPatternFirstComputationProcedure::Run()
 	// Just takes one by one the most promissing patterns and expand them
 	while( !callback->IsInterrupted() && !queue.empty() && queue.begin()->Potential > best.Quality ) {
 		const CPattern& p = *queue.begin();
-		if( !lpChain->Preimages(p.Pattern.get(), newPatterns) ) { // The expansion of the pattern
+		newPatterns.Clear();
+		// The expansion of the pattern
+		const bool toBeExpanded = lpChain->Preimages(p.Pattern.get(), newPatterns);
+		++expansionCount;
+		addNewPatterns( newPatterns );
+
+		if( !toBeExpanded ) {
 			queue.erase(queue.begin()); // If no more expansion is possible than pattern is removed
 		}
-		newPatterns.Clear();
-		addNewPatterns( newPatterns );
-		++expansionCount;
+		if( queue.size() == 0 ) {
+			break;
+		}
 
 		adjustThreshold();
-		if( expansionCount % 1000 == 0 ) { // Just to report not too often
-			callback->ReportProgress( expansionCount, string("Border size is") + StdExt::to_string(queue.size())
-			                          + ". Quality: " + StdExt::to_string(best.Quality) + " / " + StdExt::to_string(queue.begin()->Potential)
-			                          + ". Delta: " + StdExt::to_string(lpChain->GetInterestThreshold()));
-		}
+		callback->ReportProgress( expansionCount, string("Border size is ") + StdExt::to_string(queue.size())
+		                          + ". Quality: " + StdExt::to_string(best.Quality) + " / ["
+		                          + StdExt::to_string(queue.rbegin()->Potential) + "; " + StdExt::to_string(queue.begin()->Potential) + "]"
+		                          + ". Delta: " + StdExt::to_string(lpChain->GetInterestThreshold()));
 	}
 	// Last report of the progress
-	callback->ReportProgress( expansionCount, string("Border size is") + StdExt::to_string(queue.size())
+	callback->ReportProgress( expansionCount, string("Border size is ") + StdExt::to_string(queue.size())
 								+ ". Quality: " + StdExt::to_string(best.Quality) 
 	                          + ". Delta: " + StdExt::to_string(lpChain->GetInterestThreshold()) + "                                 ");
 }
@@ -127,14 +132,19 @@ void CBestPatternFirstComputationProcedure::Run()
 void CBestPatternFirstComputationProcedure::SaveResult( const std::string& basePath )
 {
 	callback->ReportNextStage("Producing output");
+
 	CDestStream dst(basePath);
 	dst << "[\n"
 	    << "{"
 			"\"NodesCount\":1,\"ArcsCount\":0,"
 			"\"Params\":" << SaveParams()
 	    << "},{ \"Nodes\":[\n"
-	    << "{" "\"ExtSize\":" << lpChain->GetExtentSize( best.Pattern.get() ) << ",\"Ext\":" << lpChain->SaveExtent( best.Pattern.get() ) << ",\n\"Int\":" << lpChain->SaveIntent( best.Pattern.get() )
-	    << ",\n\"Thld\":" << thld << ", \"Value\":" << best.Quality  << "}" 
+	    << "{" "\"ExtSize\":" << lpChain->GetExtentSize( best.Pattern.get() )
+	    << ",\n\"Ext\":" << lpChain->SaveExtent( best.Pattern.get() )
+	    << ",\n\"Int\":" << lpChain->SaveIntent( best.Pattern.get() )
+	    << ",\n\"Thld\":" << thld << ", \"Value\":" << best.Quality
+	    << ",\n\"Quality\":" << oest->GetJsonQuality( dynamic_cast<const IExtent*>(best.Pattern.get()) )
+		<< "}" 
 		"]}"
 		"]";
 }
@@ -273,6 +283,7 @@ void CBestPatternFirstComputationProcedure::addNewPatterns( const ILocalProjecti
 		p.Potential = oest->GetBestSubsetEstimate( ext );
 		queue.insert(p);
 		++itr;
+		isBestQualityKnown = true;
 	}
 	for( ;itr != newPatterns.End(); ) {
 		auto currItr = itr;
@@ -286,8 +297,14 @@ void CBestPatternFirstComputationProcedure::addNewPatterns( const ILocalProjecti
 		CPattern p;
 		p.Pattern.reset(*currItr, deleter);
 		p.Potential = oest->GetBestSubsetEstimate( ext );
-		if( oest->GetBestSubsetEstimate(ext) <= best.Quality ) {
+		assert(p.Potential < queue.begin()->Potential + 1e-10);
+		if( p.Potential <= best.Quality ) {
 			continue;
+		}
+		const double q = oest->GetValue(ext);
+		if(q > best.Quality) {
+			best.Quality = q;
+			best.Pattern = p.Pattern;
 		}
 		queue.insert(p);
 	}

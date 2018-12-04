@@ -66,6 +66,10 @@ CBinaryClassificationOEst::CBinaryClassificationOEst() :
 double CBinaryClassificationOEst::GetValue(const IExtent* ext) const
 {
 	assert(ext!=0);
+	if(ext->Size() == 0) {
+		return 0;
+	}
+
 	const DWORD curNPlus=getPositiveObjectsCount(ext);
 	assert(curNPlus <= ext->Size());
 
@@ -108,6 +112,7 @@ JSON CBinaryClassificationOEst::GetJsonQuality(const IExtent* ext) const
 	rslt << "{"
 		<< "\"Positiveness\":" << static_cast<double>(curNPlus) / ext->Size() << ","
 		<< "\"BasePositiveness\":" << static_cast<double>(nPlus) / classes.size() << ","
+		<< "\"Size\":" << static_cast<double>(ext->Size()) / classes.size() << ","
 		<< "\"p-Value\":" << pValue << ","
 		<< "\"Value\":" << GetValue(ext)
 		<<"}";
@@ -216,7 +221,7 @@ DWORD CBinaryClassificationOEst::getPositiveObjectsCount(const IExtent* ext) con
 	
 	CPatternImage img;
 	ext->GetExtent(img);
-	assert(img.ImageSize != 0 && img.Objects != 0);
+	assert(img.ImageSize >= 0 && img.Objects != 0);
 	assert(ext->Size() == img.ImageSize);
 	
 	DWORD nPlus = 0;

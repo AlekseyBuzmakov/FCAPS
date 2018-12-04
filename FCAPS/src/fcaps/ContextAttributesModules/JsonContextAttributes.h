@@ -47,8 +47,9 @@ public:
 		{return a+1;}
 	virtual int GetNextNonChildAttribute(int a)
 		{return a+1;}
+	virtual JSON DescribeAttributeSet(int* attrsSet, int attrsCount);
 
-	// Methods of IModule
+ 	// Methods of IModule
 	virtual void LoadParams( const JSON& );
 	virtual JSON SaveParams() const;
 	virtual const char* const GetType() const
@@ -65,6 +66,7 @@ public:
 private:
 	struct CAttribute {
 		CPatternImage Image;
+		std::string Name;
 	};
 private:
 	static const CModuleRegistrar<CJsonContextAttributes> registrar;

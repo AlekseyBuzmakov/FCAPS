@@ -67,6 +67,7 @@ public:
 		writeOutput(false),
 		pathToModules( "./modules/" ),
 		interactiveMode(false),
+		lastStatusTime(time(NULL)),
 		ipAlloc(interactiveParams.GetAllocator())
 	{
 	}
@@ -104,12 +105,14 @@ private:
 	bool interactiveMode;
 
 	mutable string lastCtxProcessorInfo;
+	mutable time_t lastStatusTime;
 
 	string pathToModules;
 	vector< CSharedPtr<Library> > modules;
 
 	mutable rapidjson::Document interactiveParams;
 	rapidjson::MemoryPoolAllocator<>& ipAlloc;
+
 
 	void printException( const CException& e ) const;
 
@@ -241,8 +244,13 @@ int CThisConsoleApplication::Execute()
 void CThisConsoleApplication::ReportProgress( const double& p, const std::string& info ) const
 {
 	lastCtxProcessorInfo = info;
+	time_t tt = time(NULL);
+	if( tt - lastStatusTime < 1 ) {
+		return;
+	}
+	lastStatusTime = tt;
 
-	if( 0 <= p && p <= 1 ) {
+	if( 0 <= p && p < 1 ) {
 		GetStatusStream() << std::fixed << std::setprecision(3);
         GetStatusStream() << "   In " << p*100 << "%. ";
 	} else {
