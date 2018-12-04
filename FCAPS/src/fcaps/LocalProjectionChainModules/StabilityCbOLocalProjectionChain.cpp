@@ -53,7 +53,7 @@ public:
 	          int nextAttr, DWORD d, int closestAttribute ) :
 		extent(e), intent(i), nextAttribute(nextAttr), delta(d), closestChildAttribute(closestAttribute) {initPatternImage(cmp);}
 	~CPattern()
-		{ delete img.Objects; }
+		{ delete[] img.Objects; }
 
 	// Methods of IExtent
 	virtual DWORD Size() const
@@ -318,6 +318,13 @@ const CPattern* CStabilityCbOLocalProjectionChain::newPattern(
 }
 void CStabilityCbOLocalProjectionChain::getAttributeImg(int a, CSharedPtr<const CVectorBinarySetDescriptor>& rslt)
 {
+	if( attrsHolder.size() <= a ) {
+		attrsHolder.resize(a+1);
+	}
+	if( attrsHolder[a]!=0) {
+		rslt = attrsHolder[a];
+		return;
+	}
 	CPatternImage img;
 	attrs->GetAttribute(a, img);
 
@@ -328,6 +335,7 @@ void CStabilityCbOLocalProjectionChain::getAttributeImg(int a, CSharedPtr<const 
 		extCmp->AddValue( static_cast<DWORD>( img.Objects[i]), ext );
 	}
 	attrs->ClearMemory(img);
+	attrsHolder[a] = rslt;
 }
 const CPattern* CStabilityCbOLocalProjectionChain::initializeNewPattern(
 	  const CPattern& parent,

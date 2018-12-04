@@ -13,7 +13,7 @@
 
 // #include <rapidjson/document.h>
 
-// #include <set>
+#include <deque>
 
 ////////////////////////////////////////////////////////////////////
 
@@ -68,6 +68,8 @@ private:
 	static const CModuleRegistrar<CStabilityCbOLocalProjectionChain> registrar;
 	// Object that enumerates attribute extents
 	CSharedPtr<IContextAttributes> attrs;
+	// Cached attributes
+	std::deque< CSharedPtr<const CVectorBinarySetDescriptor> > attrsHolder;
 	// The threshold for delta measure
 	double thld;
 	// Comparator for extents

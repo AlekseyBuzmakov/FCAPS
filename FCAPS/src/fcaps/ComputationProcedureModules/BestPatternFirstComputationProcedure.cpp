@@ -82,6 +82,7 @@ void CBestPatternFirstComputationProcedure::SetCallback( const IComputationCallb
 	callback = cb;
 	assert(lpChain != 0);
 }
+
 void CBestPatternFirstComputationProcedure::Run()
 {
 	assert(callback != 0);
@@ -103,7 +104,8 @@ void CBestPatternFirstComputationProcedure::Run()
 	DWORD expansionCount = 0;
 	// Just takes one by one the most promissing patterns and expand them
 	while( !callback->IsInterrupted() && !queue.empty() && queue.begin()->Potential > best.Quality ) {
-		const CPattern& p = *queue.begin();
+		auto beginItr = queue.begin();
+		const CPattern& p = *beginItr;
 		newPatterns.Clear();
 		// The expansion of the pattern
 		const bool toBeExpanded = lpChain->Preimages(p.Pattern.get(), newPatterns);
@@ -111,13 +113,14 @@ void CBestPatternFirstComputationProcedure::Run()
 		addNewPatterns( newPatterns );
 
 		if( !toBeExpanded ) {
-			queue.erase(queue.begin()); // If no more expansion is possible than pattern is removed
+			queue.erase(beginItr); // If no more expansion is possible than pattern is removed
 		}
 		if( queue.size() == 0 ) {
 			break;
 		}
 
 		adjustThreshold();
+
 		callback->ReportProgress( expansionCount, string("Border size is ") + StdExt::to_string(queue.size())
 		                          + ". Quality: " + StdExt::to_string(best.Quality) + " / ["
 		                          + StdExt::to_string(queue.rbegin()->Potential) + "; " + StdExt::to_string(queue.begin()->Potential) + "]"
@@ -341,6 +344,7 @@ void CBestPatternFirstComputationProcedure::adjustThreshold()
 		}
 		queue.erase(currItr);
 	}
+	lpChain->UpdateInterestThreshold( thld );
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -353,6 +357,9 @@ bool CBestPatternFirstComputationProcedure::CPatternPotentialComparator::operato
 	// Difference is evident from potential
 	if( a.Potential - b.Potential > 1e-10 ) {
 		return true;
+	}
+	if( a.Potential - b.Potential < -1e-10 ) {
+		return false;
 	}
 
 	// Special case if a pattern is zero
