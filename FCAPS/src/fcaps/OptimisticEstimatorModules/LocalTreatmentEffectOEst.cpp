@@ -98,9 +98,6 @@ double CLocalTreatmentEffectOEst::GetValue(const IExtent* ext) const
 	const double delta = objValues.TestConfLowBound.front()
 		- objValues.CntrlConfUpperBound.back();
 
-	if( delta <= 0 ) {
-		return 0;
-	}
 	return getValue(delta,ext->Size()); // Only linear functions are supported
 }
 
@@ -452,7 +449,11 @@ void CLocalTreatmentEffectOEst::computeConfidenceIntervalBounds() const
 // Computes a linear function of delta and size
 double CLocalTreatmentEffectOEst::getValue(const double& delta, int size) const
 {
-	return alpha * delta/delta0  + beta * size/objY.size();
+	if( delta <= 1e-10 ) {
+		return 0;
+	} else {
+		return alpha * delta/delta0  + beta * size/objY.size();
+	}
 }
 
 // Finds the best possible value if cntrl confidence interval is fixed

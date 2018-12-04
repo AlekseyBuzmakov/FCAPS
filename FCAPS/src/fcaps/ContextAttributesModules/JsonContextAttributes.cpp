@@ -70,7 +70,7 @@ JSON CJsonContextAttributes::DescribeAttributeSet(int* attrsSet, int attrsCount)
 		}
 		const int attr = attrsSet[i];
 		assert(0 <= attr && attr < attributes.size());
-		rslt << "\"" << attributes[i].Name << "\"";
+		rslt << "\"" << attributes[attr].Name << "\"";
 	}
 	rslt << "]}";
 	return rslt.str();
