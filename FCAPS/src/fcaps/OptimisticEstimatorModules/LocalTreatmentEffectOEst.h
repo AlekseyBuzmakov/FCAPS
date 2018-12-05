@@ -62,6 +62,13 @@ private:
 		// The best value change in the test test if only elements starting from [i] are allowed
 		std::vector<double> BestTestValueChange;
 	};
+	enum TConfIntervalMode {
+		CIM_Median = 0, // Nonparametric confidence interval for the median
+		CIM_2Sigma, // Just two standard deviations as the confidence interval
+		CIM_TTest, // t-test is used to compute confidence interval
+
+		CIM_EnumCount
+	};
 
 private:
 	static const CModuleRegistrar<CLocalTreatmentEffectOEst> registrar;
@@ -74,11 +81,15 @@ private:
 	std::vector<bool> objTrt;
 	// The significance level for confidence interval computation
 	double signifLevel;
+	// The multiplier before SIGMA for the corresponding significance level
+	double zp;
 	// The minimal number of objects in each group
 	int minObjNum;
 	// The parameters to compute the linear combianiton of delta and size
 	double alpha;
 	double beta;
+	// The way to compute the confidence interval
+	TConfIntervalMode confIntMode;
 
 	// The precomputed number of objects that corresponds to the significance level (1-based)
 	std::vector<int> signifObjectNum;
@@ -96,12 +107,14 @@ private:
 	// The object that contains Test and control objects for current pattern
 	mutable CObjValues objValues;
 
+	void setZP();
 	void computeSignificantObjectNumbers();
 	static double incompleteBeta(int i, int j);
 	void buildOrder();
 	void computeDelta0();
-	void extractObjValues(const IExtent* ext) const;
-	void computeConfidenceIntervalBounds() const;
+	bool extractObjValues(const IExtent* ext) const;
+	void computeMedianConfidenceIntervalBounds() const;
+	void compute2SigmasConfidenceIntervalBounds() const;
 	double getValue(const double& delta, int size) const;
 	double getBestValueForSubsets(int cntrlLastObject, int testFirstObject) const;
 	bool checkObjValues() const;

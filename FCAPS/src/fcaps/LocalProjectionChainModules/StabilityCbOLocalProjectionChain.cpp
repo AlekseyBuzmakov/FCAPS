@@ -330,7 +330,7 @@ void CStabilityCbOLocalProjectionChain::getAttributeImg(int a, CSharedPtr<const 
 
 	CVectorBinarySetDescriptor& ext = *extCmp->NewPattern();
 	rslt.reset( &ext, extDeleter );
-	assert( img.ImageSize > 0 );
+
 	for (DWORD i = 0; i < img.ImageSize; i++) {
 		extCmp->AddValue( static_cast<DWORD>( img.Objects[i]), ext );
 	}

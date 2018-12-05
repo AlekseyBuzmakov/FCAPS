@@ -60,6 +60,10 @@ STR(
 					"type": "number",
 					"minimum": 0
 				},
+				"ConfidenceIntervalMode":{
+					"description": "How to compute the confidence interval. Options are: 'median', '2sigmas', and 'ttest'.",
+					"type": "string"
+				},
 				"SignificanceLevel":{
 					"description": "The significance level that is used to compute the confidence interval",
 					"type": "number",
@@ -83,10 +87,12 @@ const char* const CLocalTreatmentEffectOEst::Desc()
 
 CLocalTreatmentEffectOEst::CLocalTreatmentEffectOEst() :
 	signifLevel(0.01),
+	zp(2.56),
 	minObjNum(100),
 	controlSize(0),
 	alpha(1),
-	beta(1)
+	beta(1),
+	confIntMode(CIM_Median)
 {
 	
 }
@@ -94,9 +100,15 @@ CLocalTreatmentEffectOEst::CLocalTreatmentEffectOEst() :
 double CLocalTreatmentEffectOEst::GetValue(const IExtent* ext) const
 {
 	assert(ext!=0);
-	extractObjValues(ext);
+	if( !extractObjValues(ext) ) {
+		return 0;
+	};
+	
 	const double delta = objValues.TestConfLowBound.front()
 		- objValues.CntrlConfUpperBound.back();
+	if( delta <= 1e-10 ) {
+		return 0;
+	}
 
 	return getValue(delta,ext->Size()); // Only linear functions are supported
 }
@@ -105,7 +117,9 @@ double CLocalTreatmentEffectOEst::GetBestSubsetEstimate(const IExtent* ext) cons
 {
 	assert(ext!=0);
 
-	extractObjValues(ext);
+	if( !extractObjValues(ext) ) {
+		return 0;
+	};
 
 	objValues.CntrlToTestPosition.resize(objValues.Cntrl.size());
 	objValues.BestTestValueChange.resize(objValues.Test.size());
@@ -146,6 +160,9 @@ double CLocalTreatmentEffectOEst::GetBestSubsetEstimate(const IExtent* ext) cons
 	double bestDiff = 0;
 	for(int i = minObjNum; i < objValues.CntrlToTestPosition.size(); ++i) {
 		const int testStart = objValues.CntrlToTestPosition[i];
+		if(testStart == -1) {
+			break;
+		}
 		assert( objValues.CntrlConfUpperBound[i] < objValues.TestConfLowBound[testStart] );
 		const double currDiff =
 			getValue(objValues.CntrlConfUpperBound[minObjNum - 1] - objValues.CntrlConfUpperBound[i],i - minObjNum + 1)
@@ -160,7 +177,10 @@ double CLocalTreatmentEffectOEst::GetBestSubsetEstimate(const IExtent* ext) cons
 JSON CLocalTreatmentEffectOEst::GetJsonQuality(const IExtent* ext) const
 {
 	std::stringstream rslt;
-	extractObjValues(ext);
+	if( !extractObjValues(ext) ) {
+		return "{\"Error\":\"Too small extent\"}";
+	};
+
 	const double delta = objValues.TestConfLowBound.front()
 		- objValues.CntrlConfUpperBound.back();
 	rslt << "{"
@@ -258,13 +278,24 @@ void CLocalTreatmentEffectOEst::LoadParams( const JSON& json )
 		const double b =p["Beta"].GetDouble();
 		beta=b;
 	}
+	if(p.HasMember("ConfidenceIntervalMode") && p["ConfidenceIntervalMode"].IsString()) {
+		const string mode =p["ConfidenceIntervalMode"].GetString();
+		if( mode == "median" || mode == "m") {
+			confIntMode = CIM_Median;
+		} else if( mode == "2sigmas" || mode == "2s") {
+			confIntMode = CIM_2Sigma;
+		} else if( mode == "ttest" || mode == "tt") {
+			confIntMode = CIM_TTest;
+		}
+	}
 	if(p.HasMember("SignificanceLevel") && p["SignificanceLevel"].IsNumber()) {
 		const double sl =p["SignificanceLevel"].GetDouble();
 		if( 0 < sl && sl < 1) {
 			signifLevel=sl;
 		}
 	}
-
+	
+	setZP();
 	computeSignificantObjectNumbers();
 	buildOrder();
 	computeDelta0();
@@ -307,6 +338,38 @@ bool CLocalTreatmentEffectOEst::operator()(int a, int b) const
 		return false;
 	}
 	return objY[a] < objY[b];
+}
+
+// Computes the multiplier of SIGMA for the correct quantile
+void CLocalTreatmentEffectOEst::setZP()
+{
+	if(signifLevel > 0.3) {
+		zp = 1;
+	} else if(signifLevel > 0.2-1e-10) {
+		zp = 1.282;
+	} else if(signifLevel > 0.1-1e-10) {
+		zp = 1.645;
+	} else if(signifLevel > 0.05-1e-10) {
+		zp = 1.96;
+	} else if(signifLevel > 0.02-1e-10) {
+		zp = 2.326;
+	} else if(signifLevel > 0.01-1e-10) {
+		zp = 2.576;
+	} else if(signifLevel > 0.005-1e-10) {
+		zp = 2.807;
+	} else if(signifLevel > 0.002-1e-10) {
+		zp = 3.09;
+	} else if(signifLevel > 0.001-1e-10) {
+		zp = 3.29;
+	} else if(signifLevel > 0.0001-1e-10) {
+		zp = 3.89;
+	} else if(signifLevel > 0.00001-1e-10) {
+		zp = 4.417;
+	} else if(signifLevel > 0.000001-1e-10) {
+		zp = 4.891;
+	} else {
+		zp = 5.327; // For 1e-6
+	}
 }
 
 // For every number of objects compute the object number that corresponds to a boundary of the median with the desired significance level
@@ -374,9 +437,12 @@ void CLocalTreatmentEffectOEst::computeDelta0()
 }
 
 // Extracts test and control group for the extent
-void CLocalTreatmentEffectOEst::extractObjValues(const IExtent* ext) const
+bool CLocalTreatmentEffectOEst::extractObjValues(const IExtent* ext) const
 {
 	assert(ext!=0);
+	if( ext->Size() < 2 * minObjNum ) {
+		return false;
+	}
 	
 	CPatternImage img;
 	CPatternImageHolder imgHolder(ext,img);
@@ -417,12 +483,27 @@ void CLocalTreatmentEffectOEst::extractObjValues(const IExtent* ext) const
 		}
 	}
 	assert( nCntrl + nTest == img.ImageSize);
+	if( nCntrl < minObjNum || nTest < minObjNum ) {
+		return false;
+	}
 
-	computeConfidenceIntervalBounds();
+	switch(confIntMode) {
+	case CIM_Median:
+		computeMedianConfidenceIntervalBounds();
+		break;
+	case CIM_2Sigma:
+	case CIM_TTest:
+		compute2SigmasConfidenceIntervalBounds();
+		break;
+	default:
+		assert(false);
+		computeMedianConfidenceIntervalBounds();
+	}
+	return true;
 }
 
 // Computes the confidence interval bounds for Test and Control sets
-void CLocalTreatmentEffectOEst::computeConfidenceIntervalBounds() const
+void CLocalTreatmentEffectOEst::computeMedianConfidenceIntervalBounds() const
 {
 	objValues.TestConfLowBound.resize(objValues.Test.size());
 	objValues.CntrlConfUpperBound.resize(objValues.Cntrl.size());
@@ -445,15 +526,62 @@ void CLocalTreatmentEffectOEst::computeConfidenceIntervalBounds() const
 		objValues.CntrlConfUpperBound[cntrlSize - 1] = min(objValues.Cntrl[cntrlSize - 1], objValues.CntrlConfUpperBound[minObjNum - 1]);
 	}
 }
+#define SQR(x)((x)*(x))
+void CLocalTreatmentEffectOEst::compute2SigmasConfidenceIntervalBounds() const
+{
+	objValues.TestConfLowBound.resize(objValues.Test.size());
+	objValues.CntrlConfUpperBound.resize(objValues.Cntrl.size());
+	// Computing sigmas in linear times.
+	// The idea is the following.
+	// Let a_n, sd_n be average and sd2 for n points then
+	// sd_n = SUM (Xi-an)^2 = SUM (Xi-a{n-1}+a{n-1}-an)^2
+	//      = SUM (Xi-a{n-1})^2 + (N-1)(a{n-1}-an)^2 + 2 * SUM (Xi - a_{n-1}) (a_{n-1}-a_n) + (Xn-an)^2
+	//      = sd_{n-1} + (N-1)(a{n-1}-an)^2 + 2 * SUM Xi (a_{n-1}-a_n) + (Xn-an)^2
+
+	// Computing low bonuds for the Test set
+	double sd2sum = 0;
+	double valSum = objValues.Test[objValues.Test.size() - 1];
+	objValues.TestConfLowBound[objValues.Test.size() - 1] = valSum;
+	for(int n = 2; n <= objValues.Test.size(); ++n ) {
+		const int i = objValues.Test.size() - n;
+		// First adding the new member to sd with the old mean
+		const double meanPrev = valSum / (n-1);
+		sd2sum += SQR(objValues.Test[i] - meanPrev );
+		// Computing the mean shift
+		const double meanDiff = meanPrev - (valSum + objValues.Test[i]) / n; 
+		// Changing the sum to the all values
+		valSum += objValues.Test[i];
+
+		// Changing the mean
+		sd2sum += n * meanDiff * meanDiff + 2 * (valSum - n * meanPrev) * meanDiff;
+		// TODO add t-test here, for now only quantiles of norm distribution
+		objValues.TestConfLowBound[i] = max(objValues.Test[i],valSum / n - sqrt(sd2sum / n) * zp);
+	}
+	
+	sd2sum = 0;
+	valSum = objValues.Cntrl[0];
+	objValues.CntrlConfUpperBound[0]=valSum;
+	for(int n = 2; n <= objValues.Cntrl.size(); ++n ) {
+		const int i = n-1;
+		// First adding the new member to sd with the old mean
+		const double meanPrev = valSum / (n-1);
+		sd2sum += SQR(objValues.Cntrl[i] - meanPrev);
+		// Computing the mean shift
+		const double meanDiff = meanPrev - (valSum + objValues.Cntrl[i]) / n; 
+		// Changing the sum to the all values
+		valSum += objValues.Cntrl[i];
+
+		// Changing the mean
+		sd2sum += n * meanDiff * meanDiff + 2 * (valSum-n*meanPrev) * meanDiff;
+		// TODO add t-test here, for now only quantiles of norm distribution
+		objValues.CntrlConfUpperBound[i] = min(objValues.Cntrl[i],valSum / n + sqrt(sd2sum / n) * zp);
+	}
+}
 
 // Computes a linear function of delta and size
 double CLocalTreatmentEffectOEst::getValue(const double& delta, int size) const
 {
-	if( delta <= 1e-10 ) {
-		return 0;
-	} else {
-		return alpha * delta/delta0  + beta * size/objY.size();
-	}
+	return alpha * delta/delta0  + beta * size/objY.size();
 }
 
 // Finds the best possible value if cntrl confidence interval is fixed
@@ -522,6 +650,12 @@ bool CLocalTreatmentEffectOEst::checkObjValues() const
 		if( testPos == -1 && objValues.CntrlConfUpperBound[i] < objValues.TestConfLowBound[objValues.Test.size() - minObjNum] ) {
 			// -1 pos means that it is not possible to find any larger value in the Test set respecting the minimal size of the tidset
 			return false;
+		}
+		if( testPos == -1 ) {
+			if( i < objValues.CntrlToTestPosition.size()-1 && objValues.CntrlToTestPosition[i+1] != -1 ) {
+				return false;
+			}
+			continue;
 		}
 		assert( i < objValues.Cntrl.size() );
 		assert( testPos < objValues.Test.size() );
