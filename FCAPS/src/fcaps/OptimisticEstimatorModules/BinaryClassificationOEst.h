@@ -50,6 +50,8 @@ private:
 	std::vector<std::string> strClasses;
 	// The vector of classes that are considered as positive classes
 	std::unordered_set<std::string> targetClasses;
+	// The weight of the frequency in the resulting formula
+	double freqWeight;
 	// The vector specifying which class label is a target label
 	std::vector<bool> classes;
 	// The number of positive objects

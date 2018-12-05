@@ -42,6 +42,12 @@ STR(
 						"description":"The file contains an array of string labels for every object",
 						"json":["+","-","-","+","-"]
 					}
+				},
+				"FreqWeight": {
+					"description": "A weight for the frequence part in the resulting formula  should be less than 1. If 1 frequency part is considered with the same weight to probability part.",
+					"type": "number",
+					"minimum": 0,
+					"maximum": 1
 				}
 			}
 		}
@@ -58,7 +64,8 @@ const char* const CBinaryClassificationOEst::Desc()
 }
 
 CBinaryClassificationOEst::CBinaryClassificationOEst() :
-	nPlus(0)
+	nPlus(0),
+	freqWeight(1)
 {
 	
 }
@@ -74,7 +81,7 @@ double CBinaryClassificationOEst::GetValue(const IExtent* ext) const
 	assert(curNPlus <= ext->Size());
 
 	
-	return static_cast<double>(ext->Size()) / classes.size()
+	return pow(static_cast<double>(ext->Size()) / classes.size(), freqWeight)
 		* (1.0L * curNPlus / ext->Size() - 1.0L * nPlus / classes.size());
 }
 double CBinaryClassificationOEst::GetBestSubsetEstimate(const IExtent* ext) const
@@ -87,7 +94,9 @@ double CBinaryClassificationOEst::GetBestSubsetEstimate(const IExtent* ext) cons
 	//   the second one is maximized when locN is minimized, i.e., it should be equal curNPlus.
 	
 	const double result =
-		static_cast<double>( curNPlus) / classes.size() - 1.0L * nPlus * curNPlus / (classes.size() * classes.size());
+		pow(static_cast<double>(curNPlus) / classes.size(), freqWeight)
+		* (1 - 1.0L * nPlus / classes.size());
+		// static_cast<double>( curNPlus) / classes.size() - 1.0L * nPlus * curNPlus / (classes.size() * classes.size());
 	
 	assert( result - GetValue(ext) > -1e-10);
 	return result;
@@ -184,6 +193,14 @@ void CBinaryClassificationOEst::LoadParams( const JSON& json )
 		classes[i]=targetClasses.find(strClasses[i]) != targetClasses.end();
 		nPlus += classes[i];
 	}
+
+	if(p.HasMember("FreqWeight") && p["FreqWeight"].IsNumber()) {
+		const double a =p["FreqWeight"].GetDouble();
+		if( 0 <= a && a <= 1) {
+			freqWeight = a;
+		}
+	}
+	
 }
 
 JSON CBinaryClassificationOEst::SaveParams() const
@@ -193,7 +210,9 @@ JSON CBinaryClassificationOEst::SaveParams() const
 	params.SetObject()
 		.AddMember( "Type", OptimisticEstimatorModuleType, alloc )
 		.AddMember( "Name", BinaryClassificationOptimisticEstimator, alloc )
-		.AddMember( "Params", rapidjson::Value().SetObject(), alloc );
+		.AddMember( "Params", rapidjson::Value().SetObject()
+		            .AddMember("FreqWeight",rapidjson::Value().SetDouble(freqWeight),alloc)
+		            , alloc );
 
 	rapidjson::Value& p = params["Params"];
 
