@@ -51,7 +51,7 @@ CJsonContextAttributes::CJsonContextAttributes() :
 CJsonContextAttributes::~CJsonContextAttributes()
 {
 	for(int i = 0; i < attributes.size(); ++i) {
-		if(attributes[i].Image.ImageSize > 0) {
+		if(attributes[i].Image.Objects != 0) {
 			delete[] attributes[i].Image.Objects;
 		}
 	}

@@ -6,11 +6,12 @@
 #include <fcaps/ContextAttributes.h>
 
 #include <fcaps/SharedModulesLib/VectorBinarySetDescriptor.h>
-#include <fcaps/SharedModulesLib/BinarySetPatternManager.h>
 
 #include <JSONTools.h>
 #include <ModuleJSONTools.h>
 #include <StdTools.h>
+
+#include <stdint.h>
 
 using namespace std;
 
@@ -30,7 +31,13 @@ STR(
 				"ContextAttributes":{
 					"description": "A module for storing and accesing formal context",
 					"type": "@ContextAttributesModules"
-				}			}
+				},
+				"ReserveMemory": {
+					"description": "A number of patterns to be reserved",
+					"type": "integer",
+					"minimum":1
+				}
+			}
 		}
 	}
 );
@@ -46,14 +53,91 @@ const char* const CStabilityCbOLocalProjectionChain::Desc()
 
 ////////////////////////////////////////////////////////////////////
 
+const CIntentsTree::TAttribute CIntentsTree::InvalidAttribute = static_cast<CIntentsTree::TAttribute>(-1);
+
+CIntentsTree::TAttribute CIntentsTree::GetNextAttribute(TIntentItr& itr) const
+{
+	assert(0 <= itr && itr < memory.size());
+	assert(memory[itr].Attribute != InvalidAttribute);
+	const TAttribute res = memory[itr].Attribute;
+	itr = memory[itr].Next;
+	return res;
+}
+
+CIntentsTree::TIntent CIntentsTree::AddAttribute(TIntent intent, TAttribute newAttr)
+{
+	TIntentItr nextNode = newNode();
+	assert(0 <= nextNode && nextNode < memory.size());
+
+	const TIntentItr currItr = GetIterator(intent);
+	assert(currItr == -1 || 0 <= currItr && currItr < memory.size());
+
+	memory[nextNode].Next = currItr;
+	memory[nextNode].Attribute = newAttr;
+	memory[nextNode].BranchesCount = 0;
+
+	if( currItr != -1 ) {
+		assert( memory[currItr].Attribute < newAttr);
+		assert( 0 <= memory[currItr].Attribute);
+		++memory[currItr].BranchesCount;
+	}
+	return nextNode;
+}
+
+void CIntentsTree::Delete(TIntent intent)
+{
+	TIntentItr itr = GetIterator(intent);
+	TIntentItr prevItr = -1;
+
+	while(itr != -1) {
+		assert(0 <= itr && itr < memory.size());
+		if(memory[itr].BranchesCount > 0) {
+			--memory[itr].BranchesCount;
+			if( prevItr != -1 ) {
+				assert(0 <= prevItr && prevItr < memory.size());
+				memory[prevItr].Next = freeNode;
+				freeNode = GetIterator(intent);
+			}
+
+			// We have found the branching something else exists, so stop it.
+			break;
+		} else {
+			memory[itr].Attribute = InvalidAttribute;
+			itr = memory[itr].Next;
+		}
+	}
+	if( itr == -1 && prevItr != -1) {
+		assert(0 <= prevItr && prevItr < memory.size());
+		memory[prevItr].Next = freeNode;
+		freeNode = GetIterator(intent);
+	}
+}
+
+// Creates a new node dealing with free memory if any
+CIntentsTree::TIntentItr CIntentsTree::newNode()
+{
+	if( freeNode == -1) {
+		memory.emplace_back();
+		return memory.size() - 1;
+	} else {
+		assert(0 <= freeNode < memory.size());
+		const TIntentItr res = freeNode;
+		freeNode = memory[freeNode].Next;
+		return res;
+	}
+}
+
+////////////////////////////////////////////////////////////////////
+
 class CPattern : public IExtent, public IPatternDescriptor {
 	
 public:
-	CPattern( const CSharedPtr<CVectorBinarySetJoinComparator>& cmp, const CSharedPtr<const CVectorBinarySetDescriptor>& e, const CSharedPtr<CBinarySetPatternDescriptor>& i,
+	CPattern( const CSharedPtr<CVectorBinarySetJoinComparator>& cmp, const CSharedPtr<const CVectorBinarySetDescriptor>& e,
+	          CIntentsTree& iTree, CIntentsTree::TIntent i,
 	          int nextAttr, DWORD d, int closestAttribute ) :
-		extent(e), intent(i), nextAttribute(nextAttr), delta(d), closestChildAttribute(closestAttribute) {initPatternImage(cmp);}
+		extent(e), intentsTree(iTree), intent(i), nextAttribute(nextAttr), delta(d), closestChildAttribute(closestAttribute) {initPatternImage(cmp);}
 	~CPattern()
-		{ delete[] img.Objects; }
+		{ delete[] img.Objects; intentsTree.Delete(intent);}
 
 	// Methods of IExtent
 	virtual DWORD Size() const
@@ -65,17 +149,18 @@ public:
 
 	// Methos of IPatternDescriptor
 	virtual bool IsMostGeneral() const
-		{return Intent().GetAttribs().Size() == 0;}
+		{return intent == -1;}
 	virtual size_t Hash() const
 		{ return Extent().Hash(); }
 
 	// Methods of the class
 	const CVectorBinarySetDescriptor& Extent() const
 		{return *extent;}
-	const CBinarySetPatternDescriptor& Intent() const
-		{return *intent;}
-	CBinarySetPatternDescriptor& IntentRW() const
-		{return *intent;}
+	CIntentsTree::TIntent Intent() const
+		{return intent;}
+	void AddAttributeToIntent(CIntentsTree::TAttribute a) const
+		{ intent = intentsTree.AddAttribute(intent,a);}
+
 	int NextAttribute() const
 		{return nextAttribute;}
 	void SetNextAttribute(int a) const
@@ -94,7 +179,9 @@ private:
 	const CSharedPtr<const CVectorBinarySetDescriptor> extent;
 	CPatternImage img;
 	
-	mutable CSharedPtr<CBinarySetPatternDescriptor> intent;
+	CIntentsTree& intentsTree;
+	mutable CIntentsTree::TIntent intent;
+
 	// The minimal number of the attribute that can be added to the pattern.
 	// This number also gives the reference to the "core" of the pattern in the CbO canonical order
 	mutable int nextAttribute;
@@ -108,18 +195,12 @@ private:
 		assert(extent != 0);
 		img.PatternId = Hash();
 		img.ImageSize = extent->Size();
+		img.Objects = 0;
+
 		unique_ptr<int[]> objects (new int[img.ImageSize]);
 		img.Objects = objects.get(); 
-		CList<DWORD> values;
-		cmp->EnumValues(*extent, values);
-		auto itr=values.Begin();
-		DWORD i = 0;
-		for(; itr != values.End(); ++itr, ++i) {
-			assert(i < img.ImageSize);
-			objects[i]=*itr;
-		}
+		cmp->EnumValues(*extent, objects.get(), img.ImageSize);
 		objects.release(); 
-		assert( i == img.ImageSize);
 	}
 };
 
@@ -128,9 +209,7 @@ private:
 CStabilityCbOLocalProjectionChain::CStabilityCbOLocalProjectionChain() :
 	thld(1),
 	extCmp(new CVectorBinarySetJoinComparator),
-	extDeleter(extCmp),
-	intCmp(new CBinarySetDescriptorsComparator),
-	intDeleter(intCmp)
+	extDeleter(extCmp)
 {
 }
 
@@ -163,6 +242,10 @@ void CStabilityCbOLocalProjectionChain::LoadParams( const JSON& json )
 		throw new CJsonException( "CStabilityCbOLocalProjectionChain::LoadParams", CJsonError( json, errorText ) );
 	}
 	extCmp->SetMaxAttrNumber(attrs->GetObjectNumber());
+
+	if(p.HasMember("ReserveMemory") && p["ReserveMemory"].IsUint()) {
+		extCmp->Reserve(p["ReserveMemory"].GetInt());
+	}
 }
 
 JSON CStabilityCbOLocalProjectionChain::SaveParams() const
@@ -223,8 +306,7 @@ void CStabilityCbOLocalProjectionChain::ComputeZeroProjection( CPatternList& ptr
 	for( DWORD i = 0; i < GetObjectNumber(); ++i ) {
 		extCmp->AddValue(i,*ptrn);
 	}
-	CSharedPtr<CBinarySetPatternDescriptor> intent(intCmp->NewPattern(), intDeleter);
-	ptrns.PushBack( newPattern( ptrn, intent, 0, GetObjectNumber(), 0) );
+	ptrns.PushBack( newPattern( ptrn, intentsTree.Create(), 0, GetObjectNumber(), 0) );
 }
 bool CStabilityCbOLocalProjectionChain::Preimages( const IPatternDescriptor* d, CPatternList& preimages )
 {
@@ -248,7 +330,7 @@ bool CStabilityCbOLocalProjectionChain::Preimages( const IPatternDescriptor* d, 
 		const DWORD extDiff = ptrnExtSize - resExtSize;
 		if(extDiff == 0 ) {
 			// Attribute is in the closure
-			p.IntentRW().AddNextAttribNumber(static_cast<DWORD>(a));
+			p.AddAttributeToIntent(a);
 			a = attrs->GetNextAttribute(a);
 			continue;
 		}
@@ -289,15 +371,21 @@ JSON CStabilityCbOLocalProjectionChain::SaveExtent( const IPatternDescriptor* d 
 JSON CStabilityCbOLocalProjectionChain::SaveIntent( const IPatternDescriptor* d ) const
 {
 	const CPattern& p = to_pattern(d);
-	const auto attrs = p.Intent().GetAttribs();
-	int* attributes = new int[attrs.Size()];
-	auto itr = attrs.Begin();
-	auto end = attrs.End();
-	for(int i = 0; itr != end; ++itr, ++i ) {
-		assert(i < attrs.Size());
-		attributes[i] = static_cast<int>(*itr);
+	CIntentsTree::TIntentItr itr = intentsTree.GetIterator(p.Intent());
+	DWORD intentSize = 0;
+	while(itr != -1) {
+		++intentSize;
+		intentsTree.GetNextAttribute(itr);
 	}
-	JSON rslt = this->attrs->DescribeAttributeSet(attributes, attrs.Size());
+	int* attributes = new int[intentSize];
+	itr = intentsTree.GetIterator(p.Intent());
+	int i = intentSize - 1;
+	while(itr != -1) {
+		assert(i >= 0);
+		attributes[i] = intentsTree.GetNextAttribute(itr);
+		--i;
+	}
+	JSON rslt = this->attrs->DescribeAttributeSet(attributes,intentSize);
 	delete[] attributes;
 
 	return rslt;
@@ -311,10 +399,12 @@ const CPattern& CStabilityCbOLocalProjectionChain::to_pattern(const IPatternDesc
 
 const CPattern* CStabilityCbOLocalProjectionChain::newPattern(
 	const CSharedPtr<const CVectorBinarySetDescriptor>& ext,
-	const CSharedPtr<CBinarySetPatternDescriptor>& intent,
+	CIntentsTree::TIntent intent,
 	int nextAttr, DWORD delta, int clossestAttr)
 {
-	return new CPattern(extCmp, ext,intent,nextAttr,delta,clossestAttr);
+	return new CPattern(extCmp, ext,
+	                    intentsTree, intent,
+	                    nextAttr,delta,clossestAttr);
 }
 void CStabilityCbOLocalProjectionChain::getAttributeImg(int a, CSharedPtr<const CVectorBinarySetDescriptor>& rslt)
 {
@@ -352,8 +442,13 @@ const CPattern* CStabilityCbOLocalProjectionChain::initializeNewPattern(
 		minAttr = parent.ClosestChild();
 	}
 
-	auto intentItr = parent.Intent().GetAttribs().Begin();
-	auto intentEnd = parent.Intent().GetAttribs().End();
+	intentStorage.clear();
+	CIntentsTree::TIntentItr itr = intentsTree.GetIterator(parent.Intent());
+	while(itr != -1) {
+		intentStorage.push_back(intentsTree.GetNextAttribute(itr));
+	}
+	auto intentItr = intentStorage.rbegin();
+	auto intentEnd = intentStorage.rend();
 
 	for(int a = 0;delta >= thld && a < genAttr && attrs->HasAttribute(a);a = attrs->GetNextNonChildAttribute(a)) {
 		while(intentItr != intentEnd && a > *intentItr) {
@@ -373,9 +468,8 @@ const CPattern* CStabilityCbOLocalProjectionChain::initializeNewPattern(
 	if( delta < thld ) {
 		return 0;
 	}
-	CSharedPtr<CBinarySetPatternDescriptor> intent(intCmp->NewPattern(),intDeleter);
-	intent->AddList(parent.Intent().GetAttribs());
-	intent->AddNextAttribNumber(genAttr);
+	CIntentsTree::TIntent intent = intentsTree.Copy(parent.Intent());
+	intent = intentsTree.AddAttribute(intent, genAttr);
 	return(newPattern(ext,intent,attrs->GetNextAttribute(genAttr), delta, minAttr));
 }
 

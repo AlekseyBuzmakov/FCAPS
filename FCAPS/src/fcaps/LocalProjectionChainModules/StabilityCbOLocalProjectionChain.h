@@ -30,6 +30,62 @@ class CBinarySetPatternDescriptor;
 
 const char StabilityCbOLocalProjectionChain[] = "StabilityCbOLocalProjectionChainModule";
 
+////////////////////////////////////////////////////////////////////
+// A class for storing intents in a tree
+class CIntentsTree {
+public:
+	typedef uint_fast32_t TAttribute;
+	typedef int_fast32_t TIntent;
+	typedef TIntent TIntentItr;
+
+	static const TAttribute InvalidAttribute;
+
+public:
+	CIntentsTree() :
+		freeNode(-1) {}
+
+	// Returns the iterator to the END of the list
+	TIntentItr GetIterator(TIntent intent) const
+		{return intent;};
+	
+	// Returns the value of the next attribute,
+	//  and changes the iterator to the next position
+	TAttribute GetNextAttribute(TIntentItr& itr) const;
+
+	// Add attributes to the intent
+	//  the old intent is INVALIDATED
+	TIntent AddAttribute(TIntent intent, TAttribute newAttr);
+
+	// Creating of a new intent
+	TIntent Create()
+		{return -1;}
+	// Copying an existing intent
+	TIntent Copy(TIntent intent)
+		{return intent;}
+	// Deletion of an intent
+	void Delete(TIntent intent);
+
+private:
+	struct TTreeNode{
+		TAttribute Attribute;
+		TIntentItr Next;
+		int_fast32_t BranchesCount;
+
+		TTreeNode() :
+			Attribute(InvalidAttribute),Next(-1),BranchesCount(0) {}
+	};
+
+private:
+	// The memory the whole tree is stored in
+	std::deque<TTreeNode> memory;
+	// The pointer to the next free node
+	TIntentItr freeNode;
+
+	TIntentItr newNode();
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
 class CStabilityCbOLocalProjectionChain : public ILocalProjectionChain, public IModule {
 public:
 	CStabilityCbOLocalProjectionChain();
@@ -75,15 +131,16 @@ private:
 	// Comparator for extents
 	CSharedPtr<CVectorBinarySetJoinComparator> extCmp;
 	CPatternDeleter extDeleter;
-	// Comparator for intents;
-	CSharedPtr<CBinarySetDescriptorsComparator> intCmp;
-	CPatternDeleter intDeleter;
+	// Holder for the intents
+	CIntentsTree intentsTree;
+	// A temporary storage for intents. Here for not allocating memory too often
+	std::vector<int> intentStorage;
 
 	const CPattern& to_pattern(const IPatternDescriptor* d) const;
 	const CPattern* newPattern(
 		const CSharedPtr<const CVectorBinarySetDescriptor>& ext,
-		const CSharedPtr<CBinarySetPatternDescriptor>& intent,
-	int nextAttr, DWORD delta, int clossestAttr = 0);
+		CIntentsTree::TIntent intent,
+		int nextAttr, DWORD delta, int clossestAttr = 0);
 	void getAttributeImg(int a, CSharedPtr<const CVectorBinarySetDescriptor>& rslt);
 	const CPattern* initializeNewPattern(
 		const CPattern& parent,

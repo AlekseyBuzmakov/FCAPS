@@ -88,6 +88,7 @@ public:
 
 	// Enumerate values in the descriptor.
 	void EnumValues( const CVectorBinarySetDescriptor& descr, CList<DWORD>& result ) const;
+	void EnumValues( const CVectorBinarySetDescriptor& descr, int* buffer, int bufferSize ) const;
 
 	// Get/Set should write names
 	bool GetWriteNames() const

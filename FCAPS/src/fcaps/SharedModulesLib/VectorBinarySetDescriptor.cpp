@@ -314,6 +314,30 @@ void CVectorBinarySetJoinComparator::EnumValues( const CVectorBinarySetDescripto
 		}
 	}
 }
+// TODO make this function the same as the other EnumValues
+void CVectorBinarySetJoinComparator::EnumValues( const CVectorBinarySetDescriptor& descr, int* buffer, int bufferSize ) const
+{
+	assert(bufferSize >= descr.Size());
+	if(bufferSize < descr.Size()) {
+		return;
+	}
+	const DWORD attrBlockNum = getAttrBlockCount();
+
+	const uintptr_t* attrBlocks = getAttrBlocks( descr );
+	int currIndex = 0;
+	for( DWORD attrBlock = 0; attrBlock < attrBlockNum; ++attrBlock ) {
+		const uintptr_t block = getAttrBlock( attrBlocks, attrBlock );
+		char nextBit = -1;
+		while( (nextBit = getNextBit( block, nextBit )) != NotFound ) {
+			assert( nextBit < sizeof( uintptr_t ) * 8 );
+			const uintptr_t attr = attrBlock * sizeof( uintptr_t ) * 8 + nextBit;
+
+			assert(currIndex < bufferSize);
+			buffer[currIndex] = static_cast<int>(attr);
+			++currIndex;
+		}
+	}
+}
 
 // Casts pointer to pattern interface to the reference to the pattern object
 inline const CVectorBinarySetDescriptor& CVectorBinarySetJoinComparator::getVectorBinarySet( const IPatternDescriptor* ptrn )
