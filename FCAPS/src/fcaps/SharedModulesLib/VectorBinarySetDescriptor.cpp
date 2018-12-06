@@ -445,8 +445,9 @@ inline void CVectorBinarySetJoinComparator::allocate()
 		s=1000;
 	}else{
 		const DWORD lastS = memory.Back().size() / blockSize;
+		const DWORD criticalSize = 1024*1024*100;
 		// TOCHANGE : Exp is so power that in certain moment we can be out of memory because of such a multiplication
-		s = lastS < 100000 ? lastS * 2 : lastS;
+		s = memory.Back().size() * sizeof(uintptr_t) < criticalSize ? lastS * 2 : criticalSize / sizeof(uintptr_t) / blockSize;
 	}
 	allocate( s );
 }

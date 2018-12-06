@@ -35,7 +35,13 @@ STR(
 				"MaxPatternNumber" :{
 					"description": "The maximal number of patterns that should be stored at any iteration of the algorithm. Used only when 'AdjustThreshold' is true.",
 					"type":"integer",
-					"minimumu":0,
+					"minimum":0,
+					"exclusiveMinimum":true
+				},
+				"MaxRAMConsumption" :{
+					"description": "The maximal amount of RAM to be used to store the patterns. The number is approximate.",
+					"type":"integer",
+					"minimum":0,
 					"exclusiveMinimum":true
 				},
 				"AdjustThreshold":{
@@ -70,6 +76,7 @@ CBestPatternFirstComputationProcedure::CBestPatternFirstComputationProcedure() :
 	callback(0),
 	thld(0),
 	mpn(-1),
+	maxRAMConsumption(-1),
 	shouldAdjustThld(false),
 	isBestQualityKnown( false ),
 	potentialCmp(lpChain),
@@ -124,7 +131,8 @@ void CBestPatternFirstComputationProcedure::Run()
 		callback->ReportProgress( expansionCount, string("Border size is ") + StdExt::to_string(queue.size())
 		                          + ". Quality: " + StdExt::to_string(best.Quality) + " / ["
 		                          + StdExt::to_string(queue.rbegin()->Potential) + "; " + StdExt::to_string(queue.begin()->Potential) + "]"
-		                          + ". Delta: " + StdExt::to_string(lpChain->GetInterestThreshold()));
+		                          + ". Delta: " + StdExt::to_string(lpChain->GetInterestThreshold())
+		                          + ". Memory: " + StdExt::to_string(round(lpChain->GetTotalConsumedMemory() / (1024.0*1024))) + "Mb.   ");
 	}
 	// Last report of the progress
 	callback->ReportProgress( expansionCount, string("Border size is ") + StdExt::to_string(queue.size())
@@ -192,6 +200,12 @@ void CBestPatternFirstComputationProcedure::LoadParams( const JSON& json )
 			mpn = mpnJson.GetUint();
 		}
 	}
+	if( p.HasMember( "MaxRAMConsumption" ) ) {
+		const rapidjson::Value& mrcJson = params["Params"]["MaxRAMConsumption"];
+		if( mrcJson.IsUint64() ) {
+			maxRAMConsumption = mrcJson.GetUint64();
+		}
+	}
 
 	if( p.HasMember("AdjustThreshold")) {
 		const rapidjson::Value& atJson = params["Params"]["AdjustThreshold"];
@@ -219,6 +233,8 @@ void CBestPatternFirstComputationProcedure::LoadParams( const JSON& json )
 			isBestQualityKnown = true;
 		}
 	}
+
+	maxRAMConsumption = max( maxRAMConsumption, 2 * lpChain->GetTotalConsumedMemory());
 }
 
 JSON CBestPatternFirstComputationProcedure::SaveParams() const
@@ -231,6 +247,7 @@ JSON CBestPatternFirstComputationProcedure::SaveParams() const
 		.AddMember( "Params", rapidjson::Value().SetObject()
 			.AddMember( "DefualtThld", rapidjson::Value().SetDouble( thld ), alloc )
 			.AddMember( "MaxObjectNumber", rapidjson::Value().SetInt( mpn ), alloc )
+			.AddMember( "MaxRAMConsumption", rapidjson::Value().SetUint64( maxRAMConsumption ), alloc )
 			.AddMember( "AdjustThreshold", rapidjson::Value().SetBool( shouldAdjustThld ), alloc )
 			.AddMember( "OEstMinQuality", rapidjson::Value().SetDouble( best.Quality ), alloc ),
 		alloc );
@@ -321,10 +338,11 @@ void CBestPatternFirstComputationProcedure::adjustThreshold()
 		queue.erase(itr, queue.end());
 	}
 
-	if( !shouldAdjustThld || queue.size() < mpn * 2 ) {
+	if( !shouldAdjustThld || (queue.size() < mpn * 2 && lpChain->GetTotalConsumedMemory() < maxRAMConsumption )) {
 		return;
 	}
 
+	const DWORD firstPatternToRemove = max<DWORD>(mpn + 1, round<DWORD>(queue.size() * 1.0 * maxRAMConsumption / lpChain->GetTotalConsumedMemory()) );
 	// Should remove patterns such that there are at most @var mpn patterns.
 	vector<double> interests;
 	interests.reserve(queue.size());
@@ -334,7 +352,7 @@ void CBestPatternFirstComputationProcedure::adjustThreshold()
 
 	sort(interests.begin(),interests.end(),std::greater<double>() );
 
-	thld = interests[mpn+1]+0.001; // A constant that can be bad for some interests
+	thld = interests[firstPatternToRemove]+0.001; // A constant that can be bad for some interests
 	for(auto itr = queue.begin(); itr != queue.end();) {
 		auto currItr = itr;
 		++itr;

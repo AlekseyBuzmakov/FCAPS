@@ -64,6 +64,10 @@ public:
 	// Reserve memory.
 	void Reserve( size_t blockCount );
 	size_t GetAvailableBlockCount() const;
+	size_t GetMemoryConsumption() const
+		{ return allocatedPatterns * blockSize * sizeof(uintptr_t); }
+	size_t GetTotalMemoryConsumption() const
+		{ return GetAvailableBlockCount() * blockSize * sizeof(uintptr_t); }
 
 	// Non virtual method for comparison and intersection
 	TCompareResult Compare(

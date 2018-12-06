@@ -65,6 +65,10 @@ public:
 	// Deletion of an intent
 	void Delete(TIntent intent);
 
+	//TOKILL
+	int Size() const
+		{return memory.size();}
+
 private:
 	struct TTreeNode{
 		TAttribute Attribute;
@@ -89,7 +93,7 @@ private:
 class CStabilityCbOLocalProjectionChain : public ILocalProjectionChain, public IModule {
 public:
 	CStabilityCbOLocalProjectionChain();
-	// Methods of IComputationProcedure
+	// Methods of ILocalProjectionChain
 	virtual int GetObjectNumber() const;
 	virtual double GetInterestThreshold() const;
 	virtual void UpdateInterestThreshold( const double& thld );
@@ -104,6 +108,8 @@ public:
 	virtual int GetExtentSize( const IPatternDescriptor* d ) const;
 	virtual JSON SaveExtent( const IPatternDescriptor* d ) const;
 	virtual JSON SaveIntent( const IPatternDescriptor* d ) const;
+	virtual size_t GetTotalAllocatedPatterns() const;
+	virtual size_t GetTotalConsumedMemory() const;
 
 	// Methods of IModule
 	virtual void LoadParams( const JSON& );
@@ -135,6 +141,10 @@ private:
 	CIntentsTree intentsTree;
 	// A temporary storage for intents. Here for not allocating memory too often
 	std::vector<int> intentStorage;
+
+	// Memory consumption
+	mutable size_t totalAllocatedPatterns;
+	mutable size_t totalAllocatedPatternSize;
 
 	const CPattern& to_pattern(const IPatternDescriptor* d) const;
 	const CPattern* newPattern(

@@ -55,6 +55,10 @@ interface ILocalProjectionChain : public virtual IObject {
 	// Saves extent and intent of a pattern
 	virtual JSON SaveExtent( const IPatternDescriptor* d ) const = 0;
 	virtual JSON SaveIntent( const IPatternDescriptor* d ) const = 0;
+
+	// The volume of consumed memmory for storing patterns
+	virtual size_t GetTotalAllocatedPatterns() const = 0;
+	virtual size_t GetTotalConsumedMemory() const = 0;
 };
 
 ////////////////////////////////////////////////////////////////////

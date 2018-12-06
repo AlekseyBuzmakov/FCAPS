@@ -97,6 +97,8 @@ private:
 	double thld;
 	// Maximal number of patterns
 	DWORD mpn;
+	// Maximal RAM consumption
+	size_t maxRAMConsumption;
 	// Should adjust thld to have a polynomial algo
 	bool shouldAdjustThld;
 

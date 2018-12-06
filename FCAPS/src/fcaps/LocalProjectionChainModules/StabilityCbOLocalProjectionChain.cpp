@@ -132,20 +132,21 @@ CIntentsTree::TIntentItr CIntentsTree::newNode()
 class CPattern : public IExtent, public IPatternDescriptor {
 	
 public:
-	CPattern( const CSharedPtr<CVectorBinarySetJoinComparator>& cmp, const CSharedPtr<const CVectorBinarySetDescriptor>& e,
+	CPattern( CVectorBinarySetJoinComparator& _cmp, const CSharedPtr<const CVectorBinarySetDescriptor>& e,
 	          CIntentsTree& iTree, CIntentsTree::TIntent i,
 	          int nextAttr, DWORD d, int closestAttribute ) :
-		extent(e), intentsTree(iTree), intent(i), nextAttribute(nextAttr), delta(d), closestChildAttribute(closestAttribute) {initPatternImage(cmp);}
+		cmp(_cmp), extent(e), intentsTree(iTree), intent(i), nextAttribute(nextAttr), delta(d), closestChildAttribute(closestAttribute)
+		{}
 	~CPattern()
-		{ delete[] img.Objects; intentsTree.Delete(intent);}
+		{ intentsTree.Delete(intent);}
 
 	// Methods of IExtent
 	virtual DWORD Size() const
 		{ return Extent().Size();}
     virtual void GetExtent( CPatternImage& extent ) const
-		{extent = img;}
-	virtual void ClearMemory( CPatternImage& ) const
-		{ /*NOTHING memory is not allocated*/}
+		{initPatternImage(extent);}
+	virtual void ClearMemory( CPatternImage& e) const
+		{ delete[] e.Objects;}
 
 	// Methos of IPatternDescriptor
 	virtual bool IsMostGeneral() const
@@ -174,11 +175,15 @@ public:
 	void SetClosestChild( int a ) const
 		{closestChildAttribute = a;}
 
+	// TOKILL
+	size_t GetPatternMemorySize() const
+		{ return sizeof(CPattern); }
+
 
 private:
+	CVectorBinarySetJoinComparator& cmp;
 	const CSharedPtr<const CVectorBinarySetDescriptor> extent;
-	CPatternImage img;
-	
+
 	CIntentsTree& intentsTree;
 	mutable CIntentsTree::TIntent intent;
 
@@ -191,7 +196,7 @@ private:
 	// Used as an optimization for earlier detection of new unstable patterns
 	mutable int closestChildAttribute;
 
-	void initPatternImage(const CSharedPtr<CVectorBinarySetJoinComparator>& cmp) {
+	void initPatternImage(CPatternImage& img) const {
 		assert(extent != 0);
 		img.PatternId = Hash();
 		img.ImageSize = extent->Size();
@@ -199,7 +204,7 @@ private:
 
 		unique_ptr<int[]> objects (new int[img.ImageSize]);
 		img.Objects = objects.get(); 
-		cmp->EnumValues(*extent, objects.get(), img.ImageSize);
+		cmp.EnumValues(*extent, objects.get(), img.ImageSize);
 		objects.release(); 
 	}
 };
@@ -209,7 +214,9 @@ private:
 CStabilityCbOLocalProjectionChain::CStabilityCbOLocalProjectionChain() :
 	thld(1),
 	extCmp(new CVectorBinarySetJoinComparator),
-	extDeleter(extCmp)
+	extDeleter(extCmp),
+	totalAllocatedPatterns(0),
+	totalAllocatedPatternSize(0)
 {
 }
 
@@ -298,6 +305,10 @@ bool CStabilityCbOLocalProjectionChain::IsTopoSmaller(const IPatternDescriptor* 
 }
 void CStabilityCbOLocalProjectionChain::FreePattern(const IPatternDescriptor* p ) const
 {
+
+	--totalAllocatedPatterns;
+	totalAllocatedPatternSize -= to_pattern(p).GetPatternMemorySize();
+
 	delete &to_pattern(p);
 }
 void CStabilityCbOLocalProjectionChain::ComputeZeroProjection( CPatternList& ptrns )
@@ -308,10 +319,11 @@ void CStabilityCbOLocalProjectionChain::ComputeZeroProjection( CPatternList& ptr
 	}
 	ptrns.PushBack( newPattern( ptrn, intentsTree.Create(), 0, GetObjectNumber(), 0) );
 }
+
 bool CStabilityCbOLocalProjectionChain::Preimages( const IPatternDescriptor* d, CPatternList& preimages )
 {
 	assert( attrs != 0);
-	
+
 	const CPattern& p = to_pattern(d);
     assert(p.Delta() >= thld);
 
@@ -390,6 +402,14 @@ JSON CStabilityCbOLocalProjectionChain::SaveIntent( const IPatternDescriptor* d 
 
 	return rslt;
 }
+size_t CStabilityCbOLocalProjectionChain::GetTotalAllocatedPatterns() const
+{
+	return totalAllocatedPatterns;
+}
+size_t CStabilityCbOLocalProjectionChain::GetTotalConsumedMemory() const
+{
+	return totalAllocatedPatternSize + intentsTree.Size() + extCmp->GetMemoryConsumption();
+}
 
 const CPattern& CStabilityCbOLocalProjectionChain::to_pattern(const IPatternDescriptor* d) const
 {
@@ -402,9 +422,13 @@ const CPattern* CStabilityCbOLocalProjectionChain::newPattern(
 	CIntentsTree::TIntent intent,
 	int nextAttr, DWORD delta, int clossestAttr)
 {
-	return new CPattern(extCmp, ext,
+	const CPattern* p = new CPattern(*extCmp, ext,
 	                    intentsTree, intent,
 	                    nextAttr,delta,clossestAttr);
+
+	++totalAllocatedPatterns;
+	totalAllocatedPatternSize += p->GetPatternMemorySize();
+	return p;
 }
 void CStabilityCbOLocalProjectionChain::getAttributeImg(int a, CSharedPtr<const CVectorBinarySetDescriptor>& rslt)
 {
