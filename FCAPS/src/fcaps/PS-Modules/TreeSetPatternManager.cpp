@@ -62,7 +62,7 @@ const CTreeSetPatternDescriptor* CTreeSetDescriptorsComparator::CalculateSimilar
 	const CTreeSetPatternDescriptor& first = getDescriptor( firstPattern );
 	const CTreeSetPatternDescriptor& second = getDescriptor( secondPattern );
 	CList<DWORD> resultIndexes;
-	const DWORD noPrevElement = 2 << 31;
+	const DWORD noPrevElement = 1 << 31;
 	DWORD last = noPrevElement;
 	bool isLastFromFirst = false;
 

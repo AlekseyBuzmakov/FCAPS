@@ -5,7 +5,11 @@
 
 #include <fcaps/PatternManager.h>
 #include <ListWrapper.h>
+
 #include <vector>
+#include <deque>
+#include <fstream>
+
 #include <stdint.h>
 
 ////////////////////////////////////////////////////////////////////
@@ -38,7 +42,10 @@ private:
 
 class CVectorBinarySetJoinComparator : public  IPatternManager {
 public:
+	typedef int TSwappedPattern;
+public:
 	CVectorBinarySetJoinComparator();
+	~CVectorBinarySetJoinComparator();
 
 	// Methods of IPatternManager.
 	virtual const CVectorBinarySetDescriptor* LoadObject( const JSON& json );
@@ -100,10 +107,26 @@ public:
 	void SetWriteNames(bool b)
 		{ shouldWriteNames = b; }
 
+	// Swapping patterns to disk
+	//  the pattern is freed and the identificator of the swapped pattern is returned
+	TSwappedPattern SwapPattern( const CVectorBinarySetDescriptor * p );
+	// Restore pattern from the swap
+	const CVectorBinarySetDescriptor* SwapRestore(TSwappedPattern p);
+	// Remove pattern from the swap
+	void SwapRemove(TSwappedPattern p);
+
 private:
 	// Memory allocator related types.
 	typedef std::vector<uintptr_t> CMemoryBlock;
 	typedef CList<CMemoryBlock> CMemory;
+	// A structure to store free blocks in the swap file
+	struct CSwapPosition {
+		size_t Position;
+		int Last;
+
+		CSwapPosition():
+			Position(-1), Last(-1) {}
+	};
 private:
 	// Size of one block equal to size of CVectorBinarySetDescriptor + buffer
 	size_t blockSize;
@@ -118,6 +141,15 @@ private:
 	std::vector<std::string> names;
 	// Should the names be written
 	bool shouldWriteNames;
+
+	// File name for swapped patterns
+	std::string swapFile;
+	// Stream for the swap
+	std::fstream swapStream;
+	// The set of swapped patterns positions in the swap file
+	std::deque<CSwapPosition> swappedPositions;
+	// The last element in swappedPositions varibale with empty value
+	TSwappedPattern freeIndxSwapPosition;
 
 #ifdef _DEBUG
 	// The fingerprint of itself for its patterns

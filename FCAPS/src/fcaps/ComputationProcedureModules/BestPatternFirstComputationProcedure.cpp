@@ -4,6 +4,7 @@
 
 #include <fcaps/OptimisticEstimator.h>
 #include <fcaps/PatternDescriptor.h>
+#include <fcaps/Swappable.h>
 
 #include <JSONTools.h>
 #include <ModuleJSONTools.h>
@@ -80,7 +81,9 @@ CBestPatternFirstComputationProcedure::CBestPatternFirstComputationProcedure() :
 	shouldAdjustThld(false),
 	isBestQualityKnown( false ),
 	potentialCmp(lpChain),
-	queue( potentialCmp )
+	queue( potentialCmp ),
+	arePatternsSwappable(-1),
+	numInMemoryPatterns(100)
 {
 }
 
@@ -336,6 +339,25 @@ void CBestPatternFirstComputationProcedure::adjustThreshold()
 	auto itr = queue.lower_bound(CPattern(best.Quality));
 	if( itr != queue.end() ) {
 		queue.erase(itr, queue.end());
+	}
+
+	if( arePatternsSwappable == -1 ) {
+		arePatternsSwappable  = ( dynamic_cast<const ISwappable*>(queue.begin()->Pattern.get()) != 0 ? 1 : 0);
+	}
+
+	if( arePatternsSwappable == 1 && lpChain->GetTotalConsumedMemory() >= maxRAMConsumption ) {
+		// Will try to swap pattrns to disk
+		int nPatterns = 0;
+		auto itr = queue.begin();
+		for( ; itr != queue.end(); ++itr, ++nPatterns) {
+			if( nPatterns < numInMemoryPatterns ) {
+				continue;
+			}
+			const ISwappable* swp = dynamic_cast<const ISwappable*>(itr->Pattern.get());
+			assert(swp != 0);
+			swp->Swap();
+		}
+		// If the memory is freed, then we will try to remove patterns
 	}
 
 	if( !shouldAdjustThld || (queue.size() < mpn * 2 && lpChain->GetTotalConsumedMemory() < maxRAMConsumption )) {

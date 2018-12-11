@@ -6,7 +6,7 @@ solution "Sofia-PS"
 	language "C++"
 	startproject "Sofia-PS"
 
-	configurations { "release", "debug" }
+	configurations { "final", "release", "debug" }
 
 	function DefaultConfig(complimentName)
 		configuration "Debug"
@@ -18,8 +18,15 @@ solution "Sofia-PS"
 		configuration "Release"
 			defines { "NDEBUG", "BOOST_DISABLE_ASSERTS" }
 			optimize "On"
+			symbols "On"
 			characterset "MBCS"
 			targetdir ("build/release/" .. complimentName)
+
+		configuration "Final"
+			defines { "NDEBUG", "BOOST_DISABLE_ASSERTS" }
+			optimize "On"
+			characterset "MBCS"
+			targetdir ("build/final/" .. complimentName)
 
 
 		configuration "*"
@@ -37,11 +44,7 @@ solution "Sofia-PS"
 		}
 		files{ "Tools/inc/**.h", "Tools/src/**.cpp" }
 
-		configuration "Debug"
-			targetname( "SharedTools" )
-
-		configuration "Release"
-			targetname( "SharedTools" )
+		targetname( "SharedTools" )
 
 	project "Storages"
 		DefaultConfig("lib")
@@ -60,15 +63,7 @@ solution "Sofia-PS"
 			"boost/stage/lib/",
 		}
 
-		configuration "Debug"
-			links{ 
-				"SharedTools"
-			}
-
-		configuration "Release"
-			links{ 
-				"SharedTools"
-			}
+		links{ "SharedTools" }
 
 	project "SharedModulesLib"
 		DefaultConfig("lib")
@@ -87,15 +82,7 @@ solution "Sofia-PS"
 			"boost/stage/lib/",
 		}
 
-		configuration "Debug"
-			links{ 
-				"SharedTools"
-			}
-
-		configuration "Release"
-			links{ 
-				"SharedTools"
-			}
+		links{ "SharedTools" }
 
 	project "StdFCAModule"
 		DefaultConfig("modules")
@@ -118,19 +105,11 @@ solution "Sofia-PS"
 			"boost/stage/lib/",
 		}
 
-		configuration "Debug"
-			links{ 
-				"SharedTools",
-				"Storages",
-				"SharedModulesLib"
-			}
-
-		configuration "Release"
-			links{ 
-				"SharedTools",
-				"Storages",
-				"SharedModulesLib"
-			}
+		links{ 
+			"SharedTools",
+			"Storages",
+			"SharedModulesLib"
+		}
 
 	project "PS-Modules"
 		DefaultConfig("modules")
@@ -153,17 +132,10 @@ solution "Sofia-PS"
 			"boost/stage/lib/",
 		}
 
-		configuration "Debug"
-			links{ 
-				"SharedTools",
-				"SharedModulesLib"
-			}
-
-		configuration "Release"
-			links{ 
-				"SharedTools",
-				"SharedModulesLib"
-			}
+		links{ 
+			"SharedTools",
+			"SharedModulesLib"
+		}
 
 	project "SofiaModules"
 		DefaultConfig("modules")
@@ -186,17 +158,10 @@ solution "Sofia-PS"
 			"boost/stage/lib/",
 		}
 
-		configuration "Debug"
-			links{ 
-				"SharedTools",
-				"SharedModulesLib"
-			}
-
-		configuration "Release"
-			links{ 
-				"SharedTools",
-				"SharedModulesLib"
-			}
+		links{ 
+			"SharedTools",
+			"SharedModulesLib"
+		}
 
 	project "ParallelPatternEnumeratorModules"
 		DefaultConfig("modules")
@@ -253,19 +218,11 @@ solution "Sofia-PS"
 			"boost/stage/lib/",
 		}
 
-		configuration "Debug"
-			links{ 
-				"SharedTools",
-				"SharedModulesLib",
-				"Storages"
-			}
-
-		configuration "Release"
-			links{ 
-				"SharedTools",
-				"SharedModulesLib",
-				"Storages"
-			}
+		links{ 
+			"SharedTools",
+			"SharedModulesLib",
+			"Storages"
+		}
 
 	project "StabilityEstimatorContextProcessorModules"
 		DefaultConfig("modules")
@@ -288,19 +245,11 @@ solution "Sofia-PS"
 			"boost/stage/lib/",
 		}
 
-		configuration "Debug"
-			links{ 
-				"SharedTools",
-				"SharedModulesLib",
-				"Storages"
-			}
-
-		configuration "Release"
-			links{ 
-				"SharedTools",
-				"SharedModulesLib",
-				"Storages"
-			}
+		links{ 
+			"SharedTools",
+			"SharedModulesLib",
+			"Storages"
+		}
 
 	project "FilterModules"
 		DefaultConfig("modules")
@@ -323,17 +272,10 @@ solution "Sofia-PS"
 			"boost/stage/lib/",
 		}
 
-		configuration "Debug"
-			links{ 
-				"SharedTools",
-				"SharedModulesLib"
-			}
-
-		configuration "Release"
-			links{ 
-				"SharedTools",
-				"SharedModulesLib"
-			}
+		links{ 
+			"SharedTools",
+			"SharedModulesLib"
+		}
 
 	project "OptimisticEstimatorModules"
 		DefaultConfig("modules")
@@ -484,9 +426,5 @@ solution "Sofia-PS"
 				"boost_system"
 			}
 		filter{}
-		configuration "Debug"
-			targetname( "Sofia-PS" )
-
-		configuration "Release"
-			targetname( "Sofia-PS" )
+		targetname( "Sofia-PS" )
 

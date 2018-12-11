@@ -137,10 +137,17 @@ public:
 	CPattern( CVectorBinarySetJoinComparator& _cmp, const CVectorBinarySetDescriptor* e, CPatternDeleter dlt,
 	          CIntentsTree& iTree, CIntentsTree::TIntent i,
 	          int nextAttr, DWORD d, int closestAttribute ) :
-		cmp(_cmp), extent(e, dlt), intentsTree(iTree), intent(i), nextAttribute(nextAttr), delta(d), closestChildAttribute(closestAttribute)
-		{}
+		cmp(_cmp), extent(e, dlt), swappedExtent(-1), intentsTree(iTree), intent(i), nextAttribute(nextAttr), delta(d), closestChildAttribute(closestAttribute)
+		{ assert( extent != 0 ); }
 	~CPattern()
-		{ intentsTree.Delete(intent);}
+	{
+		intentsTree.Delete(intent);
+		if( IsSwapped() ) {
+			assert(swappedExtent != static_cast<CVectorBinarySetJoinComparator::TSwappedPattern>(-1));
+			cmp.SwapRemove(swappedExtent);
+			swappedExtent = -1;
+		}
+	}
 
 	// Methods of IExtent
 	virtual DWORD Size() const
@@ -159,12 +166,18 @@ public:
 	// Methods of ISwappable
 	virtual bool IsSwapped() const
 		{ extent == 0;}
-	virtual void Swap()
-		{}
+	virtual void Swap() const
+	{
+		if( IsSwapped() ) {
+			return;
+		}
+		swappedExtent = cmp.SwapPattern(extent.release());
+		assert(extent == 0);
+	}
 
 	// Methods of the class
 	const CVectorBinarySetDescriptor& Extent() const
-		{if(IsSwapped()){ restore();} assert(extent != 0); return *extent;}
+		{ restore(); assert(extent != 0); return *extent;}
 	CIntentsTree::TIntent Intent() const
 		{return intent;}
 	void AddAttributeToIntent(CIntentsTree::TAttribute a) const
@@ -190,7 +203,8 @@ public:
 
 private:
 	CVectorBinarySetJoinComparator& cmp;
-	CSharedPtr<const CVectorBinarySetDescriptor> extent;
+	mutable unique_ptr<const CVectorBinarySetDescriptor, CPatternDeleter> extent;
+	mutable CVectorBinarySetJoinComparator::TSwappedPattern swappedExtent;
 
 	CIntentsTree& intentsTree;
 	mutable CIntentsTree::TIntent intent;
@@ -215,7 +229,13 @@ private:
 		objects.release(); 
 	}
 	void restore() const {
-		
+		if( extent != 0 ) {
+			return;
+		}
+		assert(swappedExtent != static_cast<CVectorBinarySetJoinComparator::TSwappedPattern>(-1));
+		extent.reset(cmp.SwapRestore(swappedExtent));
+		swappedExtent = -1;
+		assert(extent != 0);
 	}
 };
 

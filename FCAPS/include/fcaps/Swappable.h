@@ -17,7 +17,7 @@ interface ISwappable : public virtual IObject {
     // Check if the object is swapped to disk
     virtual bool IsSwapped() const = 0;
     // Swap object to disk
-    virtual void Swap() = 0;
+    virtual void Swap() const = 0;
 };
 
 ////////////////////////////////////////////////////////////////////////

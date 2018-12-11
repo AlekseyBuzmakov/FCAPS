@@ -7,8 +7,11 @@
 #include <rapidjson/document.h>
 
 #include <cstdlib>
+#include <ios>
 
 #define IS64 (sizeof(uintptr_t) == 8)
+
+using namespace std;
 
 CVectorBinarySetDescriptor::CVectorBinarySetDescriptor()
 {
@@ -21,11 +24,20 @@ CVectorBinarySetJoinComparator::CVectorBinarySetJoinComparator() :
 	blockSize( sizeof( CVectorBinarySetDescriptor) + 128 ),
 	nextFreeBlock( 0 ),
 	allocatedPatterns( 0 ),
-	shouldWriteNames(false)
+	shouldWriteNames(false),
+	swapFile("VectorBinarySet.SWAP"),
+	freeIndxSwapPosition(-1)
 #ifdef _DEBUG
 	, fingerprint( rand() )
 #endif // _DEBUG
 {
+}
+CVectorBinarySetJoinComparator::~CVectorBinarySetJoinComparator()
+{
+	if(swapStream.is_open()) {
+		swapStream.close();
+		remove(swapFile.c_str());
+	}
 }
 
 const CVectorBinarySetDescriptor* CVectorBinarySetJoinComparator::LoadObject( const JSON& json )
@@ -337,6 +349,63 @@ void CVectorBinarySetJoinComparator::EnumValues( const CVectorBinarySetDescripto
 			++currIndex;
 		}
 	}
+}
+
+CVectorBinarySetJoinComparator::TSwappedPattern CVectorBinarySetJoinComparator::SwapPattern( const CVectorBinarySetDescriptor * p )
+{
+	if( !swapStream.is_open()) {
+		swapStream.exceptions(fstream::failbit | fstream::badbit);
+		swapStream.open(swapFile, fstream::in | fstream::out | fstream::binary | fstream::trunc);
+		assert(!swapStream.fail());
+	}
+	TSwappedPattern newSwapPositionIndx = -1;
+	if( freeIndxSwapPosition == -1) {
+		newSwapPositionIndx = swappedPositions.size();
+		swappedPositions.resize(swappedPositions.size() + 1);
+		swapStream.seekp(0,ios_base::end);
+		CSwapPosition& pos = swappedPositions[newSwapPositionIndx];
+		pos.Position = swapStream.tellp();
+	} else {
+		newSwapPositionIndx = freeIndxSwapPosition;
+		freeIndxSwapPosition = swappedPositions[freeIndxSwapPosition].Last;
+		CSwapPosition& pos = swappedPositions[newSwapPositionIndx];
+		swapStream.seekp(pos.Position,ios_base::beg);
+	}
+
+#ifdef _DEBUG
+	swapStream.write(reinterpret_cast<const char*>(&p->fingerprint), sizeof(p->fingerprint));
+#endif
+	swapStream.write(reinterpret_cast<const char*>(&p->hash), sizeof(p->hash));
+	swapStream.write(reinterpret_cast<const char*>(&p->size), sizeof(p->size));
+	swapStream.write(reinterpret_cast<const char*>(getAttrBlocks(*p)),getAttrBlockCount() * sizeof(uintptr_t));
+
+	freePattern(*p);
+	return newSwapPositionIndx;
+}
+const CVectorBinarySetDescriptor* CVectorBinarySetJoinComparator::SwapRestore(TSwappedPattern p)
+{
+	assert( swapStream.is_open() );
+	CSwapPosition& pos = swappedPositions[p];
+	swapStream.seekg(pos.Position);
+	CVectorBinarySetDescriptor* newP = newPattern(false);
+#ifdef _DEBUG
+	swapStream.read(reinterpret_cast<char*>(&newP->fingerprint), sizeof(newP->fingerprint));
+#endif
+	swapStream.read(reinterpret_cast<char*>(&newP->hash), sizeof(newP->hash));
+	swapStream.read(reinterpret_cast<char*>(&newP->size), sizeof(newP->size));
+	swapStream.read(reinterpret_cast<char*>(getAttrBlocks(*newP)),getAttrBlockCount() * sizeof(uintptr_t));
+
+	assert(!swapStream.fail());
+	assert(newP->fingerprint == fingerprint);
+
+	SwapRemove(p);
+	return newP;
+}
+void CVectorBinarySetJoinComparator::SwapRemove(TSwappedPattern p)
+{
+	CSwapPosition& pos = swappedPositions[p];
+	pos.Last = freeIndxSwapPosition;
+	freeIndxSwapPosition = p;
 }
 
 // Casts pointer to pattern interface to the reference to the pattern object

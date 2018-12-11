@@ -110,6 +110,10 @@ private:
 	CPatternPotentialComparator potentialCmp;
 	// The priority queue (with operations for random access removal)
 	std::set<CPattern,CPatternPotentialComparator> queue;
+	// A flag indicating if the patterns are Swappable. -1 is not known, 0 -- not Swappable, 1 -- are swappable
+	int arePatternsSwappable;
+	// The number of patterns to be remaind in memory in the case of swapping
+	DWORD numInMemoryPatterns;
 
 	void addNewPatterns( const ILocalProjectionChain::CPatternList& newPatterns );
 	void adjustThreshold();
