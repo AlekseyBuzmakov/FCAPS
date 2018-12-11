@@ -56,6 +56,10 @@ private:
 	std::vector<bool> classes;
 	// The number of positive objects
 	DWORD nPlus;
+	// The curent extent
+	mutable const IExtent* currExt;
+	// The current number of positive objects
+	mutable DWORD currNPlus;
 
 	DWORD getPositiveObjectsCount(const IExtent* ext) const;
 };

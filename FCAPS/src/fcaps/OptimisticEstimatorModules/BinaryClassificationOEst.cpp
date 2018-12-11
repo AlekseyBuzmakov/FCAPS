@@ -65,7 +65,9 @@ const char* const CBinaryClassificationOEst::Desc()
 
 CBinaryClassificationOEst::CBinaryClassificationOEst() :
 	nPlus(0),
-	freqWeight(1)
+	freqWeight(1),
+	currExt(0),
+	currNPlus(-1)
 {
 	
 }
@@ -237,6 +239,9 @@ JSON CBinaryClassificationOEst::SaveParams() const
 DWORD CBinaryClassificationOEst::getPositiveObjectsCount(const IExtent* ext) const
 {
 	assert(ext!=0);
+	if( ext == currExt ) {
+		return currNPlus;
+	}
 	
 	CPatternImage img;
 	ext->GetExtent(img);
@@ -249,5 +254,11 @@ DWORD CBinaryClassificationOEst::getPositiveObjectsCount(const IExtent* ext) con
 		assert(objNum < classes.size());
 		nPlus += classes[objNum];
 	}
+
+	ext->ClearMemory(img);
+
+	currExt = ext;
+	currNPlus = nPlus;
+
 	return nPlus;
 }

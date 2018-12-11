@@ -128,7 +128,7 @@ void CBestPatternFirstComputationProcedure::Run()
 
 		adjustThreshold();
 
-		callback->ReportProgress( expansionCount, string("Border size is ") + StdExt::to_string(queue.size())
+		callback->ReportProgress( expansionCount, string("Border: ") + StdExt::to_string(queue.size())
 		                          + ". Quality: " + StdExt::to_string(best.Quality) + " / ["
 		                          + StdExt::to_string(queue.rbegin()->Potential) + "; " + StdExt::to_string(queue.begin()->Potential) + "]"
 		                          + ". Delta: " + StdExt::to_string(lpChain->GetInterestThreshold())
@@ -342,7 +342,7 @@ void CBestPatternFirstComputationProcedure::adjustThreshold()
 		return;
 	}
 
-	const DWORD firstPatternToRemove = max<DWORD>(mpn + 1, round<DWORD>(queue.size() * 1.0 * maxRAMConsumption / lpChain->GetTotalConsumedMemory()) );
+	const DWORD firstPatternToRemove = min<DWORD>(mpn + 1, round<DWORD>(queue.size() * 1.0 * maxRAMConsumption / lpChain->GetTotalConsumedMemory()) );
 	// Should remove patterns such that there are at most @var mpn patterns.
 	vector<double> interests;
 	interests.reserve(queue.size());
@@ -351,6 +351,8 @@ void CBestPatternFirstComputationProcedure::adjustThreshold()
 	}
 
 	sort(interests.begin(),interests.end(),std::greater<double>() );
+
+	assert(0 <= firstPatternToRemove && firstPatternToRemove < interests.size());
 
 	thld = interests[firstPatternToRemove]+0.001; // A constant that can be bad for some interests
 	for(auto itr = queue.begin(); itr != queue.end();) {

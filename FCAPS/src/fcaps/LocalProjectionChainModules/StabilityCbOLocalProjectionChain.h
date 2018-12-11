@@ -8,10 +8,7 @@
 
 #include <fcaps/PatternManager.h>
 
-// #include <ListWrapper.h>
 #include <ModuleTools.h>
-
-// #include <rapidjson/document.h>
 
 #include <deque>
 
@@ -68,6 +65,7 @@ public:
 	//TOKILL
 	int Size() const
 		{return memory.size();}
+	int MemorySize() const { return memory.size() * sizeof(TTreeNode) + sizeof(CIntentsTree);}
 
 private:
 	struct TTreeNode{
@@ -148,15 +146,15 @@ private:
 
 	const CPattern& to_pattern(const IPatternDescriptor* d) const;
 	const CPattern* newPattern(
-		const CSharedPtr<const CVectorBinarySetDescriptor>& ext,
+		const CVectorBinarySetDescriptor* ext,
 		CIntentsTree::TIntent intent,
 		int nextAttr, DWORD delta, int clossestAttr = 0);
 	void getAttributeImg(int a, CSharedPtr<const CVectorBinarySetDescriptor>& rslt);
 	const CPattern* initializeNewPattern(
 		const CPattern& parent,
 		int genAttr,
-		const CSharedPtr<const CVectorBinarySetDescriptor>& ext);
-	DWORD getAttributeDelta(int a, const CSharedPtr<const CVectorBinarySetDescriptor>& ext);
+		std::unique_ptr<const CVectorBinarySetDescriptor,CPatternDeleter>& ext);
+	DWORD getAttributeDelta(int a, const CVectorBinarySetDescriptor& ext);
 };
 
 #endif // STABILITYCbOLOCALPROJECTIONCHAIN_H
