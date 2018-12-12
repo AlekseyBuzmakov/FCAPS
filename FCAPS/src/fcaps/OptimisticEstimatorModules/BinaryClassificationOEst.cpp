@@ -39,8 +39,8 @@ STR(
 					"description": "The path to a file, containing the class labels for every object",
 					"type": "file-path",
 					"example": {
-						"description":"The file contains an array of string labels for every object",
-						"json":["+","-","-","+","-"]
+						"description":"The file contains a list of 'Class' with an array of string labels for every object and optional 'Weights' with weights of the objects",
+						"json":{"Class":["+","-","-","+","-"],"Weight":[0.9,1,1,0.9,0.2]}
 					}
 				},
 				"FreqWeight": {
@@ -64,7 +64,8 @@ const char* const CBinaryClassificationOEst::Desc()
 }
 
 CBinaryClassificationOEst::CBinaryClassificationOEst() :
-	nPlus(0),
+	wPlus(0),
+	wAll(0),
 	freqWeight(1)
 {
 	
@@ -73,43 +74,47 @@ CBinaryClassificationOEst::CBinaryClassificationOEst() :
 void CBinaryClassificationOEst::GetValue(const IExtent* ext, COEstValue& val ) const
 {
 	assert(ext!=0);
-	const DWORD curNPlus=getPositiveObjectsCount(ext);
-	assert(curNPlus <= ext->Size());
+	double curWPlus = 0;
+	double curWAll = 0;
+	getObjectsWeight(ext, curWPlus, curWAll);
+	assert(curWPlus <= curWAll);
 
-	val.Value = pow(static_cast<double>(ext->Size()) / classes.size(), freqWeight)
-		* (1.0L * curNPlus / ext->Size() - 1.0L * nPlus / classes.size());
+	val.Value = getValue(curWPlus,curWAll);
 
 	// Here we should find maximum of locNPlus/n - nPlus*locN/n^2, the first one is maximized when locNPlus == curNPLus,
 	//   the second one is maximized when locN is minimized, i.e., it should be equal curNPlus.
 	
-	val.BestSubsetEstimate = pow(static_cast<double>(curNPlus) / classes.size(), freqWeight)
-		* (1 - 1.0L * nPlus / classes.size());
+	val.BestSubsetEstimate = pow(curWPlus / wAll, freqWeight)
+		* (1 - wPlus / wAll);
+
 	assert( val.BestSubsetEstimate - val.Value > -1e-10);
 }
 
 JSON CBinaryClassificationOEst::GetJsonQuality(const IExtent* ext) const
 {
 	std::stringstream rslt;
-	const DWORD curNPlus=getPositiveObjectsCount(ext);
-	assert(curNPlus <= ext->Size());
+	double curWPlus = 0;
+	double curWAll = 0;
+	getObjectsWeight(ext, curWPlus, curWAll);
+	assert(curWPlus <= curWAll);
 
 	// Computing P-value
-	const DWORD o1 = curNPlus;
-	const DWORD o0 = ext->Size() - o1;
+	const double o1 = curWPlus;
+	const double o0 = curWAll - o1;
 	//  expected counts
-	const double probability = static_cast<double>(nPlus)/classes.size();
-	const double e1 = ext->Size() * probability;  
-	const double e0 = ext->Size() - e1;
+	const double probability = wPlus/wAll;
+	const double e1 = curWAll * probability;  
+	const double e0 = curWAll - e1;
 	const double T = (e1-o1)*(e1-o1)/e1 + (e0-o0)*(e0-o0)/e0;
 	boost::math::chi_squared chi2(1);
 	const double pValue = 1-boost::math::cdf(chi2,T);
 
 	rslt << "{"
-		<< "\"Positiveness\":" << static_cast<double>(curNPlus) / ext->Size() << ","
-		<< "\"BasePositiveness\":" << static_cast<double>(nPlus) / classes.size() << ","
-		<< "\"Size\":" << static_cast<double>(ext->Size()) / classes.size() << ","
+		<< "\"Positiveness\":" << curWPlus / curWAll << ","
+		<< "\"BasePositiveness\":" << wPlus / wAll << ","
+		<< "\"Size\":" << curWAll / wAll << ","
 		<< "\"p-Value\":" << pValue << ","
-		<< "\"Value\":" << getValue(curNPlus, ext->Size())
+		<< "\"Value\":" << getValue(curWPlus, curWAll)
 		<<"}";
 	return rslt.str();
 }
@@ -146,29 +151,34 @@ void CBinaryClassificationOEst::LoadParams( const JSON& json )
 	}
 
 	// Reading class labels information
-	if(!(p.HasMember("Classes") && (p["Classes"].IsArray() || p["Classes"].IsString()))) {
-		error.Data = json;
-		error.Error = "Params.Classes is not found or is neither 'Array' nor 'String'.";
+	if(!(p.HasMember("Classes") && p["Classes"].IsString())) {
+		error.Data = json;			                
+		error.Error = "Params.Classes is not found or is not an 'String'.";
 		throw new CJsonException("CBinaryClassificationOEst::LoadParams", error);
 	}
 
-	const rapidjson::Value* cl_ptr = 0;
 	rapidjson::Document classesDocument;
-	if( p["Classes"].IsArray() ) {
-		cl_ptr = &p["Classes"];
-	} else {
-		classesFilePath = p["Classes"].GetString();
-		if( !ReadJsonFile( classesFilePath, classesDocument, error ) ) {
-			throw new CJsonException( "CBinaryClassificationOEst::LoadParams", error );
-		}
-		cl_ptr=&classesDocument;
+	classesFilePath = p["Classes"].GetString();
+	if( !ReadJsonFile( classesFilePath, classesDocument, error ) ) {
+		throw new CJsonException( "CBinaryClassificationOEst::LoadParams", error );
 	}
-	assert(cl_ptr != 0);
-	const rapidjson::Value& cl = *cl_ptr;
+	if( !classesDocument.IsObject() || !classesDocument.HasMember("Class") || !classesDocument["Class"].IsArray() ) {
+		error.Data = json;			                
+		error.Error = "Params.Classes.Class is not found or is not an 'Array'.";
+		throw new CJsonException("CBinaryClassificationOEst::LoadParams", error);
+	}
+	const rapidjson::Value& cl = classesDocument["Class"];
+	const rapidjson::Value* w = 0;
+	if( classesDocument.HasMember("Weight") && classesDocument["Weight"].IsArray() && classesDocument["Weight"].Size() == cl.Size() ) {
+		w = &classesDocument["Weight"];
+	}
 
-	assert(nPlus==0);
+	assert(wPlus == 0);
+	assert(wAll == 0);
 	classes.resize(cl.Size(),false);
+	weights.resize(classes.size(),0);
 	strClasses.resize(cl.Size());
+
 	for( int i = 0; i < cl.Size(); ++i ) {
 		if(!cl[i].IsString()) {
 			error.Data = json;
@@ -177,7 +187,18 @@ void CBinaryClassificationOEst::LoadParams( const JSON& json )
 		}
 		strClasses[i]=cl[i].GetString();
 		classes[i]=targetClasses.find(strClasses[i]) != targetClasses.end();
-		nPlus += classes[i];
+		weights[i] = 1;
+		if(w != 0) {
+			assert(i < w->Size());
+			if(!(*w)[i].IsDouble() || (*w)[i].GetDouble() < 0 ) {
+				error.Data = json;
+				error.Error = "Params.Classes.Weight should be a positive number.";
+				throw new CJsonException("CBinaryClassificationOEst::LoadParams", error);
+			}
+			weights[i] = (*w)[i].GetDouble();
+		}
+		wPlus += classes[i] * weights[i];
+		wAll += weights[i];
 	}
 
 	if(p.HasMember("FreqWeight") && p["FreqWeight"].IsNumber()) {
@@ -207,12 +228,7 @@ JSON CBinaryClassificationOEst::SaveParams() const
 		targets.PushBack(rapidjson::StringRef((*it).c_str()), alloc);
 	}
 
-	if(classesFilePath != "") {
-		p.AddMember("Classes", rapidjson::StringRef(classesFilePath.c_str()), alloc);
-	} else {
-		// TODO How should we do that??
-		//   skipping for now
-	}
+	p.AddMember("Classes", rapidjson::StringRef(classesFilePath.c_str()), alloc);
 
 	JSON result;
 	CreateStringFromJSON( params, result );
@@ -220,7 +236,7 @@ JSON CBinaryClassificationOEst::SaveParams() const
 }
 
 // Returns the number of positive objects in the extent @param ext
-DWORD CBinaryClassificationOEst::getPositiveObjectsCount(const IExtent* ext) const
+void CBinaryClassificationOEst::getObjectsWeight(const IExtent* ext, double& wPlus, double& wAll) const
 {
 	assert(ext!=0);
 	
@@ -229,22 +245,25 @@ DWORD CBinaryClassificationOEst::getPositiveObjectsCount(const IExtent* ext) con
 	assert(img.ImageSize >= 0 && img.Objects != 0);
 	assert(ext->Size() == img.ImageSize);
 	
-	DWORD nPlus = 0;
+	wPlus = 0;
+	wAll = 0;
 	for( int i = 0; i < img.ImageSize; ++i) {
 		const DWORD objNum = img.Objects[i];
 		assert(objNum < classes.size());
-		nPlus += classes[objNum];
+		assert(classes.size() == weights.size());
+
+		wPlus += classes[objNum] * weights[objNum];
+		wAll += weights[objNum];
 	}
 
 	ext->ClearMemory(img);
 
-	assert(nPlus <= ext->Size());
-	return nPlus;
+	assert(wPlus <= wAll);
 }
 
 // Returns the value given the number of positive objects and the extent size
-double CBinaryClassificationOEst::getValue( DWORD curNPlus, DWORD size ) const
+double CBinaryClassificationOEst::getValue( const double& curWPlus, const double& curWAll ) const
 {
-	return pow(static_cast<double>(size) / classes.size(), freqWeight)
-		* (1.0L * curNPlus / size - 1.0L * nPlus / classes.size());
+	return pow(curWAll / wAll, freqWeight)
+		* (curWPlus / curWAll - wPlus / wAll);
 }

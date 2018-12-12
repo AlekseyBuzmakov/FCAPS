@@ -419,7 +419,6 @@ bool CBestPatternFirstComputationProcedure::CPatternPotentialComparator::operato
 		return false;
 	}
 
-	return a.Potential - b.Potential > 0;
-	// It is better to do like this. However, when swapped to disk it is not efficient
-	// return lpChain->IsTopoSmaller(a.Pattern.get(), b.Pattern.get());
+	// return a.Potential - b.Potential > 0;
+	return lpChain->IsTopoSmaller(a.Pattern.get(), b.Pattern.get());
 }

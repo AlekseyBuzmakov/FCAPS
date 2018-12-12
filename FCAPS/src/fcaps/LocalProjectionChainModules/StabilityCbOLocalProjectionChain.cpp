@@ -137,8 +137,11 @@ public:
 	CPattern( CVectorBinarySetJoinComparator& _cmp, const CVectorBinarySetDescriptor* e, CPatternDeleter dlt,
 	          CIntentsTree& iTree, CIntentsTree::TIntent i,
 	          int nextAttr, DWORD d, int closestAttribute ) :
-		cmp(_cmp), extent(e, dlt), swappedExtent(-1), intentsTree(iTree), intent(i), nextAttribute(nextAttr), delta(d), closestChildAttribute(closestAttribute)
-		{ assert( extent != 0 ); }
+		cmp(_cmp), extent(e, dlt), swappedExtent(-1), extentSize(e->Size()), extentHash(e->Hash()),
+		intentsTree(iTree), intent(i), nextAttribute(nextAttr), delta(d), closestChildAttribute(closestAttribute)
+	{
+		assert( extent != 0 );
+	}
 	~CPattern()
 	{
 		intentsTree.Delete(intent);
@@ -151,7 +154,7 @@ public:
 
 	// Methods of IExtent
 	virtual DWORD Size() const
-		{ return Extent().Size();}
+		{ return extentSize;}
     virtual void GetExtent( CPatternImage& extent ) const
 		{initPatternImage(extent);}
 	virtual void ClearMemory( CPatternImage& e) const
@@ -161,7 +164,7 @@ public:
 	virtual bool IsMostGeneral() const
 		{return intent == -1;}
 	virtual size_t Hash() const
-		{ return Extent().Hash(); }
+		{ return extentHash; }
 
 	// Methods of ISwappable
 	virtual bool IsSwapped() const
@@ -205,6 +208,8 @@ private:
 	CVectorBinarySetJoinComparator& cmp;
 	mutable unique_ptr<const CVectorBinarySetDescriptor, CPatternDeleter> extent;
 	mutable CVectorBinarySetJoinComparator::TSwappedPattern swappedExtent;
+	const DWORD extentSize;
+	const DWORD extentHash;
 
 	CIntentsTree& intentsTree;
 	mutable CIntentsTree::TIntent intent;
@@ -331,7 +336,7 @@ double CStabilityCbOLocalProjectionChain::GetPatternInterest( const IPatternDesc
 }
 bool CStabilityCbOLocalProjectionChain::IsTopoSmaller(const IPatternDescriptor* p, const IPatternDescriptor* q) const
 {
-	return to_pattern(p).Extent().Size() >= to_pattern(q).Extent().Size();
+	return to_pattern(p).Size() > to_pattern(q).Size() || to_pattern(p).Size() == to_pattern(q).Size() && to_pattern(p).Hash() > to_pattern(q).Hash();
 }
 void CStabilityCbOLocalProjectionChain::FreePattern(const IPatternDescriptor* p ) const
 {

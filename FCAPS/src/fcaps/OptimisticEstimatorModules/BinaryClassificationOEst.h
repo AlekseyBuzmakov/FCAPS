@@ -53,11 +53,16 @@ private:
 	double freqWeight;
 	// The vector specifying which class label is a target label
 	std::vector<bool> classes;
-	// The number of positive objects
-	DWORD nPlus;
+	// The vector specifying the weights of the objects
+	std::vector<double> weights;
 
-	DWORD getPositiveObjectsCount(const IExtent* ext) const;
-	double getValue( DWORD currNPlus, DWORD size ) const;
+	// The weight of positive objects
+	double wPlus;
+	// The total weiht of all objets
+	double wAll;
+
+	void getObjectsWeight(const IExtent* ext, double& wPlus, double& wAll) const;
+	double getValue( const double& curWPlus, const double& curWAll ) const;
 };
 
 #endif // BINARYCLASSIFICATIONOEST_H
