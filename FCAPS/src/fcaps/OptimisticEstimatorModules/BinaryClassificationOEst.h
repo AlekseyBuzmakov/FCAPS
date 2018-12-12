@@ -24,8 +24,7 @@ public:
 	virtual bool CheckObjectNumber(DWORD n) const
 		{ assert( strClasses.size() == classes.size()); return n==classes.size(); }
 	// Methods of IOptimisticEstimator
-	virtual double GetValue(const IExtent* ext) const;
-	virtual double GetBestSubsetEstimate(const IExtent* ext) const;
+	virtual void GetValue(const IExtent* ext, COEstValue& val ) const;
 	virtual JSON GetJsonQuality(const IExtent* ext) const; 
 
 	// Methods of IModule
@@ -56,12 +55,9 @@ private:
 	std::vector<bool> classes;
 	// The number of positive objects
 	DWORD nPlus;
-	// The curent extent
-	mutable const IExtent* currExt;
-	// The current number of positive objects
-	mutable DWORD currNPlus;
 
 	DWORD getPositiveObjectsCount(const IExtent* ext) const;
+	double getValue( DWORD currNPlus, DWORD size ) const;
 };
 
 #endif // BINARYCLASSIFICATIONOEST_H

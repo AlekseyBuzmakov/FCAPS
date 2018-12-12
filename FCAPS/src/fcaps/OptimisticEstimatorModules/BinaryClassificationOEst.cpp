@@ -65,49 +65,33 @@ const char* const CBinaryClassificationOEst::Desc()
 
 CBinaryClassificationOEst::CBinaryClassificationOEst() :
 	nPlus(0),
-	freqWeight(1),
-	currExt(0),
-	currNPlus(-1)
+	freqWeight(1)
 {
 	
 }
 
-double CBinaryClassificationOEst::GetValue(const IExtent* ext) const
+void CBinaryClassificationOEst::GetValue(const IExtent* ext, COEstValue& val ) const
 {
 	assert(ext!=0);
-	if(ext->Size() == 0) {
-		return 0;
-	}
-
 	const DWORD curNPlus=getPositiveObjectsCount(ext);
 	assert(curNPlus <= ext->Size());
 
-	
-	return pow(static_cast<double>(ext->Size()) / classes.size(), freqWeight)
+	val.Value = pow(static_cast<double>(ext->Size()) / classes.size(), freqWeight)
 		* (1.0L * curNPlus / ext->Size() - 1.0L * nPlus / classes.size());
-}
-double CBinaryClassificationOEst::GetBestSubsetEstimate(const IExtent* ext) const
-{
-	assert(ext!=0);
-	const DWORD curNPlus=getPositiveObjectsCount(ext);
-	assert(curNPlus <= ext->Size());
 
 	// Here we should find maximum of locNPlus/n - nPlus*locN/n^2, the first one is maximized when locNPlus == curNPLus,
 	//   the second one is maximized when locN is minimized, i.e., it should be equal curNPlus.
 	
-	const double result =
-		pow(static_cast<double>(curNPlus) / classes.size(), freqWeight)
+	val.BestSubsetEstimate = pow(static_cast<double>(curNPlus) / classes.size(), freqWeight)
 		* (1 - 1.0L * nPlus / classes.size());
-		// static_cast<double>( curNPlus) / classes.size() - 1.0L * nPlus * curNPlus / (classes.size() * classes.size());
-	
-	assert( result - GetValue(ext) > -1e-10);
-	return result;
+	assert( val.BestSubsetEstimate - val.Value > -1e-10);
 }
 
 JSON CBinaryClassificationOEst::GetJsonQuality(const IExtent* ext) const
 {
 	std::stringstream rslt;
 	const DWORD curNPlus=getPositiveObjectsCount(ext);
+	assert(curNPlus <= ext->Size());
 
 	// Computing P-value
 	const DWORD o1 = curNPlus;
@@ -125,7 +109,7 @@ JSON CBinaryClassificationOEst::GetJsonQuality(const IExtent* ext) const
 		<< "\"BasePositiveness\":" << static_cast<double>(nPlus) / classes.size() << ","
 		<< "\"Size\":" << static_cast<double>(ext->Size()) / classes.size() << ","
 		<< "\"p-Value\":" << pValue << ","
-		<< "\"Value\":" << GetValue(ext)
+		<< "\"Value\":" << getValue(curNPlus, ext->Size())
 		<<"}";
 	return rslt.str();
 }
@@ -239,9 +223,6 @@ JSON CBinaryClassificationOEst::SaveParams() const
 DWORD CBinaryClassificationOEst::getPositiveObjectsCount(const IExtent* ext) const
 {
 	assert(ext!=0);
-	if( ext == currExt ) {
-		return currNPlus;
-	}
 	
 	CPatternImage img;
 	ext->GetExtent(img);
@@ -257,8 +238,13 @@ DWORD CBinaryClassificationOEst::getPositiveObjectsCount(const IExtent* ext) con
 
 	ext->ClearMemory(img);
 
-	currExt = ext;
-	currNPlus = nPlus;
-
+	assert(nPlus <= ext->Size());
 	return nPlus;
+}
+
+// Returns the value given the number of positive objects and the extent size
+double CBinaryClassificationOEst::getValue( DWORD curNPlus, DWORD size ) const
+{
+	return pow(static_cast<double>(size) / classes.size(), freqWeight)
+		* (1.0L * curNPlus / size - 1.0L * nPlus / classes.size());
 }

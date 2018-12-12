@@ -15,17 +15,23 @@
 const char OptimisticEstimatorModuleType[] = "OptimisticEstimatorModules";
 
 interface IOptimisticEstimator : public virtual IObject {
+	struct COEstValue {
+		double Value;
+		double BestSubsetEstimate;
+
+		COEstValue() : Value(-1), BestSubsetEstimate(-1) {}
+	};
+
 	// Check if the availbale number of objects is suitable for the Estimator
 	virtual bool CheckObjectNumber(DWORD) const = 0;
-	// Returns the exact value of the extent ext
-	virtual double GetValue(const IExtent* ext) const = 0;
-	// Returns the best estimate of the value on extent subsets
-	virtual double GetBestSubsetEstimate(const IExtent* ext) const = 0;
+	// Returns the exact value and the best subset estimate for the extent ext
+	virtual void GetValue(const IExtent* ext, COEstValue& val ) const = 0;
 	// A predicate verifying if one value is better than another value
 	virtual bool IsBetter(const double& a, const double& b) const 
 		{return a > b;}
 	// Get JSON description of pattern quality
 	virtual JSON GetJsonQuality(const IExtent* ext) const = 0;
 };
+
 
 #endif // PATTERNENUMERATOR_H_INCLUDED

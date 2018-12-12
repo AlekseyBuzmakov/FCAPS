@@ -83,7 +83,7 @@ CBestPatternFirstComputationProcedure::CBestPatternFirstComputationProcedure() :
 	potentialCmp(lpChain),
 	queue( potentialCmp ),
 	arePatternsSwappable(-1),
-	numInMemoryPatterns(100)
+	numInMemoryPatterns(1000)
 {
 }
 
@@ -131,11 +131,13 @@ void CBestPatternFirstComputationProcedure::Run()
 
 		adjustThreshold();
 
-		callback->ReportProgress( expansionCount, string("Border: ") + StdExt::to_string(queue.size())
-		                          + ". Quality: " + StdExt::to_string(best.Quality) + " / ["
-		                          + StdExt::to_string(queue.rbegin()->Potential) + "; " + StdExt::to_string(queue.begin()->Potential) + "]"
-		                          + ". Delta: " + StdExt::to_string(lpChain->GetInterestThreshold())
-		                          + ". Memory: " + StdExt::to_string(round(lpChain->GetTotalConsumedMemory() / (1024.0*1024))) + "Mb.   ");
+		if( queue.size() > 0 ) {
+			callback->ReportProgress( expansionCount, string("Border: ") + StdExt::to_string(queue.size())
+									+ ". Quality: " + StdExt::to_string(best.Quality) + " / ["
+									+ StdExt::to_string(queue.rbegin()->Potential) + "; " + StdExt::to_string(queue.begin()->Potential) + "]"
+									+ ". Delta: " + StdExt::to_string(lpChain->GetInterestThreshold())
+									+ ". Memory: " + StdExt::to_string(round(lpChain->GetTotalConsumedMemory() / (1024.0*1024))) + "Mb.   ");
+		}
 	}
 	// Last report of the progress
 	callback->ReportProgress( expansionCount, string("Border size is ") + StdExt::to_string(queue.size())
@@ -299,11 +301,14 @@ void CBestPatternFirstComputationProcedure::addNewPatterns( const ILocalProjecti
 									 "Cannot extract extent from pattern. Local projection chain does not support it.");
 		}
 
-		best.Quality = oest->GetValue( ext );
+		IOptimisticEstimator::COEstValue val;
+		oest->GetValue(ext, val);
+
+		best.Quality = val.Value;
 		best.Pattern.reset(*itr, deleter);
 		CPattern p;
 		p.Pattern = best.Pattern;
-		p.Potential = oest->GetBestSubsetEstimate( ext );
+		p.Potential = val.BestSubsetEstimate;
 		queue.insert(p);
 		++itr;
 		isBestQualityKnown = true;
@@ -317,14 +322,17 @@ void CBestPatternFirstComputationProcedure::addNewPatterns( const ILocalProjecti
 									 "Cannot extract extent from pattern. Local projection chain does not support it.");
 		}
 
+		IOptimisticEstimator::COEstValue val;
+		oest->GetValue(ext, val);
+
 		CPattern p;
 		p.Pattern.reset(*currItr, deleter);
-		p.Potential = oest->GetBestSubsetEstimate( ext );
+		p.Potential = val.BestSubsetEstimate;
 		assert(p.Potential < queue.begin()->Potential + 1e-10);
 		if( p.Potential <= best.Quality ) {
 			continue;
 		}
-		const double q = oest->GetValue(ext);
+		const double q = val.Value;
 		if(q > best.Quality) {
 			best.Quality = q;
 			best.Pattern = p.Pattern;
@@ -411,5 +419,7 @@ bool CBestPatternFirstComputationProcedure::CPatternPotentialComparator::operato
 		return false;
 	}
 
-	return lpChain->IsTopoSmaller(a.Pattern.get(), b.Pattern.get());
+	return a.Potential - b.Potential > 0;
+	// It is better to do like this. However, when swapped to disk it is not efficient
+	// return lpChain->IsTopoSmaller(a.Pattern.get(), b.Pattern.get());
 }

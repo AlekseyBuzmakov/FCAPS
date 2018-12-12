@@ -63,16 +63,16 @@ JSON CJsonContextAttributes::DescribeAttributeSet(int* attrsSet, int attrsCount)
 
 	std::stringstream rslt;
 	rslt << "{" << "\"Count\":" << attrsCount << ", "
-	     << "\"Names\":[";
+	     << "\"Names\":[\n\t";
 	for( int i = 0; i < attrsCount; ++i) {
 		if( i != 0 ) {
-			rslt << ",";
+			rslt << ",\n\t";
 		}
 		const int attr = attrsSet[i];
 		assert(0 <= attr && attr < attributes.size());
 		rslt << "\"" << attributes[attr].Name << "\"";
 	}
-	rslt << "]}";
+	rslt << "\n]}";
 	return rslt.str();
 }
 

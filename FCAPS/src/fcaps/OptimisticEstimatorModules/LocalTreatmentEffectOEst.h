@@ -24,8 +24,7 @@ public:
 	virtual bool CheckObjectNumber(DWORD n) const
 	    { assert(objY.size() == objTrt.size()); return objY.size() == n;}
 	// Methods of IOptimisticEstimator
-	virtual double GetValue(const IExtent* ext) const;
-	virtual double GetBestSubsetEstimate(const IExtent* ext) const;
+	virtual void GetValue(const IExtent* ext, COEstValue& val ) const;
 	virtual JSON GetJsonQuality(const IExtent* ext) const; 
 
 	// Methods of IModule
@@ -115,6 +114,8 @@ private:
 	bool extractObjValues(const IExtent* ext) const;
 	void computeMedianConfidenceIntervalBounds() const;
 	void compute2SigmasConfidenceIntervalBounds() const;
+	double getBestSubsetEstimate() const;
+	double getValue() const;
 	double getValue(const double& delta, int size) const;
 	double getBestValueForSubsets(int cntrlLastObject, int testFirstObject) const;
 	bool checkObjValues() const;

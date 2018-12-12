@@ -168,7 +168,7 @@ public:
 		{ extent == 0;}
 	virtual void Swap() const
 	{
-		if( IsSwapped() ) {
+		if( extent == 0 ) {
 			return;
 		}
 		swappedExtent = cmp.SwapPattern(extent.release());

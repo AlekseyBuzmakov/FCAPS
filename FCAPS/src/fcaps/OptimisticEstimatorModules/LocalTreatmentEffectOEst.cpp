@@ -97,81 +97,18 @@ CLocalTreatmentEffectOEst::CLocalTreatmentEffectOEst() :
 	
 }
 
-double CLocalTreatmentEffectOEst::GetValue(const IExtent* ext) const
+void CLocalTreatmentEffectOEst::GetValue(const IExtent* ext, COEstValue& val ) const
 {
 	assert(ext!=0);
 	if( !extractObjValues(ext) ) {
-		return 0;
+		val.Value = 0;
+		val.BestSubsetEstimate = 0;
+		return;
 	};
+	assert(objValues.Test.size() + objValues.Cntrl.size() == ext->Size());
 	
-	const double delta = objValues.TestConfLowBound.front()
-		- objValues.CntrlConfUpperBound.back();
-	if( delta <= 1e-10 ) {
-		return 0;
-	}
-
-	return getValue(delta,ext->Size()); // Only linear functions are supported
-}
-
-double CLocalTreatmentEffectOEst::GetBestSubsetEstimate(const IExtent* ext) const
-{
-	assert(ext!=0);
-
-	if( !extractObjValues(ext) ) {
-		return 0;
-	};
-
-	objValues.CntrlToTestPosition.resize(objValues.Cntrl.size());
-	objValues.BestTestValueChange.resize(objValues.Test.size());
-
-	std::fill(objValues.CntrlToTestPosition.begin(),objValues.CntrlToTestPosition.end(),0);
-	std::fill(objValues.BestTestValueChange.begin(),objValues.BestTestValueChange.end(),0.0);
-
-	// For every position of the cntrl, we find the clossest position in the test set
-	int curTestObj=0;
-	for(int i = 0; i < objValues.CntrlToTestPosition.size(); ++i) {
-		const double cntrlY = objValues.CntrlConfUpperBound[i];
-		while(curTestObj < objValues.Test.size()) {
-			const double testY = objValues.TestConfLowBound[curTestObj];
-			if(testY > cntrlY) {
-				break;
-			}
-			++curTestObj;
-		}
-		objValues.CntrlToTestPosition[i] = curTestObj <= objValues.Test.size()-minObjNum ? curTestObj : -1;
-	}
-
-	// Now for the test set we should know for every object the following.
-	//  If the test set contains only last elements starting at [i] what is the optimal size
-	const int minNumObjTestPosition = objValues.Test.size()-minObjNum;
-	double lastBestQ = 0;
-	for(int testStart = minNumObjTestPosition - 1; testStart >= 0; --testStart ) {
-		const double diff = getValue(
-			objValues.TestConfLowBound[testStart] - objValues.TestConfLowBound[minNumObjTestPosition], minNumObjTestPosition - testStart);
-		lastBestQ = max(lastBestQ, diff);
-		assert(testStart < objValues.BestTestValueChange.size());
-		objValues.BestTestValueChange[testStart]=lastBestQ;
-	}
-
-	assert(checkObjValues());
-
-	//  Now just iterate over possible conf interval position in cntrl set and finds the corresponding the best value in the test set
-	const double minObjNumValue = getValue(objValues.TestConfLowBound[minNumObjTestPosition] - objValues.CntrlConfUpperBound[minObjNum - 1], 2 * minObjNum); 
-	double bestDiff = 0;
-	for(int i = minObjNum; i < objValues.CntrlToTestPosition.size(); ++i) {
-		const int testStart = objValues.CntrlToTestPosition[i];
-		if(testStart == -1) {
-			break;
-		}
-		assert( objValues.CntrlConfUpperBound[i] < objValues.TestConfLowBound[testStart] );
-		const double currDiff =
-			getValue(objValues.CntrlConfUpperBound[minObjNum - 1] - objValues.CntrlConfUpperBound[i],i - minObjNum + 1)
-			+ objValues.BestTestValueChange[testStart];
-		assert(abs(minObjNumValue + currDiff - getBestValueForSubsets(i,testStart)) < delta0 * 1e-10);
-		bestDiff = max(bestDiff, currDiff);
-	}
-
-	return bestDiff + minObjNumValue;
+	val.Value = getValue();
+	val.BestSubsetEstimate = getBestSubsetEstimate();
 }
 
 JSON CLocalTreatmentEffectOEst::GetJsonQuality(const IExtent* ext) const
@@ -189,7 +126,7 @@ JSON CLocalTreatmentEffectOEst::GetJsonQuality(const IExtent* ext) const
 		<< "\"N0\":" << objValues.Cntrl.size() << ","
 		<< "\"N1\":" << objValues.Test.size() << ","
 		<< "\"TotalSize\":" << objY.size() << ","
-		<< "\"Value\":" << GetValue(ext)
+		<< "\"Value\":" << getValue()
 		<<"}";
 	return rslt.str();
 }
@@ -575,6 +512,74 @@ void CLocalTreatmentEffectOEst::compute2SigmasConfidenceIntervalBounds() const
 		sd2sum += n * meanDiff * meanDiff + 2 * (valSum-n*meanPrev) * meanDiff;
 		// TODO add t-test here, for now only quantiles of norm distribution
 		objValues.CntrlConfUpperBound[i] = min(objValues.Cntrl[i],valSum / n + sqrt(sd2sum / n) * zp);
+	}
+}
+
+// Return the best subset estimate based on objValues object
+double CLocalTreatmentEffectOEst::getBestSubsetEstimate() const
+{
+	objValues.CntrlToTestPosition.resize(objValues.Cntrl.size());
+	objValues.BestTestValueChange.resize(objValues.Test.size());
+
+	std::fill(objValues.CntrlToTestPosition.begin(),objValues.CntrlToTestPosition.end(),0);
+	std::fill(objValues.BestTestValueChange.begin(),objValues.BestTestValueChange.end(),0.0);
+
+	// For every position of the cntrl, we find the clossest position in the test set
+	int curTestObj=0;
+	for(int i = 0; i < objValues.CntrlToTestPosition.size(); ++i) {
+		const double cntrlY = objValues.CntrlConfUpperBound[i];
+		while(curTestObj < objValues.Test.size()) {
+			const double testY = objValues.TestConfLowBound[curTestObj];
+			if(testY > cntrlY) {
+				break;
+			}
+			++curTestObj;
+		}
+		objValues.CntrlToTestPosition[i] = curTestObj <= objValues.Test.size()-minObjNum ? curTestObj : -1;
+	}
+
+	// Now for the test set we should know for every object the following.
+	//  If the test set contains only last elements starting at [i] what is the optimal size
+	const int minNumObjTestPosition = objValues.Test.size()-minObjNum;
+	double lastBestQ = 0;
+	for(int testStart = minNumObjTestPosition - 1; testStart >= 0; --testStart ) {
+		const double diff = getValue(
+			objValues.TestConfLowBound[testStart] - objValues.TestConfLowBound[minNumObjTestPosition], minNumObjTestPosition - testStart);
+		lastBestQ = max(lastBestQ, diff);
+		assert(testStart < objValues.BestTestValueChange.size());
+		objValues.BestTestValueChange[testStart]=lastBestQ;
+	}
+
+	assert(checkObjValues());
+
+	//  Now just iterate over possible conf interval position in cntrl set and finds the corresponding the best value in the test set
+	const double minObjNumValue = getValue(objValues.TestConfLowBound[minNumObjTestPosition] - objValues.CntrlConfUpperBound[minObjNum - 1], 2 * minObjNum); 
+	double bestDiff = 0;
+	for(int i = minObjNum; i < objValues.CntrlToTestPosition.size(); ++i) {
+		const int testStart = objValues.CntrlToTestPosition[i];
+		if(testStart == -1) {
+			break;
+		}
+		assert( objValues.CntrlConfUpperBound[i] < objValues.TestConfLowBound[testStart] );
+		const double currDiff =
+			getValue(objValues.CntrlConfUpperBound[minObjNum - 1] - objValues.CntrlConfUpperBound[i],i - minObjNum + 1)
+			+ objValues.BestTestValueChange[testStart];
+		assert(abs(minObjNumValue + currDiff - getBestValueForSubsets(i,testStart)) < delta0 * 1e-10);
+		bestDiff = max(bestDiff, currDiff);
+	}
+
+	return bestDiff + minObjNumValue;
+}
+
+// Returns the exact value for a set based on objValues object
+double CLocalTreatmentEffectOEst::getValue() const
+{
+	const double delta = objValues.TestConfLowBound.front()
+		- objValues.CntrlConfUpperBound.back();
+	if( delta <= 1e-10 ) {
+		return 0;
+	} else {
+		return getValue(delta,objValues.Test.size() + objValues.Cntrl.size()); // Only linear functions are supported
 	}
 }
 
