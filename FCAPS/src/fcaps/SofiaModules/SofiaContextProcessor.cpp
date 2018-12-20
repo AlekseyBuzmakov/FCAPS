@@ -73,6 +73,10 @@ STR(
 				"ProjectionChain":{
 					"description": "The object that defines the projection chain that is related to both the patterns and the measure to compute.",
 					"type": "@ProjectionChainModules"
+				},
+				"KnownConcepts":{
+					"description": "A lattice of already known concepts. The algorithm would exclude any subconcept of them.",
+					"type": "file-path",
 				}
 			}
 		}
@@ -100,6 +104,14 @@ CSofiaContextProcessor::CSofiaContextProcessor() :
 	maxPotential(-1)
 {
 	storage.Reserve( mpn );
+}
+CSofiaContextProcessor::~CSofiaContextProcessor()
+{
+	assert(pChain != 0);
+	for(int i = 0; i < knownConcepts.size(); ++i) {
+		pChain->FreePattern(knownConcepts[i].get());
+		knownConcepts[i] = 0;
+	}
 }
 
 void CSofiaContextProcessor::LoadParams( const JSON& json )
@@ -168,6 +180,13 @@ void CSofiaContextProcessor::LoadParams( const JSON& json )
 		}
 	}
 
+	if( p.HasMember("KnownConcepts") ) {
+		const rapidjson::Value& fc = p["KnownConcepts"];
+		if( fc.IsString() ) {
+			knownConceptsPath = fc.GetString();
+		}
+	}
+
 	if( !p.HasMember("ProjectionChain") ) {
 		error.Data = json;
 		error.Error = "Params is not found. Necessary for ProjectionChain";
@@ -182,6 +201,8 @@ void CSofiaContextProcessor::LoadParams( const JSON& json )
 	}
 	storage.Initialize(CHasher(pChain));
 	storage.Reserve( mpn );
+
+	loadKnownConcepts();
 }
 JSON CSofiaContextProcessor::SaveParams() const
 {
@@ -363,6 +384,56 @@ void CSofiaContextProcessor::SaveResult( const std::string& path )
 	}
 }
 
+// Loads the file with known concepts that are further used to filter the lattice
+void CSofiaContextProcessor::loadKnownConcepts()
+{
+	if(knownConceptsPath.empty()) {
+		return;
+	}
+	rapidjson::Document kcJson;
+	CJsonError jsonError;
+	if( !ReadJsonFile( knownConceptsPath, kcJson, jsonError ) ) {
+		throw new CJsonException( "SofiaContextProcessor::KnownConceptsJson", jsonError );
+	}
+	if( !kcJson.IsArray() || kcJson.Size() < 2 || !kcJson[1].HasMember("Nodes") || kcJson[1]["Nodes"].IsArray()) {
+		throw new CTextException( "SofiaContextProcessor::KnownConceptsJson", "JSON of KnownConcepts lattice is invalid" );
+	}
+	rapidjson::Value& nodesJson = kcJson[1]["Nodes"];
+	rapidjson::Value* topsJson = 0;
+	if(kcJson[0].HasMember("Top") && kcJson[0]["Top"].IsArray()) {
+		topsJson = &(kcJson[0]["Top"]);
+	}
+
+	assert(pChain != 0);
+
+	for(int i = 0; i < nodesJson.Size() && (topsJson == 0 || i < topsJson->Size()); ++i) {
+		const rapidjson::Value* node = 0;
+		if( topsJson == 0 ) {
+			node = &(nodesJson[i]);
+		} else {
+			if(!topsJson[i].IsUint()) {
+				throw new CTextException( "SofiaContextProcessor::KnownConceptsJson", "One of tops is not a number" );
+			}
+			const int n = topsJson[i].GetInt();
+			assert( n >= 0);
+			if( n >= nodesJson.Size() ) {
+				throw new CTextException( "SofiaContextProcessor::KnownConceptsJson", "A top index is larger than the number of nodes" );
+			}
+			node = &(nodesJson[n]);
+		}
+
+		assert( node != 0);
+		if(!node->HasMember("Ext")) {
+			continue;
+		}
+
+		JSON json = "";
+		CreateStringFromJSON( *node, json );
+	
+		knownConcepts.emplace_back(pChain->LoadPatternByExtent(json));
+	}
+}
+
 // Adds new patterns to
 void CSofiaContextProcessor::addNewPatterns( const IProjectionChain::CPatternList& newPatterns )
 {
@@ -370,6 +441,9 @@ void CSofiaContextProcessor::addNewPatterns( const IProjectionChain::CPatternLis
 	DWORD i = 0;
 	for( ; !itr.IsEnd(); ++itr, ++i ) {
         const IPatternDescriptor* origP = *itr;
+        if( isUnderKnownPatterns(origP) ) {
+	        continue; // The pattern is a specification of a known pattern. We exclude such patterns.
+        }
         const IPatternDescriptor* p = storage.AddPattern( origP ); // Patterns are stored here
 		assert( p!=0 );
 		if(p==origP) {
@@ -418,6 +492,17 @@ void CSofiaContextProcessor::addNewPatterns( const IProjectionChain::CPatternLis
 			}
 		}
 	}
+}
+// Checks if the pattern is under a known pattern
+bool CSofiaContextProcessor::isUnderKnownPatterns(const IPatternDescriptor* p) const
+{
+	assert(p != 0);
+	for(int i = 0; i < knownConcepts.size(); ++i) {
+		if(pChain->IsSmaller(p, knownConcepts[i].get()) || pChain->AreEqual(p, knownConcepts[i].get())) {
+			return true;
+		}
+	}
+	return false;
 }
 // Computes OEstimate for pattern @param p
 void CSofiaContextProcessor::computeOEstimate(const IPatternDescriptor* p, COEstQuality& q)

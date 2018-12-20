@@ -28,6 +28,7 @@ const char SofiaContextProcessor[] = "SofiaContextProcessorModule";
 class CSofiaContextProcessor : public IContextProcessor, public IModule {
 public:
 	CSofiaContextProcessor();
+	~CSofiaContextProcessor();
 
 	// Methods of IModule
 	virtual void LoadParams( const JSON& );
@@ -129,6 +130,8 @@ private:
 	bool shouldAdjustThld;
 	// The params of the output
 	COutputParams outParams;
+	// The path to the file with aleady known concepts
+	std::string knownConceptsPath;
 
 	// The number of added objects
 	DWORD objectNumber;
@@ -148,7 +151,12 @@ private:
 	double minPotential;
 	double maxPotential;
 
+	// The of known concepts that are used to filter the result and the computation
+	std::vector< CSharedPtr<const IPatternDescriptor> > knownConcepts;
+
+	void loadKnownConcepts();
 	void addNewPatterns( const IProjectionChain::CPatternList& newPatterns );
+	bool isUnderKnownPatterns(const IPatternDescriptor* p) const;
 	void computeOEstimate(const IPatternDescriptor* p, COEstQuality& q);
 	void removeProjectionPattern(const IPatternDescriptor* p);
 	void removeBestPattern();
