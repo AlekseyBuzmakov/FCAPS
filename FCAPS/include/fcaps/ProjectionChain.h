@@ -58,6 +58,9 @@ interface IProjectionChain : public virtual IObject {
 	// Some attributes of patterns
 	virtual int GetExtentSize( const IPatternDescriptor* d ) const = 0;
 
+	// Loads a pattern from extent
+	virtual const IPatternDescriptor* LoadPatternByExtent(JSON) = 0;
+
 	// Saves extent and intent of a pattern
 	virtual JSON SaveExtent( const IPatternDescriptor* d ) const = 0;
 	virtual JSON SaveIntent( const IPatternDescriptor* d ) const = 0;

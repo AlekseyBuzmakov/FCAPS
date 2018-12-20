@@ -54,6 +54,7 @@ public:
 
 	virtual int GetExtentSize( const IPatternDescriptor* d ) const;
 
+	virtual const IPatternDescriptor* LoadPatternByExtent(JSON);
 	virtual JSON SaveExtent( const IPatternDescriptor* d ) const;
 	virtual JSON SaveIntent( const IPatternDescriptor* d ) const;
 

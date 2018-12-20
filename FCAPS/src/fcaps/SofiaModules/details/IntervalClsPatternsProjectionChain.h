@@ -37,6 +37,7 @@ public:
 
 	int GetExtentSize( const IPatternDescriptor* d ) const;
 
+	const IPatternDescriptor* LoadPatternByExtent(JSON json);
 	virtual JSON SaveExtent( const IPatternDescriptor* d ) const;
 	virtual JSON SaveIntent( const IPatternDescriptor* d ) const;
 

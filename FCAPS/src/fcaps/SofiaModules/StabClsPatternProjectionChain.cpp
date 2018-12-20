@@ -234,6 +234,11 @@ int CStabClsPatternProjectionChain::GetExtentSize( const IPatternDescriptor* d )
 {
 	return Ptrn(d).Extent().Size();
 }
+const IPatternDescriptor* CStabClsPatternProjectionChain::LoadPatternByExtent(JSON json)
+{
+	CSharedPtr<const CVectorBinarySetDescriptor> ext(extCmp->LoadPattern(json),extDeleter);
+	return new CStabClsPatternDescription( ext );
+}
 JSON CStabClsPatternProjectionChain::SaveExtent( const IPatternDescriptor* d ) const
 {
 	return extCmp->SavePattern( &Ptrn(d).Extent() );

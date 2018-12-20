@@ -161,6 +161,11 @@ int CIntervalClsPatternsProjectionChain::GetExtentSize( const IPatternDescriptor
 	return Pattern(d).Extent().Size();
 }
 
+const IPatternDescriptor* CIntervalClsPatternsProjectionChain::LoadPatternByExtent(JSON json)
+{
+	CSharedPtr<const CVectorBinarySetDescriptor> ext(extCmp->LoadPattern(json),extDeleter);
+	return NewPattern( ext );
+}
 JSON CIntervalClsPatternsProjectionChain::SaveExtent( const IPatternDescriptor* d ) const
 {
 	return extCmp->SavePattern( &Pattern(d).Extent() );
