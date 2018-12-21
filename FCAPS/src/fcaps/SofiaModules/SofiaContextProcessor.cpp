@@ -76,7 +76,11 @@ STR(
 				},
 				"KnownConcepts":{
 					"description": "A lattice of already known concepts. The algorithm would exclude any subconcept of them.",
-					"type": "file-path",
+					"type": "file-path"
+				},
+				"MaxKnownConceptSize" : {
+					"description": "The maximal number of object that a known concept can have to be considered. The rest is ignored",
+					"type":"integer"
 				}
 			}
 		}
@@ -101,7 +105,8 @@ CSofiaContextProcessor::CSofiaContextProcessor() :
 	shouldAdjustThld(true),
 	objectNumber(0),
 	minPotential(1),
-	maxPotential(-1)
+	maxPotential(-1),
+	maxKnownConceptSize(-1)
 {
 	storage.Reserve( mpn );
 }
@@ -109,7 +114,7 @@ CSofiaContextProcessor::~CSofiaContextProcessor()
 {
 	assert(pChain != 0);
 	for(int i = 0; i < knownConcepts.size(); ++i) {
-		pChain->FreePattern(knownConcepts[i].get());
+		pChain->FreePattern(knownConcepts[i]);
 		knownConcepts[i] = 0;
 	}
 }
@@ -187,6 +192,13 @@ void CSofiaContextProcessor::LoadParams( const JSON& json )
 		}
 	}
 
+	if( p.HasMember( "MaxKnownConceptSize" ) ) {
+		const rapidjson::Value& mkcJson = params["Params"]["MaxKnownConceptSize"];
+		if( mkcJson.IsUint() ) {
+			maxKnownConceptSize = mkcJson.GetUint();
+		}
+	}
+
 	if( !p.HasMember("ProjectionChain") ) {
 		error.Data = json;
 		error.Error = "Params is not found. Necessary for ProjectionChain";
@@ -201,8 +213,6 @@ void CSofiaContextProcessor::LoadParams( const JSON& json )
 	}
 	storage.Initialize(CHasher(pChain));
 	storage.Reserve( mpn );
-
-	loadKnownConcepts();
 }
 JSON CSofiaContextProcessor::SaveParams() const
 {
@@ -292,6 +302,9 @@ void CSofiaContextProcessor::ProcessAllObjectsAddition()
 
 	IProjectionChain::CPatternList newPatterns;
 	pChain->ComputeZeroProjection( newPatterns );
+
+	loadKnownConcepts();
+
 	addNewPatterns( newPatterns );
 
 	while( pChain->NextProjection() ) {
@@ -395,7 +408,7 @@ void CSofiaContextProcessor::loadKnownConcepts()
 	if( !ReadJsonFile( knownConceptsPath, kcJson, jsonError ) ) {
 		throw new CJsonException( "SofiaContextProcessor::KnownConceptsJson", jsonError );
 	}
-	if( !kcJson.IsArray() || kcJson.Size() < 2 || !kcJson[1].HasMember("Nodes") || kcJson[1]["Nodes"].IsArray()) {
+	if( !kcJson.IsArray() || kcJson.Size() < 2 || !kcJson[1].HasMember("Nodes") || !kcJson[1]["Nodes"].IsArray()) {
 		throw new CTextException( "SofiaContextProcessor::KnownConceptsJson", "JSON of KnownConcepts lattice is invalid" );
 	}
 	rapidjson::Value& nodesJson = kcJson[1]["Nodes"];
@@ -403,34 +416,101 @@ void CSofiaContextProcessor::loadKnownConcepts()
 	if(kcJson[0].HasMember("Top") && kcJson[0]["Top"].IsArray()) {
 		topsJson = &(kcJson[0]["Top"]);
 	}
+	rapidjson::Value* arcsJson = 0;
+	if(kcJson.Size() > 2 && kcJson[2].HasMember("Arcs") && kcJson[2]["Arcs"].IsArray()) {
+		arcsJson = &(kcJson[2]["Arcs"]);
+	}
 
-	assert(pChain != 0);
-
-	for(int i = 0; i < nodesJson.Size() && (topsJson == 0 || i < topsJson->Size()); ++i) {
-		const rapidjson::Value* node = 0;
-		if( topsJson == 0 ) {
-			node = &(nodesJson[i]);
-		} else {
-			if(!topsJson[i].IsUint()) {
+	CList<int> nodesId;
+	if( topsJson != 0 ) {
+		for(int i = 0; i < topsJson->Size(); ++i) {
+			const rapidjson::Value& tops = *topsJson;
+			if(!tops[i].IsUint()) {
 				throw new CTextException( "SofiaContextProcessor::KnownConceptsJson", "One of tops is not a number" );
 			}
-			const int n = topsJson[i].GetInt();
+			const int n = tops[i].GetInt();
 			assert( n >= 0);
 			if( n >= nodesJson.Size() ) {
 				throw new CTextException( "SofiaContextProcessor::KnownConceptsJson", "A top index is larger than the number of nodes" );
 			}
-			node = &(nodesJson[n]);
+			nodesId.PushBack(n);
+		}
+	} else {
+		for(int i = 0; i < nodesJson.Size(); ++i) {
+			nodesId.PushBack(i);
+		}
+	}
+
+	assert(pChain != 0);
+
+	vector<bool> isUsed;
+	isUsed.resize(nodesJson.Size(), false);
+
+	auto itr = nodesId.Begin();
+	for(; itr != nodesId.End(); ++itr) {
+		const int n = *itr;
+		assert( 0 <= n && n < nodesJson.Size());
+		if( isUsed[n] ) {
+			continue;
 		}
 
-		assert( node != 0);
-		if(!node->HasMember("Ext")) {
+		const rapidjson::Value& node = nodesJson[n];
+		if(!node.HasMember("Ext")) {
 			continue;
 		}
 
 		JSON json = "";
-		CreateStringFromJSON( *node, json );
-	
-		knownConcepts.emplace_back(pChain->LoadPatternByExtent(json));
+		CreateStringFromJSON( node["Ext"], json );
+		const IPatternDescriptor* newPtrn = pChain->LoadPatternByExtent(json);
+		if( pChain->GetExtentSize(newPtrn) < maxKnownConceptSize ) {
+			// Concept can be used for filtering
+			knownConcepts.push_back(newPtrn);
+			isUsed[n] = true;
+			continue;
+		}
+		if(topsJson == 0) {
+			// children will be considered in another iteration
+			continue;
+		}
+		// The concept is not considered but its children can be
+		if(arcsJson == 0) {
+			// we have no idea where are the children
+			continue;
+		}
+		bool addChildren = true;
+		for(int i = 0; i < arcsJson->Size(); ++i) {
+			const rapidjson::Value& arcs = *arcsJson;
+			if(!arcs[i].IsObject()
+			   || !arcs[i].HasMember("D") || !arcs[i]["D"].IsUint()
+			   || !arcs[i].HasMember("S") || !arcs[i]["S"].IsUint() )
+			{
+				throw new CTextException( "SofiaContextProcessor::KnownConceptsJson", "An arc is incorrect" );
+			}
+			const int dest = arcs[i]["D"].GetInt();
+			const int source = arcs[i]["S"].GetInt();
+			if( 0 > dest || dest >= nodesJson.Size()
+			    || 0 > source || source >= nodesJson.Size() )
+			{
+				throw new CTextException( "SofiaContextProcessor::KnownConceptsJson", "An arc contains incorrect nodes ids" );
+			}
+
+			if( n == dest && isUsed[source]) {
+				// The parent is already includded
+				addChildren = false;
+				break;
+			}
+		}
+		if( !addChildren ) {
+			continue;
+		}
+		for(int i = 0; i < arcsJson->Size(); ++i) {
+			const rapidjson::Value& arcs = *arcsJson;
+			const int dest = arcs[i]["D"].GetInt();
+			const int source = arcs[i]["S"].GetInt();
+			if( n == source ) {
+				nodesId.PushBack(dest);
+			}
+		}
 	}
 }
 
@@ -498,7 +578,7 @@ bool CSofiaContextProcessor::isUnderKnownPatterns(const IPatternDescriptor* p) c
 {
 	assert(p != 0);
 	for(int i = 0; i < knownConcepts.size(); ++i) {
-		if(pChain->IsSmaller(p, knownConcepts[i].get()) || pChain->AreEqual(p, knownConcepts[i].get())) {
+		if(pChain->IsSmaller(knownConcepts[i],p) || pChain->AreEqual(p, knownConcepts[i])) {
 			return true;
 		}
 	}

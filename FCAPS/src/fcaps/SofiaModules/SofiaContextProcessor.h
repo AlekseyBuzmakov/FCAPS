@@ -132,6 +132,7 @@ private:
 	COutputParams outParams;
 	// The path to the file with aleady known concepts
 	std::string knownConceptsPath;
+	DWORD maxKnownConceptSize;
 
 	// The number of added objects
 	DWORD objectNumber;
@@ -152,7 +153,7 @@ private:
 	double maxPotential;
 
 	// The of known concepts that are used to filter the result and the computation
-	std::vector< CSharedPtr<const IPatternDescriptor> > knownConcepts;
+	std::vector< const IPatternDescriptor* > knownConcepts;
 
 	void loadKnownConcepts();
 	void addNewPatterns( const IProjectionChain::CPatternList& newPatterns );

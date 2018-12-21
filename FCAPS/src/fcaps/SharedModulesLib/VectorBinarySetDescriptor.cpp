@@ -96,9 +96,26 @@ JSON CVectorBinarySetJoinComparator::SavePattern( const IPatternDescriptor* ptrn
 }
 const CVectorBinarySetDescriptor* CVectorBinarySetJoinComparator::LoadPattern( const JSON& json )
 {
-	// TODO
-	assert( false );
-	return 0;
+	CJsonError error;
+	rapidjson::Document ptrn;
+	if( !ReadJsonString( json, ptrn, error ) ) {
+		throw new CJsonException( "CVectorBinarySetJoinComparator::LoadPattern", error );
+	}
+	if(!ptrn.IsObject() || !ptrn.HasMember("Inds") || !ptrn["Inds"].IsArray()) {
+		throw new CTextException(  "CVectorBinarySetJoinComparator::LoadPattern", "Extent does not have an inds member");
+	}
+
+	rapidjson::Value& inds = ptrn["Inds"];
+	unique_ptr<CVectorBinarySetDescriptor> res(NewPattern());
+	for( int i = 0; i < inds.Size(); ++i ) {
+		if(!inds[i].IsUint()) {
+			throw new CTextException(  "CVectorBinarySetJoinComparator::LoadPattern", "Extent contains not a Uint");
+		}
+		const DWORD attr = inds[i].GetUint();
+		AddValue(attr,*res);
+	}
+
+	return res.release();
 }
 
 TCompareResult CVectorBinarySetJoinComparator::Compare(
