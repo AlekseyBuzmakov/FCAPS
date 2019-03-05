@@ -73,3 +73,44 @@ The final lines are parameters of SOFIA.
 
 **OutParams** specifying how the found concepts should be reported, in particular it is said that the extent and the intent of the concepts are reported.
 
+### The Context File
+
+In this section we discuss [context.json](https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/EXAMPLES/Sofia-IPS/context.json). The file is below.
+
+```json
+[{
+	"ObjNames":["g1","g2","g3","g4","g5"]
+},{
+	"Count": 4,
+	"Data": [
+		[1,2,1],
+		[1,2,1],
+		[2,1,1],
+		[2,1,1],
+		[[1,2],[1,2],2]
+	]
+}]
+```
+**ObjNames** are optional and specify the names of the objects in the dataset.
+
+**Data** introduces the object description one by one, where the first description in the array is the description of the first object.
+In the case of Interval Pattern Structure every object description is an array of length equal to the number of numerical attirbutes in the data. The value of the *i*-th attribute is given in the *i*-th position of this array. For example, in this dataset every object is described by 3 numerical attributes. The first object has value 1 for the first attribute, value 2 for the second one, and value 1 for the third attribute. Instead of giving the exact value for an attirbute it is possible to give an interval where the exact value is located, as it is done for the last object in the data.
+
+### The result file
+In this section we discuss [result.json](https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/FCAPS/EXAMPLES/Sofia-IPS/result.json). The file is below.
+
+```json
+[{
+	"NodesCount":3,"ArcsCount":2,"Top":[2],"Bottom":[0,1],
+	"Params":{"Type":"ContextProcessorModules","Name":"SofiaContextProcessorModule","Params":{"Thld":2.0,"MaxPatternNumber":10,"AdjustThreshold":true,"FindPartialOrder":true,"OutputParams":{"OutExtent":true,"OutIntent":true},"ProjectionChain":{"Type":"ProjectionChainModules","Name":"StabIntervalClsPatternsProjectionChainModule","Params":{"Precisions":[1e-8,1e-8,1e-8]}}}}
+},{"Nodes":[
+	{"Ext":{"Count":2,"Names":["g3","g4"]},"Int":[[2,2],[1,1],[1,1]],"Interest":2},
+	{"Ext":{"Count":2,"Names":["g1","g2"]},"Int":[[1,1],[2,2],[1,1]],"Interest":2},
+	{"Ext":{"Count":4,"Names":["g1","g2","g3","g4"]},"Int":[[1,2],[1,2],[1,1]],"Interest":2}
+]},{"Arcs":[
+	{"S":2,"D":0},  
+	{"S":2,"D":1}
+]}]
+```
+
+It files reports 3 concepts in **Nodes** with 2 arcs (given in **Arcs**) in the Hasse's diagram. The metadata and the parameters of getting the file are given in the first part of the file.
