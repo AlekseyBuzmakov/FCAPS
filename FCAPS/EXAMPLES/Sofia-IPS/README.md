@@ -25,14 +25,14 @@ In this section we discuss [settings.json](https://raw.githubusercontent.com/Ale
         "ContextFilePath": "context.json",
 ```
 
-ContextFilePath is the path to the file with the data.
+**ContextFilePath** is the path to the file with the data.
 
 ```json
         "ContextProcessor": {
 		"Type" : "ContextProcessorModules",
 		"Name" : "SofiaContextProcessorModule",
 ```
-ContextProcessor is the algorithm that procces context. In this example we works with algorithm SOFIA. The parameters of the SOFIA is given below.
+**ContextProcessor** is the algorithm that procces context. In this example we works with algorithm SOFIA. The parameters of the SOFIA is given below.
 
 ```json
 		"Params" : {
