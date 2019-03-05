@@ -1,0 +1,27 @@
+{
+    "Type": "ComputationProcedureModules",
+    "Name": "ContextBasedComputationProcedureModule",
+    "Params": {
+        "ContextFilePath": "context.json",
+        "ContextProcessor": {
+		"Type" : "ContextProcessorModules",
+		"Name" : "SofiaContextProcessorModule",
+		"Params" : {
+			"ProjectionChain" : {	
+				"Type": "ProjectionChainModules",
+				"Name": "StabIntervalClsPatternsProjectionChainModule",
+				"Params": {}
+			},
+			"DefualtThld": 2,
+			"MaxPatternNumber": 10,
+			"AdjustThreshold": true,
+			"FindPartialOrder": true,
+			"OutputParams" : {
+				"OutExtent": true,
+				"OutIntent": true
+			},
+			"MaxKnownConceptSize":15000
+		}
+        }
+    }
+}

@@ -1,0 +1,11 @@
+[{
+	"NodesCount":3,"ArcsCount":2,"Top":[2],"Bottom":[0,1],
+	"Params":{"Type":"ContextProcessorModules","Name":"SofiaContextProcessorModule","Params":{"Thld":2.0,"MaxPatternNumber":10,"AdjustThreshold":true,"FindPartialOrder":true,"OutputParams":{"OutExtent":true,"OutIntent":true},"ProjectionChain":{"Type":"ProjectionChainModules","Name":"StabIntervalClsPatternsProjectionChainModule","Params":{"Precisions":[1e-8,1e-8,1e-8]}}}}
+},{"Nodes":[
+	{"Ext":{"Count":2,"Names":["g3","g4"]},"Int":[[2,2],[1,1],[1,1]],"Interest":2},
+	{"Ext":{"Count":2,"Names":["g1","g2"]},"Int":[[1,1],[2,2],[1,1]],"Interest":2},
+	{"Ext":{"Count":4,"Names":["g1","g2","g3","g4"]},"Int":[[1,2],[1,2],[1,1]],"Interest":2}
+]},{"Arcs":[
+	{"S":2,"D":0},  
+	{"S":2,"D":1}
+]}]
