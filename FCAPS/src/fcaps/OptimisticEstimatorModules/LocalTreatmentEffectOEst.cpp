@@ -90,6 +90,8 @@ CLocalTreatmentEffectOEst::CLocalTreatmentEffectOEst() :
 	zp(2.56),
 	minObjNum(100),
 	controlSize(0),
+	delta0Max(0),
+	delta0(0),
 	alpha(1),
 	beta(1),
 	confIntMode(CIM_Median)
@@ -123,6 +125,7 @@ JSON CLocalTreatmentEffectOEst::GetJsonQuality(const IExtent* ext) const
 	rslt << "{"
 		<< "\"Delta\":" << delta << ","
 		<< "\"Delta0\":" << delta0 << ","
+		<< "\"Delta0Max\":" << delta0Max << ","
 		<< "\"N0\":" << objValues.Cntrl.size() << ","
 		<< "\"N1\":" << objValues.Test.size() << ","
 		<< "\"TotalSize\":" << objY.size() << ","
@@ -201,7 +204,7 @@ void CLocalTreatmentEffectOEst::LoadParams( const JSON& json )
 			error.Error = "Params.ObjInfoFile.Trt has nonstring values.";
 			throw new CJsonException("CLocalTreatmentEffectOEst::LoadParams", error);
 		}
-		objTrt[i]=cntrlLevels.find(trt[i].GetString()) != cntrlLevels.end();
+		objTrt[i]=cntrlLevels.find(trt[i].GetString()) == cntrlLevels.end();
 		objY[i]=y[i].GetDouble();
 	}
 	if(p.HasMember("MinObjNum") && p["MinObjNum"].IsInt()) {
@@ -236,6 +239,7 @@ void CLocalTreatmentEffectOEst::LoadParams( const JSON& json )
 	computeSignificantObjectNumbers();
 	buildOrder();
 	computeDelta0();
+	computeDelta0Max();
 }
 
 JSON CLocalTreatmentEffectOEst::SaveParams() const
@@ -363,6 +367,23 @@ void CLocalTreatmentEffectOEst::buildOrder()
 void CLocalTreatmentEffectOEst::computeDelta0()
 {
 	// TODO change function for dealing with other measures than median confidence interval
+	assert(controlSize < signifObjectNum.size());
+	assert(objY.size() - controlSize < signifObjectNum.size());
+	const int sObjNumCntrl = signifObjectNum[controlSize];
+	const int sObjNumTest = signifObjectNum[objY.size() - controlSize];
+
+	assert(0 <= sObjNumCntrl && sObjNumCntrl < controlSize);
+	assert(0 <= sObjNumTest && sObjNumTest < objY.size() - controlSize);
+	const double cntrlY = objY[order[sObjNumCntrl]];
+	const double testY = objY[order[objY.size() - sObjNumTest - 1]];
+   
+	delta0=testY-cntrlY;
+}
+
+// Computes maximal delta for the whole dataset and the minimal number of observations in Trt and Ctrl
+void CLocalTreatmentEffectOEst::computeDelta0Max()
+{
+	// TODO change function for dealing with other measures than median confidence interval
 	const int sObjNum = signifObjectNum[minObjNum];
 	assert(sObjNum < minObjNum);
 	assert(sObjNum < controlSize);
@@ -370,7 +391,7 @@ void CLocalTreatmentEffectOEst::computeDelta0()
 	const double cntrlY = objY[order[minObjNum - 1 - sObjNum + 1]];
 	const double testY = objY[order[objY.size() - minObjNum + sObjNum - 1]];
    
-	delta0=testY-cntrlY;
+	delta0Max=testY-cntrlY;
 }
 
 // Extracts test and control group for the extent
@@ -530,7 +551,7 @@ double CLocalTreatmentEffectOEst::getBestSubsetEstimate() const
 		const double cntrlY = objValues.CntrlConfUpperBound[i];
 		while(curTestObj < objValues.Test.size()) {
 			const double testY = objValues.TestConfLowBound[curTestObj];
-			if(testY > cntrlY) {
+			if(testY - delta0 > cntrlY) { // delta0 is the minimal difference to be achieved
 				break;
 			}
 			++curTestObj;
@@ -543,7 +564,7 @@ double CLocalTreatmentEffectOEst::getBestSubsetEstimate() const
 	const int minNumObjTestPosition = objValues.Test.size()-minObjNum;
 	double lastBestQ = 0;
 	for(int testStart = minNumObjTestPosition - 1; testStart >= 0; --testStart ) {
-		const double diff = getValue(
+		const double diff = getDeltaValue(
 			objValues.TestConfLowBound[testStart] - objValues.TestConfLowBound[minNumObjTestPosition], minNumObjTestPosition - testStart);
 		lastBestQ = max(lastBestQ, diff);
 		assert(testStart < objValues.BestTestValueChange.size());
@@ -562,9 +583,9 @@ double CLocalTreatmentEffectOEst::getBestSubsetEstimate() const
 		}
 		assert( objValues.CntrlConfUpperBound[i] < objValues.TestConfLowBound[testStart] );
 		const double currDiff =
-			getValue(objValues.CntrlConfUpperBound[minObjNum - 1] - objValues.CntrlConfUpperBound[i],i - minObjNum + 1)
+			getDeltaValue(objValues.CntrlConfUpperBound[minObjNum - 1] - objValues.CntrlConfUpperBound[i],i - minObjNum + 1)
 			+ objValues.BestTestValueChange[testStart];
-		assert(abs(minObjNumValue + currDiff - getBestValueForSubsets(i,testStart)) < delta0 * 1e-10);
+		assert(abs(minObjNumValue + currDiff - getBestValueForSubsets(i,testStart)) < delta0Max * 1e-10);
 		bestDiff = max(bestDiff, currDiff);
 	}
 
@@ -576,7 +597,7 @@ double CLocalTreatmentEffectOEst::getValue() const
 {
 	const double delta = objValues.TestConfLowBound.front()
 		- objValues.CntrlConfUpperBound.back();
-	if( delta <= 1e-10 ) {
+	if( delta - delta0 <= 1e-10 ) {
 		return 0;
 	} else {
 		return getValue(delta,objValues.Test.size() + objValues.Cntrl.size()); // Only linear functions are supported
@@ -586,7 +607,12 @@ double CLocalTreatmentEffectOEst::getValue() const
 // Computes a linear function of delta and size
 double CLocalTreatmentEffectOEst::getValue(const double& delta, int size) const
 {
-	return alpha * delta/delta0  + beta * size/objY.size();
+	return alpha * (delta-delta0)/delta0Max  + beta * size/objY.size();
+}
+// Computes a change of the Value if the delta and size are changed by ddelta and dsize
+double CLocalTreatmentEffectOEst::getDeltaValue(const double& ddelta, int dsize) const
+{
+	return alpha * ddelta/delta0Max  + beta * dsize/objY.size();
 }
 
 // Finds the best possible value if cntrl confidence interval is fixed

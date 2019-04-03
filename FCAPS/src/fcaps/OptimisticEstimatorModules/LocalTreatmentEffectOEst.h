@@ -99,6 +99,8 @@ private:
 	// Size of the control group
 	int controlSize;
 	// The basic delta computed for minObjNum objects in every  group
+	double delta0Max;
+	// The basic delta in the whole dataset
 	double delta0;
 	// The variable are mutable since they have only local meaning, but more efficient to be here.
 	// The flag vectors indicating which objects are in the current pattern
@@ -110,6 +112,7 @@ private:
 	void computeSignificantObjectNumbers();
 	static double incompleteBeta(int i, int j);
 	void buildOrder();
+	void computeDelta0Max();
 	void computeDelta0();
 	bool extractObjValues(const IExtent* ext) const;
 	void computeMedianConfidenceIntervalBounds() const;
@@ -117,6 +120,7 @@ private:
 	double getBestSubsetEstimate() const;
 	double getValue() const;
 	double getValue(const double& delta, int size) const;
+	double getDeltaValue(const double& ddelta, int dsize) const;
 	double getBestValueForSubsets(int cntrlLastObject, int testFirstObject) const;
 	bool checkObjValues() const;
 };
