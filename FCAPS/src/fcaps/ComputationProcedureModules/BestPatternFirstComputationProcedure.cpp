@@ -118,11 +118,14 @@ void CBestPatternFirstComputationProcedure::Run()
 		const CPattern& p = *beginItr;
 		newPatterns.Clear();
 		// The expansion of the pattern
-		const bool toBeExpanded = lpChain->Preimages(p.Pattern.get(), newPatterns);
+		const ILocalProjectionChain::TPreimageResult res = lpChain->Preimages(p.Pattern.get(), newPatterns);
 		++expansionCount;
 		addNewPatterns( newPatterns );
-
-		if( !toBeExpanded ) {
+		
+		if( res == ILocalProjectionChain::PR_Finished ) {
+			checkForBestConcept(p); // The expansion is finished and the concept is stable, should check for best quality
+		}
+		if( res != ILocalProjectionChain::PR_Expandable ) {
 			queue.erase(beginItr); // If no more expansion is possible than pattern is removed
 		}
 		if( queue.size() == 0 ) {
@@ -294,25 +297,7 @@ void CBestPatternFirstComputationProcedure::addNewPatterns( const ILocalProjecti
 	if( itr == newPatterns.End()) {
 		return;
 	}
-	if( !isBestQualityKnown ) {
-		const IExtent* ext = dynamic_cast<const IExtent*>(*itr);
-		if( ext == 0) {
-			throw new CTextException("CBestPatternFirstComputationProcedure::computeOEstimate",
-									 "Cannot extract extent from pattern. Local projection chain does not support it.");
-		}
 
-		IOptimisticEstimator::COEstValue val;
-		oest->GetValue(ext, val);
-
-		best.Quality = val.Value;
-		best.Pattern.reset(*itr, deleter);
-		CPattern p;
-		p.Pattern = best.Pattern;
-		p.Potential = val.BestSubsetEstimate;
-		queue.insert(p);
-		++itr;
-		isBestQualityKnown = true;
-	}
 	for( ;itr != newPatterns.End(); ) {
 		auto currItr = itr;
 		++itr;
@@ -328,16 +313,33 @@ void CBestPatternFirstComputationProcedure::addNewPatterns( const ILocalProjecti
 		CPattern p;
 		p.Pattern.reset(*currItr, deleter);
 		p.Potential = val.BestSubsetEstimate;
+		p.Quality = val.Value;
 		assert(p.Potential < queue.begin()->Potential + 1e-10);
-		if( p.Potential <= best.Quality ) {
+
+		checkForBestConcept(p);
+		
+		if( isBestQualityKnown && p.Potential <= best.Quality ) {
 			continue;
 		}
-		const double q = val.Value;
-		if(q > best.Quality) {
-			best.Quality = q;
-			best.Pattern = p.Pattern;
+		
+		if( lpChain->IsExpandable(p.Pattern.get()) ) {
+			queue.insert(p);
 		}
-		queue.insert(p);
+	}
+}
+
+// If pattern is finished checks its quality and update the best concept
+void CBestPatternFirstComputationProcedure::checkForBestConcept(const CPattern& p)
+{
+	if( lpChain->IsExpandable(p.Pattern.get()) ) {
+		return; // Cannot yet take its quality
+	}
+	
+	const double q = p.Quality;
+	if(!isBestQualityKnown || q > best.Quality) {
+		best.Quality = q;
+		best.Pattern = p.Pattern;
+		isBestQualityKnown = true;
 	}
 }
 
