@@ -314,7 +314,9 @@ void CBestPatternFirstComputationProcedure::addNewPatterns( const ILocalProjecti
 		p.Pattern.reset(*currItr, deleter);
 		p.Potential = val.BestSubsetEstimate;
 		p.Quality = val.Value;
-		assert(p.Potential < queue.begin()->Potential + 1e-10);
+		// The first element in the queue is the parent of this concept.
+		//  Thus OEst cannot increase
+		assert(queue.empty() || p.Potential < queue.begin()->Potential + 1e-10);
 
 		checkForBestConcept(p);
 		
