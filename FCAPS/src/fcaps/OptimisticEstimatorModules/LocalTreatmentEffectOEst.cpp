@@ -50,12 +50,12 @@ STR(
 					"type": "integer",
 					"minimum": 10
 				},
-				"Alpha":{
+				"kDelta":{
 					"description": "The weight of distance between confidence intervals. The distance is normalized to the maximal possible distance",
 					"type": "number",
 					"minimum": 0
 				},
-				"Beta":{
+				"kN":{
 					"description": "The weight number of objects in the pattern. The number of objects is normalized to the total number of objects in the dataset",
 					"type": "number",
 					"minimum": 0
@@ -210,12 +210,12 @@ void CLocalTreatmentEffectOEst::LoadParams( const JSON& json )
 	if(p.HasMember("MinObjNum") && p["MinObjNum"].IsInt()) {
 		minObjNum=p["MinObjNum"].GetInt();
 	}
-	if(p.HasMember("Alpha") && p["Alpha"].IsNumber()) {
-		const double a =p["Alpha"].GetDouble();
+	if(p.HasMember("kDelta") && p["kDelta"].IsNumber()) {
+		const double a =p["kDelta"].GetDouble();
 		alpha=a;
 	}
-	if(p.HasMember("Beta") && p["Beta"].IsNumber()) {
-		const double b =p["Beta"].GetDouble();
+	if(p.HasMember("kN") && p["kN"].IsNumber()) {
+		const double b =p["kN"].GetDouble();
 		beta=b;
 	}
 	if(p.HasMember("ConfidenceIntervalMode") && p["ConfidenceIntervalMode"].IsString()) {
@@ -252,8 +252,8 @@ JSON CLocalTreatmentEffectOEst::SaveParams() const
 		.AddMember( "Params", rapidjson::Value().SetObject()
 					.AddMember("ObjInfoFile", rapidjson::StringRef(objInfoFilePath.c_str()), alloc)
 		            .AddMember("MinObjNum",rapidjson::Value().SetInt(minObjNum), alloc)
-		            .AddMember("Alpha",rapidjson::Value().SetDouble(alpha), alloc)
-		            .AddMember("Beta",rapidjson::Value().SetDouble(beta), alloc)
+		            .AddMember("kDelta",rapidjson::Value().SetDouble(alpha), alloc)
+		            .AddMember("kN",rapidjson::Value().SetDouble(beta), alloc)
 		            .AddMember("SignificanceLevel",rapidjson::Value().SetDouble(signifLevel), alloc)
 				, alloc );
 
