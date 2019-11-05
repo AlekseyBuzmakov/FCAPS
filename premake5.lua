@@ -163,40 +163,40 @@ solution "Sofia-PS"
 			"SharedModulesLib"
 		}
 
-	project "ParallelPatternEnumeratorModules"
-		DefaultConfig("modules")
-		kind "SharedLib"
-		language "C++"
-		includedirs { 
-			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
-			"rapidjson/include",
-			"FCAPS/include/", 
-			"FCAPS/src/", 
-			"Tools/inc/", 
-			"Sofia-PS/inc/",
-			"../LibgSpanForSofia/inc",
-			"../LibGastonForSofia/inc"
-		}
-		files{ "FCAPS/src/fcaps/ParallelPatternEnumeratorModules/*.h", "FCAPS/src/fcaps/ParallelPatternEnumeratorModules/*.cpp" }
-		filter{ "system:windows" }
-			files{ "FCAPS/src/fcaps/ParallelPatternEnumeratorModules/**.def" }
-		filter{}
-
-		libdirs {
-			"boost/stage/lib/"
-		}
-
-		links{ 
-			"SharedTools",
-			"SharedModulesLib"
-		}
-		filter{ "system:not windows" }
-			links{
-				"boost_thread",
-				"pthread",
-			}
-		filter{}
-
+--	project "ParallelPatternEnumeratorModules"
+--		DefaultConfig("modules")
+--		kind "SharedLib"
+--		language "C++"
+--		includedirs { 
+--			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
+--			"rapidjson/include",
+--			"FCAPS/include/", 
+--			"FCAPS/src/", 
+--			"Tools/inc/", 
+--			"Sofia-PS/inc/",
+--			"../LibgSpanForSofia/inc",
+--			"../LibGastonForSofia/inc"
+--		}
+--		files{ "FCAPS/src/fcaps/ParallelPatternEnumeratorModules/*.h", "FCAPS/src/fcaps/ParallelPatternEnumeratorModules/*.cpp" }
+--		filter{ "system:windows" }
+--			files{ "FCAPS/src/fcaps/ParallelPatternEnumeratorModules/**.def" }
+--		filter{}
+--
+--		libdirs {
+--			"boost/stage/lib/"
+--		}
+--
+--		links{ 
+--			"SharedTools",
+--			"SharedModulesLib"
+--		}
+--		filter{ "system:not windows" }
+--			links{
+--				"boost_thread",
+--				"pthread",
+--			}
+--		filter{}
+--
 	project "ClassifierModules"
 		DefaultConfig("modules")
 		kind "SharedLib"
@@ -292,6 +292,35 @@ solution "Sofia-PS"
 		files{ "FCAPS/src/fcaps/OptimisticEstimatorModules/**.h", "FCAPS/src/fcaps/OptimisticEstimatorModules/**.cpp" }
 		filter{ "system:windows" }
 			files{ "FCAPS/src/fcaps/OptimisticEstimatorModules/**.def" }
+		filter{}
+
+		libdirs {
+			"boost/stage/lib/",
+		}
+		links{ 
+			"SharedTools",
+			"SharedModulesLib"
+		}
+		filter{ "system:not windows" }
+			links{ 
+			}
+		filter{}
+
+	project "WestfallYoungOptimisticEstimatorModules"
+		DefaultConfig("modules")
+		kind "SharedLib"
+		language "C++"
+		includedirs { 
+			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
+			"rapidjson/include",
+			"FCAPS/include/", 
+			"FCAPS/src/", 
+			"Tools/inc/", 
+			"Sofia-PS/inc/"
+		}
+		files{ "FCAPS/src/fcaps/WestfallYoungOptimisticEstimatorModules/**.h", "FCAPS/src/fcaps/WestfallYoungOptimisticEstimatorModules/**.cpp", "FCAPS/include/WestfallYoungOptimisticEstimator.h" }
+		filter{ "system:windows" }
+			files{ "FCAPS/src/fcaps/WestfallYoungOptimisticEstimatorModules/**.def" }
 		filter{}
 
 		libdirs {

@@ -16,6 +16,17 @@ const char LocalProjectionChainModuleType[] = "LocalProjectionChainModules";
 ////////////////////////////////////////////////////////////////////
 
 interface ILocalProjectionChain : public virtual IObject {
+	// The type identifying the result of computing stability
+	enum TPreimageResult{
+		// The pattern can be expanded further
+		PR_Expandable = 0,
+		// The interest of the pattern after computing the preimage is low
+		PR_Uninteresting,
+		// The pattern reached the final projection
+		PR_Finished,
+
+		PR_EnumCount
+	};
 	// Memory inside CPattern is not controlled. The user is responsable for it.
 	typedef CList<const IPatternDescriptor*> CPatternList;
 
@@ -45,9 +56,11 @@ interface ILocalProjectionChain : public virtual IObject {
 	//  Pattern 'd' is not included in the set.
 	//  Probably updates the measure of 'd'.
 	//  Useless preimages (e.g. unstable) can be omitted from 'preimages'
-	//  NOTE: the preimages are added at the end(!); preimages. Nothing is removed.
-	// @return A flag indicating if more projections are possible
-	virtual bool Preimages( const IPatternDescriptor* d, CPatternList& preimages ) = 0;
+	//  NOTE: the preimages are added at the end(!) of @param preimages. Nothing is removed.
+	// @return An enum indicating if more projections are possible
+	virtual TPreimageResult Preimages( const IPatternDescriptor* d, CPatternList& preimages ) = 0;
+	// Check if the pattern is expandable, i.e., there are some other projections in the chain for this pattern
+	virtual bool IsExpandable( const IPatternDescriptor* d ) const = 0;
 
 	// Some attributes of patterns
 	virtual int GetExtentSize( const IPatternDescriptor* d ) const = 0;

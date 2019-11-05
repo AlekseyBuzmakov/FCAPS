@@ -57,10 +57,11 @@ private:
 
 	struct CPattern {
 		CSharedPtr<const IPatternDescriptor> Pattern;
+		double Quality;
 		double Potential;
 		
-		CPattern() : Potential(0) {}
-		CPattern( const double & p) : Potential(p) {}
+		CPattern() : Quality(-1),Potential(0) {}
+		CPattern( const double & potential) : Quality(-1), Potential(potential) {}
 	};
 	struct CBestPattern {
 		CSharedPtr<const IPatternDescriptor> Pattern;
@@ -116,6 +117,7 @@ private:
 	DWORD numInMemoryPatterns;
 
 	void addNewPatterns( const ILocalProjectionChain::CPatternList& newPatterns );
+	void checkForBestConcept(const CPattern& p);
 	void adjustThreshold();
 };
 

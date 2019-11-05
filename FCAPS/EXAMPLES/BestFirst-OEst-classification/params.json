@@ -1,0 +1,32 @@
+{
+    "Type": "ComputationProcedureModules",
+    "Name": "BestPatternFirstComputationProcedureModule",
+    "Params": {
+        "LocalProjectionChain": {
+            "Type": "LocalProjectionChainModules",
+            "Name": "StabilityCbOLocalProjectionChainModule",
+            "Params": {
+                "ContextAttributes": {
+                    "Type": "ContextAttributesModules",
+                    "Name": "JsonContextAttributesModule",
+                    "Params": {
+                        "ContextFilePath": "titanic.json"
+                    }
+                }
+            }
+        },
+        "AdjustThreshold": false,
+        "DefualtThld": 5,
+        "-MaxPatternNumber": 30000,
+	"MaxRAMConsumption": 2000000000,
+	"OptimisticEstimator": {
+		"Type": "OptimisticEstimatorModules",
+		"Name": "BinaryClassificationOptimisticEstimatorModule",
+		"Params": {
+			"TargetClasses":["1"],
+			"Classes":"survived.json",
+			"FreqWeight": 0.5
+		}
+	}
+    }
+}

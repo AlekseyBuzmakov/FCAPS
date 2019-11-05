@@ -364,7 +364,7 @@ void CStabilityCbOLocalProjectionChain::ComputeZeroProjection( CPatternList& ptr
 	ptrns.PushBack( newPattern( ptrn.release(), intentsTree.Create(), 0, GetObjectNumber(), 0) );
 }
 
-bool CStabilityCbOLocalProjectionChain::Preimages( const IPatternDescriptor* d, CPatternList& preimages )
+ILocalProjectionChain::TPreimageResult CStabilityCbOLocalProjectionChain::Preimages( const IPatternDescriptor* d, CPatternList& preimages )
 {
 	assert( attrs != 0);
 
@@ -416,7 +416,20 @@ bool CStabilityCbOLocalProjectionChain::Preimages( const IPatternDescriptor* d, 
 		}
 	}
 	p.SetNextAttribute(a);
-	return p.Delta() >= thld && attrs->HasAttribute(a);
+	const bool isStable = p.Delta() >= thld;
+	if(!attrs->HasAttribute(a)){
+		return isStable ? PR_Finished : PR_Uninteresting;
+	} else {
+		return isStable ? PR_Expandable : PR_Uninteresting;
+	}
+}
+bool CStabilityCbOLocalProjectionChain::IsExpandable( const IPatternDescriptor* d ) const
+{
+	assert(attrs != 0);
+
+	const CPattern& p = to_pattern(d);
+    assert(p.Delta() >= thld);
+    return attrs->HasAttribute(p.NextAttribute());
 }
 int CStabilityCbOLocalProjectionChain::GetExtentSize( const IPatternDescriptor* d ) const
 {

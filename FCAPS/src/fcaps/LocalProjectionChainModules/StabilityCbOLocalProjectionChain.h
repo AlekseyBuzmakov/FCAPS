@@ -102,7 +102,9 @@ public:
 	virtual bool IsTopoSmaller(const IPatternDescriptor* p, const IPatternDescriptor* q) const;
 	virtual void FreePattern(const IPatternDescriptor* p ) const;
 	virtual void ComputeZeroProjection( CPatternList& ptrns );
-	virtual bool Preimages( const IPatternDescriptor* d, CPatternList& preimages );
+	virtual TPreimageResult Preimages( const IPatternDescriptor* d, CPatternList& preimages );
+
+	virtual bool IsExpandable( const IPatternDescriptor* d ) const;
 	virtual int GetExtentSize( const IPatternDescriptor* d ) const;
 	virtual JSON SaveExtent( const IPatternDescriptor* d ) const;
 	virtual JSON SaveIntent( const IPatternDescriptor* d ) const;
