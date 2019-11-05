@@ -106,7 +106,8 @@ CSofiaContextProcessor::CSofiaContextProcessor() :
 	objectNumber(0),
 	minPotential(1),
 	maxPotential(-1),
-	maxKnownConceptSize(-1)
+	maxKnownConceptSize(-1),
+	maxKnownConceptFreq(1.0)
 {
 	storage.Reserve( mpn );
 }
@@ -196,6 +197,8 @@ void CSofiaContextProcessor::LoadParams( const JSON& json )
 		const rapidjson::Value& mkcJson = params["Params"]["MaxKnownConceptSize"];
 		if( mkcJson.IsUint() ) {
 			maxKnownConceptSize = mkcJson.GetUint();
+		} else if( mkcJson.IsDouble() ) {
+			maxKnownConceptFreq = mkcJson.GetDouble();
 		}
 	}
 
@@ -295,6 +298,9 @@ void CSofiaContextProcessor::ProcessAllObjectsAddition()
 	assert( pChain != 0 );
 	pChain->UpdateInterestThreshold( thld );
 	assert(minPotential == 1 && maxPotential == -1);
+	if(0 < maxKnownConceptFreq && maxKnownConceptFreq < 0.9999) {
+		maxKnownConceptSize = static_cast<DWORD>(maxKnownConceptFreq * objectNumber);
+	}
 
 	if(oest != 0 && !oest->CheckObjectNumber(objectNumber)) {
 		throw new CTextException("CSofiaContextprocessor::ProcessAllObjectsAddition", "Optimistic estimator is based on different number of objects that are found in the data");
@@ -304,6 +310,7 @@ void CSofiaContextProcessor::ProcessAllObjectsAddition()
 	pChain->ComputeZeroProjection( newPatterns );
 
 	loadKnownConcepts();
+	mpn += knownConcepts.size();
 
 	addNewPatterns( newPatterns );
 
@@ -403,6 +410,14 @@ void CSofiaContextProcessor::loadKnownConcepts()
 	if(knownConceptsPath.empty()) {
 		return;
 	}
+	FILE *file = fopen(knownConceptsPath.c_str(), "r");
+	if( file == 0 ) {
+		// File does not exist
+		return;
+	} else {
+		fclose(file);
+	}
+
 	rapidjson::Document kcJson;
 	CJsonError jsonError;
 	if( !ReadJsonFile( knownConceptsPath, kcJson, jsonError ) ) {
@@ -578,7 +593,7 @@ bool CSofiaContextProcessor::isUnderKnownPatterns(const IPatternDescriptor* p) c
 {
 	assert(p != 0);
 	for(int i = 0; i < knownConcepts.size(); ++i) {
-		if(pChain->IsSmaller(knownConcepts[i],p) || pChain->AreEqual(p, knownConcepts[i])) {
+		if(pChain->IsSmaller(knownConcepts[i],p)) {// || pChain->AreEqual(p, knownConcepts[i])) {
 			return true;
 		}
 	}
@@ -818,6 +833,7 @@ dst << "{";
 	if(oest != 0) {
 		dst << "\"PatternQuality\":" << oest->GetJsonQuality(dynamic_cast<const IExtent*>(c.first)) << ",";
 	}
+	//dst << "\"IsKnown\":" << isUnderKnownPatterns(c.first) << ",";
 
 	dst << "\"Interest\":" << c.second;
 

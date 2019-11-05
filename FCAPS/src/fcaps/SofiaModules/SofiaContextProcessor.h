@@ -133,6 +133,7 @@ private:
 	// The path to the file with aleady known concepts
 	std::string knownConceptsPath;
 	DWORD maxKnownConceptSize;
+	double maxKnownConceptFreq;
 
 	// The number of added objects
 	DWORD objectNumber;
