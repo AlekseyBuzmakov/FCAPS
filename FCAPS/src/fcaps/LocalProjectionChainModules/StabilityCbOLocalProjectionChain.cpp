@@ -37,6 +37,10 @@ STR(
 					"description": "A number of patterns to be reserved",
 					"type": "integer",
 					"minimum":1
+				},
+				"AllAttributesInOnce": {
+					"description": "When called to compute next projection should it be generated only one 'next' pattern with one attribute, or all of them",
+					"type": "boolean"
 				}
 			}
 		}
@@ -250,6 +254,7 @@ CStabilityCbOLocalProjectionChain::CStabilityCbOLocalProjectionChain() :
 	thld(1),
 	extCmp(new CVectorBinarySetJoinComparator),
 	extDeleter(extCmp),
+	areAllInOnce(false),
 	totalAllocatedPatterns(0),
 	totalAllocatedPatternSize(0)
 {
@@ -288,6 +293,9 @@ void CStabilityCbOLocalProjectionChain::LoadParams( const JSON& json )
 	if(p.HasMember("ReserveMemory") && p["ReserveMemory"].IsUint()) {
 		extCmp->Reserve(p["ReserveMemory"].GetInt());
 	}
+	if(p.HasMember("AllAttributesInOnce") && p["AllAttributesInOnce"].IsBool()) {
+		areAllInOnce = p["AllAttributesInOnce"].GetBool();
+	}
 }
 
 JSON CStabilityCbOLocalProjectionChain::SaveParams() const
@@ -297,7 +305,8 @@ JSON CStabilityCbOLocalProjectionChain::SaveParams() const
 	params.SetObject()
 		.AddMember( "Type", rapidjson::StringRef(Type()), alloc )
 		.AddMember( "Name", rapidjson::StringRef(Name()), alloc )
-		.AddMember( "Params", rapidjson::Value().SetObject(), alloc );
+		.AddMember( "Params", rapidjson::Value().SetObject()
+		            .AddMember("AllAttributesInOnce",rapidjson::Value(areAllInOnce),alloc), alloc );
 
 	IModule* m = dynamic_cast<IModule*>(attrs.get());
 
@@ -402,7 +411,9 @@ bool CStabilityCbOLocalProjectionChain::Preimages( const IPatternDescriptor* d, 
 		}
 
 		a = attrs->GetNextAttribute(a);
-		break;
+		if(!areAllInOnce){
+			break;		
+		}
 	}
 	p.SetNextAttribute(a);
 	return p.Delta() >= thld && attrs->HasAttribute(a);

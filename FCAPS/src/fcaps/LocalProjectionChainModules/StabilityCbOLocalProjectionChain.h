@@ -139,6 +139,8 @@ private:
 	CIntentsTree intentsTree;
 	// A temporary storage for intents. Here for not allocating memory too often
 	std::vector<int> intentStorage;
+	// A flag indicating if all attributes for a concept should be processed in once
+	bool areAllInOnce;
 
 	// Memory consumption
 	mutable size_t totalAllocatedPatterns;
