@@ -7,6 +7,7 @@
 #include <JSONTools.h>
 #include <ModuleJSONTools.h>
 #include <StdTools.h>
+#include <RelativePathes.h>
 
 using namespace std;
 
@@ -222,7 +223,9 @@ JSON CContextBasedComputationProcedure::SaveParams() const
 void CContextBasedComputationProcedure::readDataJson( rapidjson::Document& data ) const
 {
 	CJsonError jsonError;
-	if( !ReadJsonFile( contextFilePath, data, jsonError ) ) {
+	string path;
+	RelativePathes::GetFullPath( contextFilePath, path);
+	if( !ReadJsonFile( path, data, jsonError ) ) {
 		throw new CJsonException( "readDataJson", jsonError );
 	}
 	if( !data.IsArray() || data.Size() < 2 ) {

@@ -195,7 +195,9 @@ void CJsonContextAttributes::loadContext()
 {
 	CJsonError error;
 	rapidjson::Document jsonContext;
-	if( !ReadJsonFile( filePath, jsonContext, error ) ) {
+	string path;
+	RelativePathes::GetFullPath( filePath, path);
+	if( !ReadJsonFile( path, jsonContext, error ) ) {
 		throw new CJsonException( "CJsonContextAttributes::LoadParams", error );
 	}
 	if(!jsonContext.IsArray() || jsonContext.Size() < 2
