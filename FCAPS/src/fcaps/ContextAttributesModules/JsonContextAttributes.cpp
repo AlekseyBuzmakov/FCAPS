@@ -28,6 +28,10 @@ STR(
 				"ContextFilePath":{
 					"description": "The path to a file containing the context in JSON format",
 					"type": "file-path"
+				},
+					"Order":{
+					"description": "The sorting order of attributes in the context: desc(ending), (asc)ending, rand(om), (n)one.",
+					"type": "string"
 				}
 			}
 		}
@@ -96,12 +100,22 @@ void CJsonContextAttributes::LoadParams( const JSON& json )
 		error.Error = "Params.ContextFilePath is not found or is not a file name.";
 		throw new CJsonException("CJsonContextAttributes::LoadParams", error);
 	}
+	if(params["Params"].HasMember("Order") && params["Params"]["Order"].IsString()) {
+		string orderStr = params["Params"]["Order"].GetString();
+		if(orderStr == "desc") {
+			order = AO_Desc;
+		} else if(orderStr == "asc") {
+			order = AO_Asc;
+		} else if(orderStr == "rand") {
+			order = AO_Random;
+		} else {
+			order = AO_None;
+		}
+	}
 
 	filePath = params["Params"]["ContextFilePath"].GetString();
 
 	loadContext();
-
-
 }
 
 JSON CJsonContextAttributes::SaveParams() const
