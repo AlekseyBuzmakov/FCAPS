@@ -36,6 +36,8 @@ ValgrindOut.xml
 .*.swp
 *.swo
 
+\#*\#
+
 # Stuf of GTAGS
 GPATH
 GRTAGS

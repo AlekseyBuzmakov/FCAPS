@@ -1,0 +1,13 @@
+[
+{"NodesCount":1,"ArcsCount":0,"Params":{"Type":"ComputationProcedureModules","Name":"BestPatternFirstComputationProcedureModule","Params":{"DefualtThld":3.0,"MaxObjectNumber":-1,"MaxRAMConsumption":2000000000,"AdjustThreshold":false,"OEstMinQuality":0.47844575413518866,"LocalProjectionChain":{"Type":"LocalProjectionChainModules","Name":"StabilityCbOLocalProjectionChainModule","Params":{"AllAttributesInOnce":true,"ContextAttributes":{"Type":"ContextAttributesModules","Name":"JsonContextAttributesModule","Params":"TODO"}}},"OptimisticEstimator":{"Type":"OptimisticEstimatorModules","Name":"BinaryClassificationOptimisticEstimatorModule","Params":{"FreqWeight":0.1,"TargetClasses":["1"],"Classes":"survived.json"}}}}},{ "Nodes":[
+{"ExtSize":71,
+"Ext":{"Count":71,"Inds":[1,3,31,52,61,151,166,195,215,218,230,256,257,258,268,269,275,290,291,299,306,307,309,310,319,325,329,334,337,356,366,369,375,380,383,393,412,457,486,496,504,513,520,523,537,558,577,581,591,609,627,641,669,689,700,708,710,716,730,759,765,779,781,809,820,829,835,849,856,871,879]},
+"Int":{"Count":16, "Names":[
+	"class <= 1",
+	"fare>39.6875",
+	"par_ch <= 1",
+	"sex=female",
+	"sib_sp <= 1"
+]},
+"Thld":3, "Value":0.478446,
+"Quality":{"Positiveness":1,"BasePositiveness":0.383838,"Size":0.0796857,"p-Value":0,"Value":0.478446}}]}]

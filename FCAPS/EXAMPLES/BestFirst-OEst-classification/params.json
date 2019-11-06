@@ -12,11 +12,12 @@
                     "Params": {
                         "ContextFilePath": "titanic.json"
                     }
-                }
+                },
+		"AllAttributesInOnce":true
             }
         },
         "AdjustThreshold": false,
-        "DefualtThld": 5,
+        "DefualtThld": 3,
         "-MaxPatternNumber": 30000,
 	"MaxRAMConsumption": 2000000000,
 	"OptimisticEstimator": {
@@ -25,7 +26,7 @@
 		"Params": {
 			"TargetClasses":["1"],
 			"Classes":"survived.json",
-			"FreqWeight": 0.5
+			"FreqWeight": 0.1
 		}
 	}
     }

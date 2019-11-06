@@ -395,6 +395,7 @@ ILocalProjectionChain::TPreimageResult CStabilityCbOLocalProjectionChain::Preima
 			// Pattern 'res' is not stable
 			// Any more specific attribute can be ignored
 			a = attrs->GetNextNonChildAttribute(a);
+			// TODO: normally all this attributes will be in the closure of any found children and thus there is no needs to intersect them  with this attribute
 			// Should search funther for a better pattern
 			continue;
 		}
@@ -411,10 +412,11 @@ ILocalProjectionChain::TPreimageResult CStabilityCbOLocalProjectionChain::Preima
 		}
 
 		a = attrs->GetNextAttribute(a);
-		if(!areAllInOnce){
-			break;		
+		if(!areAllInOnce || p.Delta() < thld) {
+			break;
 		}
 	}
+
 	p.SetNextAttribute(a);
 	const bool isStable = p.Delta() >= thld;
 	if(!attrs->HasAttribute(a)){
