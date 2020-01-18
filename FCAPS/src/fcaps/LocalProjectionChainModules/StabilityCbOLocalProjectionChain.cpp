@@ -172,7 +172,7 @@ public:
 
 	// Methods of ISwappable
 	virtual bool IsSwapped() const
-		{ extent == 0;}
+		{ return extent == 0;}
 	virtual void Swap() const
 	{
 		if( extent == 0 ) {

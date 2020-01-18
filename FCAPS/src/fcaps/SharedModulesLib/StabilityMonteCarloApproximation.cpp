@@ -8,6 +8,8 @@
 
 #include <vector>
 
+#define log2(x)(log(x)/log(2))
+
 using namespace std;
 using namespace boost;
 

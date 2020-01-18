@@ -10,6 +10,8 @@
 
 #include <math.h>
 
+#define log2(x)(log(x)/log(2))
+
 ////////////////////////////////////////////////////////////////////
 
 template<typename T, typename CIndexType>
