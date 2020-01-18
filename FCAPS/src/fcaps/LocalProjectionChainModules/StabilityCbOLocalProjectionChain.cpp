@@ -17,7 +17,7 @@
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////
-#define STR(x...) #x
+#define STR(...) #__VA_ARGS__
 
 const char description[] =
 STR(

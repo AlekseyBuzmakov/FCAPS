@@ -42,7 +42,7 @@ size_t CCompositePatternDescriptor::Hash() const
 }
 
 ////////////////////////////////////////////////////////////////////
-#define STR(x...) #x
+#define STR(...) #__VA_ARGS__
 
 const char description[] =
 STR(

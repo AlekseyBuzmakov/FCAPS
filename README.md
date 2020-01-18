@@ -6,7 +6,7 @@ Initial software, Aleksey Buzmakov, Copyright (c) INRIA and University of Lorrai
 
 ## Compilation
 
-Bellow there are some commands that should be copied in the console (__terminal__ in Linux/MacOs or __cmd__ in Windows). By "$" a prompt is denoted, which means that this sign should NOT be typed to the console.
+Bellow there are some commands that should be copied in the console (__terminal__ in Linux/MacOs or __cmd__ in Windows). By "$" a prompt is denoted, which means that this sign should NOT be typed to the console. Some problems are discussed at the end of the section.
 
 You will need
 * git (on Windows it should be accesible from __cmd__, i.e., you should be able to run "$git status" from __cmd__)
@@ -77,12 +77,13 @@ After running the scirpt you should see the following structure of folders in th
 * Tools
 * {files}
 
-## Some notes for debugging
+### Some notes for debugging
 
 This subsection is likely to be skipped, however if some probelms appear, the subsection can be useful.
 
 * *For the moment, on some configurations, e.g., Windows and MS Visual Studio, a manual naming of static linked libraries is needed. These libraries are found in boost/stage/libs, but their names are not fixed. They are named like "lib{BOOST LIB NAME}-bla-bla-bla".{a|lib}, for example 'libboost_regex-gcc34-mt-d-1_36.a'*
 * *Be careful, the boost libraries should be compiled by the same toolchain as the main program. For instance it is not possible to compile the boost libraries by the MSVS2015 toolchain and the program by the MSVS2013 toolchain. Errors of linkage occur in this case.* 
+* *Be careful, not all versions of boost can be compiled by old MS Visual Studios toolchains. For example, MSVC-11 (MS Visual Studio 2012) can compile boost 1.60.0 but cannot compile 1.72.0*
 
 ## Repository content
 
