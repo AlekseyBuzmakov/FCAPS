@@ -10,6 +10,8 @@
 #include <ModuleJSONTools.h>
 #include <StdTools.h>
 
+#include <cmath>
+
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////
