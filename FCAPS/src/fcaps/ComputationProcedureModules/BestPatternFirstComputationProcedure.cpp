@@ -10,7 +10,7 @@
 #include <ModuleJSONTools.h>
 #include <StdTools.h>
 
-#include <cmath>
+#include <boost/math/special_functions/round.hpp>
 
 using namespace std;
 
@@ -141,7 +141,7 @@ void CBestPatternFirstComputationProcedure::Run()
 									+ ". Quality: " + StdExt::to_string(best.Quality) + " / ["
 									+ StdExt::to_string(queue.rbegin()->Potential) + "; " + StdExt::to_string(queue.begin()->Potential) + "]"
 									+ ". Delta: " + StdExt::to_string(lpChain->GetInterestThreshold())
-									+ ". Memory: " + StdExt::to_string(round(lpChain->GetTotalConsumedMemory() / (1024.0*1024))) + "Mb.   ");
+									+ ". Memory: " + StdExt::to_string(boost::math::round(lpChain->GetTotalConsumedMemory() / (1024.0*1024))) + "Mb.   ");
 		}
 	}
 	// Last report of the progress
@@ -389,7 +389,7 @@ void CBestPatternFirstComputationProcedure::adjustThreshold()
 		return;
 	}
 
-	const DWORD firstPatternToRemove = min<DWORD>(mpn + 1, round<DWORD>(queue.size() * 1.0 * maxRAMConsumption / lpChain->GetTotalConsumedMemory()) );
+	const DWORD firstPatternToRemove = min<DWORD>(mpn + 1, boost::math::round<DWORD>(queue.size() * 1.0 * maxRAMConsumption / lpChain->GetTotalConsumedMemory()) );
 	// Should remove patterns such that there are at most @var mpn patterns.
 	vector<double> interests;
 	interests.reserve(queue.size());
