@@ -153,19 +153,30 @@ void CBestPatternFirstComputationProcedure::SaveResult( const std::string& baseP
 	callback->ReportNextStage("Producing output");
 
 	CDestStream dst(basePath);
-	dst << "[\n"
-	    << "{"
-			"\"NodesCount\":1,\"ArcsCount\":0,"
-			"\"Params\":" << SaveParams()
-	    << "},{ \"Nodes\":[\n"
-	    << "{" "\"ExtSize\":" << lpChain->GetExtentSize( best.Pattern.get() )
-	    << ",\n\"Ext\":" << lpChain->SaveExtent( best.Pattern.get() )
-	    << ",\n\"Int\":" << lpChain->SaveIntent( best.Pattern.get() )
-	    << ",\n\"Thld\":" << thld << ", \"Value\":" << best.Quality
-	    << ",\n\"Quality\":" << oest->GetJsonQuality( dynamic_cast<const IExtent*>(best.Pattern.get()) )
-		<< "}" 
-		"]}"
-		"]";
+	if( best.Pattern.get() == 0 ) {
+		// No pattern is found w.r.t. the input
+		dst << "[\n"
+			<< "{"
+				"\"NodesCount\":0,\"ArcsCount\":0,"
+				"\"Params\":" << SaveParams()
+			<< "},{ \"Nodes\":[\n"
+			"]}"
+			"]";
+	} else {
+		dst << "[\n"
+			<< "{"
+				"\"NodesCount\":1,\"ArcsCount\":0,"
+				"\"Params\":" << SaveParams()
+			<< "},{ \"Nodes\":[\n"
+			<< "{" "\"ExtSize\":" << lpChain->GetExtentSize( best.Pattern.get() )
+			<< ",\n\"Ext\":" << lpChain->SaveExtent( best.Pattern.get() )
+			<< ",\n\"Int\":" << lpChain->SaveIntent( best.Pattern.get() )
+			<< ",\n\"Thld\":" << thld << ", \"Value\":" << best.Quality
+			<< ",\n\"Quality\":" << oest->GetJsonQuality( dynamic_cast<const IExtent*>(best.Pattern.get()) )
+			<< "}" 
+			"]}"
+			"]";
+	}
 }
 
 void CBestPatternFirstComputationProcedure::LoadParams( const JSON& json )

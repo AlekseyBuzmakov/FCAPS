@@ -694,7 +694,7 @@ bool CLocalTreatmentEffectOEst::checkObjValues() const
 			// The returned value should be lager
 			return false;
 		}
-		if( testPos > 0 && objValues.CntrlConfUpperBound[i] < objValues.TestConfLowBound[testPos-1]) {
+		if( testPos > 0 && objValues.CntrlConfUpperBound[i] + delta0 < objValues.TestConfLowBound[testPos-1]) {
 			// The testPos should be the minimal available number
 			return false;
 		}
