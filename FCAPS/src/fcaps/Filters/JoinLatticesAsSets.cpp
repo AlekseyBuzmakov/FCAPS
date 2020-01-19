@@ -10,8 +10,6 @@
 
 #include <rapidjson/writer.h>
 
-#include <boost/sort/spinsort/spinsort.hpp>
-
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////
@@ -32,7 +30,9 @@ public:
 		return res;
 	}
 	bool operator()( DWORD c1, DWORD c2 ) const {
-		return IsTopologicallyLess(c1,c2);
+		const bool res = IsTopologicallyLess(c1,c2);
+		assert( res != IsTopologicallyLess(c2,c1));
+		return res;
 	}
 
 	bool IsLess( DWORD c1, DWORD c2 ) const
@@ -125,7 +125,7 @@ void CJoinLatticesAsSets::Process()
 
 	// Finding duplicates
 	CConceptsForOrder conceptsForDupplicateRemoval( cmp, concepts  );
-	boost::sort::spinsort(conceptInds.begin(), conceptInds.end(), conceptsForDupplicateRemoval );
+	std::sort(conceptInds.begin(), conceptInds.end(), conceptsForDupplicateRemoval );
 
 	for( int i = 1; i < conceptInds.size(); ++i ) {
 		TCompareResult res = 

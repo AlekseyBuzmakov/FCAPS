@@ -20,6 +20,13 @@ using namespace std;
 using namespace boost;
 using namespace rapidjson;
 
+template<typename T> bool isfinite(T arg)
+{
+    return arg == arg && 
+           arg != std::numeric_limits<T>::infinity() &&
+           arg != -std::numeric_limits<T>::infinity();
+}
+
 ////////////////////////////////////////////////////////////////////
 
 class CInterestingConcepts {
