@@ -83,7 +83,7 @@ This subsection is likely to be skipped, however if some probelms appear, the su
 
 * *For the moment, on some configurations, e.g., Windows and MS Visual Studio, a manual naming of static linked libraries is needed. These libraries are found in boost/stage/libs, but their names are not fixed. They are named like "lib{BOOST LIB NAME}-bla-bla-bla".{a|lib}, for example 'libboost_regex-gcc34-mt-d-1_36.a'*
 * *Be careful, the boost libraries should be compiled by the same toolchain as the main program. For instance it is not possible to compile the boost libraries by the MSVS2015 toolchain and the program by the MSVS2013 toolchain. Errors of linkage occur in this case.* 
-* *Be careful, not all versions of boost can be compiled by old MS Visual Studios toolchains. For example, MSVC-11 (MS Visual Studio 2012) can compile boost 1.60.0 but cannot compile 1.72.0*
+* *Be careful, not all versions of boost can be compiled by old MS Visual Studios toolchains. For example, MSVC-11 (MS Visual Studio 2012) can compile boost 1.60.0 and 1.67.0 (though not all boost modules are supported) but cannot compile 1.72.0*
 
 ## Repository content
 
