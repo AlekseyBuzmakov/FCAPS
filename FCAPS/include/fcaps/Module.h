@@ -13,7 +13,7 @@
 ////////////////////////////////////////////////////////////////////
 
 // An interface of a module.
-interface IModule : public IObject {
+interface IModule : public virtual IObject {
 	// Load/Save module params.
 	// Works with successors of schemas/module.json
 	//  the params that are not in the JSON does not change

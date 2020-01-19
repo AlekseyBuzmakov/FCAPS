@@ -16,7 +16,7 @@ const char ClassifierModuleType[] = "ClassifierModules";
 const char CL_NotEnoughData[] = "###NotEnoughData###";
 const char CL_ContradictoryData[] = "###ContradictoryData###";
 
-interface IClassifier : public IObject {
+interface IClassifier : public virtual IObject {
 	// Passes common params of all descriptions.
 	virtual void PassDescriptionParams( const JSON& ) = 0;
 	// Prepare for classification. Should be called when all data are given.
