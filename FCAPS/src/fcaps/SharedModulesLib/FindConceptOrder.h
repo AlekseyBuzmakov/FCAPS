@@ -42,9 +42,9 @@ public:
 	// Function for topological sort
 	bool operator()( DWORD c1, DWORD c2 )
 	{
-		assert(c1 < concepts.size() );
-		assert(c2 < concepts.size() );
-		return inConcepts.IsTopologicallyLess(c1, c2);
+		const bool res = cmp(c1,c2);
+		assert(res != cmp(c2,c1));
+		return res;
 	}
 
 private:
@@ -57,6 +57,11 @@ private:
 	CList<DWORD> bottoms;
 
 	void markFlags( DWORD ind );
+	bool cmp( DWORD c1, DWORD c2 ) {
+		assert(c1 < concepts.size() );
+		assert(c2 < concepts.size() );
+		return inConcepts.IsTopologicallyLess(c1, c2);
+	}
 };
 
 /*

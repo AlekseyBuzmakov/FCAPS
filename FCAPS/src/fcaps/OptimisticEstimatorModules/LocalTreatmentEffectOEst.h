@@ -123,6 +123,8 @@ private:
 	double getDeltaValue(const double& ddelta, int dsize) const;
 	double getBestValueForSubsets(int cntrlLastObject, int testFirstObject) const;
 	bool checkObjValues() const;
+
+	bool cmp(int a, int b) const;
 };
 
 #endif // LOCALTREATMENTEFFECTOEST_H

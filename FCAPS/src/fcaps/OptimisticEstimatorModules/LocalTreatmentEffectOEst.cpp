@@ -269,6 +269,12 @@ JSON CLocalTreatmentEffectOEst::SaveParams() const
 }
 bool CLocalTreatmentEffectOEst::operator()(int a, int b) const
 {
+	const bool res = cmp(a,b);
+	assert( res != cmp(b,a));
+	return res;
+}
+inline bool CLocalTreatmentEffectOEst::cmp(int a, int b) const
+{
 	assert(objY.size() == objTrt.size());
 	assert( 0 <= a && a < objY.size());
 	assert( 0 <= b && b < objY.size());
