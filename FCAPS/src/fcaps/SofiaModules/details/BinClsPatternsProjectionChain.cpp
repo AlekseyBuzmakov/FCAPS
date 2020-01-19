@@ -92,7 +92,7 @@ bool CBinClsPatternsProjectionChain::IsSmaller(const IPatternDescriptor* p, cons
 }
 bool CBinClsPatternsProjectionChain::IsTopoSmaller(const IPatternDescriptor* p, const IPatternDescriptor* q) const
 {
-	return Pattern(p).Extent().Size() >= Pattern(q).Extent().Size();
+	return Pattern(p).Extent().Size() > Pattern(q).Extent().Size();
 }
 void CBinClsPatternsProjectionChain::FreePattern(const IPatternDescriptor* p ) const
 {

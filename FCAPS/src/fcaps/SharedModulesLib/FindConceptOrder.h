@@ -8,8 +8,6 @@
 #include <fcaps/CompareResults.h>
 #include <ListWrapper.h>
 
-#include <boost/sort/spinsort/spinsort.hpp>
-
 template<class TConcepts>
 class CFindConceptOrder {
 public:
@@ -92,7 +90,7 @@ CFindConceptOrder<TConcepts>::CFindConceptOrder( const TConcepts& _inConcepts ):
 template<class TConcepts>
 void CFindConceptOrder<TConcepts>::Compute()
 {
-	boost::sort::spinsort(order.begin(), order.end(), *this );
+	std::sort(order.begin(), order.end(), *this );
 
 	for( int i = 0; i < order.size(); ++i ) {
 		std::fill(flags.begin(), flags.end(), false);

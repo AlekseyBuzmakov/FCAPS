@@ -33,7 +33,7 @@ public:
 	{
 		assert( c1 < concepts.size() );
 		assert( c2 < concepts.size() );
-		const bool res = extSize[c1] >= extSize[c2];
+		const bool res = extSize[c1] > extSize[c2];
 		return res;
 	}
 	bool IsLess( DWORD c1, DWORD c2 ) const

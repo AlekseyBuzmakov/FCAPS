@@ -10,7 +10,6 @@
 
 #include <rapidjson/document.h>
 
-#include <boost/sort/spinsort/spinsort.hpp>
 #include <boost/math/special_functions/beta.hpp>
 #include <sstream>
 #include <math.h>
@@ -347,7 +346,7 @@ void CLocalTreatmentEffectOEst::buildOrder()
 	for(int i = 0; i < objY.size(); ++i) {
 		order[i]=i;
 	}
-	boost::sort::spinsort(order.begin(), order.end(), *this );
+	std::sort(order.begin(), order.end(), *this );
 	// inverted order
 	posToOrder.resize(order.size());
 	for(int i = 0; i < objY.size(); ++i) {
