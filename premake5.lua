@@ -7,26 +7,43 @@ solution "Sofia-PS"
 	startproject "Sofia-PS"
 
 	configurations { "final", "release", "debug" }
+	platforms {"x64","x32"}
+	filter { "platforms:x64" }
+	    architecture "x64"
+	filter { "platforms:x32" }
+	    architecture "x32"
 
 	function DefaultConfig(complimentName)
 		configuration "Debug"
 			defines { "DEBUG", "_DEBUG" }
 			symbols "On"
 			characterset "MBCS"
-			targetdir ("build/debug/" .. complimentName)
+			filter { "platforms:x64" }
+				targetdir ("build/debug_x64/" .. complimentName)
+			filter { "platforms:x32" }
+				targetdir ("build/debug_x32/" .. complimentName)
+			filter{}
 
 		configuration "Release"
 			defines { "NDEBUG", "BOOST_DISABLE_ASSERTS" }
 			optimize "On"
 			symbols "On"
 			characterset "MBCS"
-			targetdir ("build/release/" .. complimentName)
+			filter { "platforms:x64" }
+				targetdir ("build/release_x64/" .. complimentName)
+			filter { "platforms:x32" }
+				targetdir ("build/release_x32/" .. complimentName)
+			filter{}
 
 		configuration "Final"
 			defines { "NDEBUG", "BOOST_DISABLE_ASSERTS" }
 			optimize "On"
 			characterset "MBCS"
-			targetdir ("build/final/" .. complimentName)
+			filter { "platforms:x64" }
+				targetdir ("build/final_x64/" .. complimentName)
+			filter { "platforms:x32" }
+				targetdir ("build/final_x32/" .. complimentName)
+			filter{}
 
 
 		configuration "*"
