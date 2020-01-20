@@ -6,6 +6,10 @@
 
 #include <rapidjson/document.h>
 
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
+
 #include <cstdlib>
 #include <ios>
 
@@ -25,12 +29,14 @@ CVectorBinarySetJoinComparator::CVectorBinarySetJoinComparator() :
 	nextFreeBlock( 0 ),
 	allocatedPatterns( 0 ),
 	shouldWriteNames(false),
-	swapFile("VectorBinarySet.SWAP"),
+	swapFile("VectorBinarySetDesriptar.SWAP"),
 	freeIndxSwapPosition(-1)
 #ifdef _DEBUG
 	, fingerprint( rand() )
 #endif // _DEBUG
 {
+	const std::string tmp = boost::uuids::to_string(boost::uuids::random_generator()());
+	swapFile = "VBSD"+tmp+".SWAP";
 }
 CVectorBinarySetJoinComparator::~CVectorBinarySetJoinComparator()
 {
