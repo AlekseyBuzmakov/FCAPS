@@ -6,7 +6,7 @@ solution "Sofia-PS"
 	language "C++"
 	startproject "Sofia-PS"
 
-	configurations { "final", "release", "debug" }
+	configurations { "Final", "Release", "Debug" }
 	platforms {"x64","x32"}
 	filter { "platforms:x64" }
 	    architecture "x64"

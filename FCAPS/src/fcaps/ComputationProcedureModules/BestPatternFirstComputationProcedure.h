@@ -102,6 +102,8 @@ private:
 	size_t maxRAMConsumption;
 	// Should adjust thld to have a polynomial algo
 	bool shouldAdjustThld;
+	// Should stop the computations on the first found subgroup
+	bool shouldBreakOnFirst;
 
 	// Flag indicating if the minimal pattern quality is not known
 	bool isBestQualityKnown;

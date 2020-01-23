@@ -58,6 +58,10 @@ STR(
 				"OEstMinQuality":{
 					"description": "The minimal quality of the pattern that is considederd interesting to be found",
 					"type": "number"
+				},
+				"BreakOnFirstSD":{
+				"description": "Stop the computation when the first subgroup with sufficient quality is found",
+					"type":"boolean"
 				}
 			}
 		}
@@ -81,6 +85,7 @@ CBestPatternFirstComputationProcedure::CBestPatternFirstComputationProcedure() :
 	mpn(-1),
 	maxRAMConsumption(-1),
 	shouldAdjustThld(false),
+	shouldBreakOnFirst(false),
 	isBestQualityKnown( false ),
 	potentialCmp(lpChain),
 	queue( potentialCmp ),
@@ -130,7 +135,7 @@ void CBestPatternFirstComputationProcedure::Run()
 		if( res != ILocalProjectionChain::PR_Expandable ) {
 			queue.erase(beginItr); // If no more expansion is possible than pattern is removed
 		}
-		if( queue.size() == 0 ) {
+		if( queue.size() == 0 || shouldBreakOnFirst && best.Pattern != 0 ) {
 			break;
 		}
 
@@ -254,6 +259,13 @@ void CBestPatternFirstComputationProcedure::LoadParams( const JSON& json )
 			isBestQualityKnown = true;
 		}
 	}
+	if( p.HasMember("BreakOnFirstSD")) {
+		const rapidjson::Value& atJson = params["Params"]["BreakOnFirstSD"];
+		if( atJson.IsBool() ) {
+			shouldBreakOnFirst = atJson.GetBool();
+		}
+	}
+
 
 	maxRAMConsumption = max( maxRAMConsumption, 2 * lpChain->GetTotalConsumedMemory());
 }
