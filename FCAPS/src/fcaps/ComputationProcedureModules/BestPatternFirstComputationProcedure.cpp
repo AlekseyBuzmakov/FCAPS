@@ -86,7 +86,6 @@ CBestPatternFirstComputationProcedure::CBestPatternFirstComputationProcedure() :
 	maxRAMConsumption(-1),
 	shouldAdjustThld(false),
 	shouldBreakOnFirst(false),
-	isBestQualityKnown( false ),
 	potentialCmp(lpChain),
 	queue( potentialCmp ),
 	arePatternsSwappable(-1),
@@ -120,7 +119,14 @@ void CBestPatternFirstComputationProcedure::Run()
 
 	DWORD expansionCount = 0;
 	// Just takes one by one the most promissing patterns and expand them
-	while( !callback->IsInterrupted() && !queue.empty() && queue.begin()->Potential > best.Quality ) {
+	while( !callback->IsInterrupted() // requested by the user
+	       && !queue.empty() // nothing to process
+	       // Searching for just one patern mean that for the found stability
+	       // we cannot improve the found quality, then only front is reported
+	       // TODO: if we want to report all correspondnce of stability and quality,
+	       //   then we should continue
+	       && queue.begin()->Potential > bestMap.GetFrontQuality() )
+	{
 		auto beginItr = queue.begin();
 		const CPattern& p = *beginItr;
 		newPatterns.Clear();
@@ -135,7 +141,7 @@ void CBestPatternFirstComputationProcedure::Run()
 		if( res != ILocalProjectionChain::PR_Expandable ) {
 			queue.erase(beginItr); // If no more expansion is possible than pattern is removed
 		}
-		if( queue.size() == 0 || shouldBreakOnFirst && best.Pattern != 0 ) {
+		if( queue.size() == 0 || shouldBreakOnFirst && bestMap.HasValues() ) {
 			break;
 		}
 
@@ -143,7 +149,7 @@ void CBestPatternFirstComputationProcedure::Run()
 
 		if( queue.size() > 0 ) {
 			callback->ReportProgress( expansionCount, string("Border: ") + StdExt::to_string(queue.size())
-									+ ". Quality: " + StdExt::to_string(best.Quality) + " / ["
+			                          + ". Quality: " + StdExt::to_string(bestMap.GetFrontQuality()) + " / ["
 									+ StdExt::to_string(queue.rbegin()->Potential) + "; " + StdExt::to_string(queue.begin()->Potential) + "]"
 									+ ". Delta: " + StdExt::to_string(lpChain->GetInterestThreshold())
 									+ ". Memory: " + StdExt::to_string(boost::math::round(lpChain->GetTotalConsumedMemory() / (1024.0*1024))) + "Mb.   ");
@@ -151,7 +157,7 @@ void CBestPatternFirstComputationProcedure::Run()
 	}
 	// Last report of the progress
 	callback->ReportProgress( expansionCount, string("Border size is ") + StdExt::to_string(queue.size())
-								+ ". Quality: " + StdExt::to_string(best.Quality) 
+								+ ". Quality: " + StdExt::to_string(bestMap.GetFrontQuality()) 
 	                          + ". Delta: " + StdExt::to_string(lpChain->GetInterestThreshold()) + "                                 ");
 }
 
@@ -160,7 +166,7 @@ void CBestPatternFirstComputationProcedure::SaveResult( const std::string& baseP
 	callback->ReportNextStage("Producing output");
 
 	CDestStream dst(basePath);
-	if( best.Pattern.get() == 0 ) {
+	if( !bestMap.HasValues() ) {
 		// No pattern is found w.r.t. the input
 		dst << "[\n"
 			<< "{"
@@ -170,6 +176,7 @@ void CBestPatternFirstComputationProcedure::SaveResult( const std::string& baseP
 			"]}"
 			"]";
 	} else {
+		const CBestPattern& best = bestMap.Begin()->second;
 		dst << "[\n"
 			<< "{"
 				"\"NodesCount\":1,\"ArcsCount\":0,"
@@ -227,7 +234,7 @@ void CBestPatternFirstComputationProcedure::LoadParams( const JSON& json )
 		}
 	}
 	if( p.HasMember( "MaxRAMConsumption" ) ) {
-		const rapidjson::Value& mrcJson = params["Params"]["MaxRAMConsumption"];
+	   	const rapidjson::Value& mrcJson = params["Params"]["MaxRAMConsumption"];
 		if( mrcJson.IsUint64() ) {
 			maxRAMConsumption = mrcJson.GetUint64();
 		}
@@ -255,8 +262,7 @@ void CBestPatternFirstComputationProcedure::LoadParams( const JSON& json )
 	if( p.HasMember( "OEstMinQuality" )) {
 		const rapidjson::Value& minQ = params["Params"]["OEstMinQuality"];
 		if( minQ.IsNumber() ) {
-			best.Quality = minQ.GetDouble();
-			isBestQualityKnown = true;
+			bestMap.SetMinAcceptableQuality(minQ.GetDouble());
 		}
 	}
 	if( p.HasMember("BreakOnFirstSD")) {
@@ -282,7 +288,7 @@ JSON CBestPatternFirstComputationProcedure::SaveParams() const
 			.AddMember( "MaxObjectNumber", rapidjson::Value().SetInt( mpn ), alloc )
 			.AddMember( "MaxRAMConsumption", rapidjson::Value().SetUint64( maxRAMConsumption ), alloc )
 			.AddMember( "AdjustThreshold", rapidjson::Value().SetBool( shouldAdjustThld ), alloc )
-			.AddMember( "OEstMinQuality", rapidjson::Value().SetDouble( best.Quality ), alloc ),
+			.AddMember( "OEstMinQuality", rapidjson::Value().SetDouble( bestMap.GetFrontQuality() ), alloc ),
 		alloc );
 
 	JSON cpParams;
@@ -317,6 +323,7 @@ JSON CBestPatternFirstComputationProcedure::SaveParams() const
 void CBestPatternFirstComputationProcedure::addNewPatterns( const ILocalProjectionChain::CPatternList& newPatterns )
 {
 	assert(oest != 0);
+	assert(lpChain != 0);
 	
 	auto itr = newPatterns.Begin();
 	if( itr == newPatterns.End()) {
@@ -345,7 +352,12 @@ void CBestPatternFirstComputationProcedure::addNewPatterns( const ILocalProjecti
 
 		checkForBestConcept(p);
 		
-		if( isBestQualityKnown && p.Potential <= best.Quality ) {
+		if( p.Potential <= max(
+				// We are not interested at all in smaller quality
+				bestMap.GetMinAcceptableQuality(),
+				// For the given interest (or better) the already found pattern is of better quality
+				bestMap.GetQuality(lpChain->GetPatternInterest(p.Pattern.get()))) )
+		{
 			continue;
 		}
 		
@@ -358,24 +370,39 @@ void CBestPatternFirstComputationProcedure::addNewPatterns( const ILocalProjecti
 // If pattern is finished checks its quality and update the best concept
 void CBestPatternFirstComputationProcedure::checkForBestConcept(const CPattern& p)
 {
+	assert(lpChain != 0);
+
 	if( lpChain->IsExpandable(p.Pattern.get()) ) {
 		return; // Cannot yet take its quality
 	}
 	
-	const double q = p.Quality;
-	if(!isBestQualityKnown || q > best.Quality) {
-		best.Quality = q;
-		best.Pattern = p.Pattern;
-		isBestQualityKnown = true;
-	}
+	const double& interest = lpChain->GetPatternInterest(p.Pattern.get()); // since the pattern is not expandable, it is the final interest
+	const bool res = bestMap.Insert(interest,CBestPattern(p));
+	const ISwappable* swp = dynamic_cast<const ISwappable*>(p.Pattern.get());
+	assert(swp != 0);
+	swp->Swap();
 }
 
 // Adjusting threshold in order to maintain the limitted number of pattern candidates
 void CBestPatternFirstComputationProcedure::adjustThreshold()
 {
-	auto itr = queue.lower_bound(CPattern(best.Quality));
-	if( itr != queue.end() ) {
-		queue.erase(itr, queue.end());
+	////Cannot be done, since when adjusting the treshold currently stable pattern can became unstable
+	// auto itr = queue.lower_bound(CPattern(best.Quality));
+	// if( itr != queue.end() ) {
+	// 	queue.erase(itr, queue.end());
+	// }
+
+	for(auto itr = queue.begin(); itr != queue.end(); ) {
+		auto currItr = itr;
+		++itr;
+		if( currItr->Potential <= max(
+				// We are not interested at all in smaller quality
+				bestMap.GetMinAcceptableQuality(),
+				// For the given interest (or better) the already found pattern is of better quality
+				bestMap.GetQuality(lpChain->GetPatternInterest(currItr->Pattern.get()))) )
+		{
+			queue.erase(currItr, queue.end());
+		}
 	}
 
 	if( arePatternsSwappable == -1 ) {

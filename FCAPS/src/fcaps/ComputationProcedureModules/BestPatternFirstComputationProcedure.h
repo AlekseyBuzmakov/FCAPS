@@ -6,7 +6,7 @@
 
 #include <fcaps/ComputationProcedure.h>
 #include <fcaps/LocalProjectionChain.h>
-
+#include <fcaps/ComputationProcedureModules/details/ThldBestPatternMap.h>
 #include <ListWrapper.h>
 #include <ModuleTools.h>
 
@@ -68,6 +68,10 @@ private:
 		double Quality;
 
 		CBestPattern() : Quality(-1e10) {}
+		CBestPattern(const CPattern& p) : Pattern(p.Pattern), Quality(p.Quality) {}
+
+		const double& operator()() const
+			{ return Quality; }
 	};
 
 	// Class for comparing potential of patterns
@@ -105,10 +109,8 @@ private:
 	// Should stop the computations on the first found subgroup
 	bool shouldBreakOnFirst;
 
-	// Flag indicating if the minimal pattern quality is not known
-	bool isBestQualityKnown;
-	// The best pattern and its info is stored here
-	CBestPattern best;
+	// The correspondnce between stability (interest of a pattern) and the best quality for patterns of at least certain interest
+	CThldBestPatternMap<double,CBestPattern> bestMap;
 	// Class for comparing patterns
 	CPatternPotentialComparator potentialCmp;
 	// The priority queue (with operations for random access removal)
