@@ -108,6 +108,8 @@ private:
 	bool shouldAdjustThld;
 	// Should stop the computations on the first found subgroup
 	bool shouldBreakOnFirst;
+	// Should compute best SD for every possible Thld, or only for the first found one?
+	bool shouldComputeForAllThlds;
 
 	// The correspondnce between stability (interest of a pattern) and the best quality for patterns of at least certain interest
 	CThldBestPatternMap<double,CBestPattern> bestMap;

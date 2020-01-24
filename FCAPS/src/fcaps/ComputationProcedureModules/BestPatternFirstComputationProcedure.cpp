@@ -48,7 +48,7 @@ STR(
 					"exclusiveMinimum":true
 				},
 				"AdjustThreshold":{
-					"description": "A flag indicating if the threshold should be adjusted in orderder to ensure polynomiality and memory finity",
+					"description": "A flag indicating if the threshold should be adjusted in order to ensure polynomiality and memory finity",
 					"type":"boolean"
 				},
 				"OptimisticEstimator":{
@@ -61,6 +61,10 @@ STR(
 				},
 				"BreakOnFirstSD":{
 				"description": "Stop the computation when the first subgroup with sufficient quality is found",
+					"type":"boolean"
+				},
+				"ComputeForAllThlds":{
+				"description": "If false, then the computation stops when it understand that for the current threshold the best pattern is known. Otherwise it computes for all thlds, starting from the first one.",
 					"type":"boolean"
 				}
 			}
@@ -86,6 +90,7 @@ CBestPatternFirstComputationProcedure::CBestPatternFirstComputationProcedure() :
 	maxRAMConsumption(-1),
 	shouldAdjustThld(false),
 	shouldBreakOnFirst(false),
+	shouldComputeForAllThlds(false),
 	potentialCmp(lpChain),
 	queue( potentialCmp ),
 	arePatternsSwappable(-1),
@@ -125,7 +130,7 @@ void CBestPatternFirstComputationProcedure::Run()
 	       // we cannot improve the found quality, then only front is reported
 	       // TODO: if we want to report all correspondnce of stability and quality,
 	       //   then we should continue
-	       && queue.begin()->Potential > bestMap.GetFrontQuality() )
+	       && (shouldComputeForAllThlds || queue.begin()->Potential > bestMap.GetFrontQuality() ) )
 	{
 		auto beginItr = queue.begin();
 		const CPattern& p = *beginItr;
@@ -176,19 +181,28 @@ void CBestPatternFirstComputationProcedure::SaveResult( const std::string& baseP
 			"]}"
 			"]";
 	} else {
-		const CBestPattern& best = bestMap.Begin()->second;
 		dst << "[\n"
 			<< "{"
 				"\"NodesCount\":1,\"ArcsCount\":0,"
 				"\"Params\":" << SaveParams()
-			<< "},{ \"Nodes\":[\n"
-			<< "{" "\"ExtSize\":" << lpChain->GetExtentSize( best.Pattern.get() )
-			<< ",\n\"Ext\":" << lpChain->SaveExtent( best.Pattern.get() )
-			<< ",\n\"Int\":" << lpChain->SaveIntent( best.Pattern.get() )
-			<< ",\n\"Thld\":" << thld << ", \"Value\":" << best.Quality
-			<< ",\n\"Quality\":" << oest->GetJsonQuality( dynamic_cast<const IExtent*>(best.Pattern.get()) )
-			<< "}" 
-			"]}"
+		    << "},{ \"Nodes\":[\n";
+
+		bool shouldAddComma = false;
+		for( auto itr = bestMap.Begin(); itr != bestMap.End();++itr ) {
+			if( shouldAddComma) {
+				dst << ",";
+			}
+			shouldAddComma = true;
+			const CBestPattern& best = itr->second;
+			dst	<< "{" "\"ExtSize\":" << lpChain->GetExtentSize( best.Pattern.get() )
+				<< ",\n\"Ext\":" << lpChain->SaveExtent( best.Pattern.get() )
+				<< ",\n\"Int\":" << lpChain->SaveIntent( best.Pattern.get() )
+				<< ",\n\"Thld\":" << thld << ", \"Value\":" << best.Quality << ", \"Interest\":" << itr->first
+				<< ",\n\"Quality\":" << oest->GetJsonQuality( dynamic_cast<const IExtent*>(best.Pattern.get()) )
+				<< "}\n" ;
+		}
+
+		dst << "]}"
 			"]";
 	}
 }
@@ -271,7 +285,12 @@ void CBestPatternFirstComputationProcedure::LoadParams( const JSON& json )
 			shouldBreakOnFirst = atJson.GetBool();
 		}
 	}
-
+	if( p.HasMember("ComputeForAllThlds")) {
+		const rapidjson::Value& atJson = params["Params"]["ComputeForAllThlds"];
+		if( atJson.IsBool() ) {
+			shouldComputeForAllThlds = atJson.GetBool();
+		}
+	}
 
 	maxRAMConsumption = max( maxRAMConsumption, 2 * lpChain->GetTotalConsumedMemory());
 }
