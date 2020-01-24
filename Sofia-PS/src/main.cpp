@@ -250,6 +250,7 @@ void CThisConsoleApplication::ReportProgress( const double& p, const std::string
 	}
 	lastStatusTime = tt;
 
+	GetStatusStream() << "   \r"; // It is before in order to not overide the progress with errors
 	if( 0 <= p && p < 1 ) {
 		GetStatusStream() << std::fixed << std::setprecision(3);
         GetStatusStream() << "   In " << p*100 << "%. ";
@@ -257,7 +258,7 @@ void CThisConsoleApplication::ReportProgress( const double& p, const std::string
 		GetStatusStream() << std::fixed << std::setprecision(1);
         GetStatusStream() << "   In " << p << ". ";
 	}
-	GetStatusStream() << info << "   \r";
+	GetStatusStream() << info ;
 	GetStatusStream().flush();
 }
 

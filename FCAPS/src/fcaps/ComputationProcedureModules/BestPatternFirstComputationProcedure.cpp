@@ -392,6 +392,11 @@ void CBestPatternFirstComputationProcedure::adjustThreshold()
 	// 	queue.erase(itr, queue.end());
 	// }
 
+	// Nothing is wory about...
+	if( !shouldAdjustThld || (queue.size() < mpn * 2 && lpChain->GetTotalConsumedMemory() < maxRAMConsumption )) {
+		return;
+	}
+
 	for(auto itr = queue.begin(); itr != queue.end(); ) {
 		auto currItr = itr;
 		++itr;
@@ -401,7 +406,7 @@ void CBestPatternFirstComputationProcedure::adjustThreshold()
 				// For the given interest (or better) the already found pattern is of better quality
 				bestMap.GetQuality(lpChain->GetPatternInterest(currItr->Pattern.get()))) )
 		{
-			queue.erase(currItr, queue.end());
+			queue.erase(currItr);
 		}
 	}
 
@@ -424,6 +429,7 @@ void CBestPatternFirstComputationProcedure::adjustThreshold()
 		// If the memory is freed, then we will try to remove patterns
 	}
 
+	// Yes, now there is nothing to worry about
 	if( !shouldAdjustThld || (queue.size() < mpn * 2 && lpChain->GetTotalConsumedMemory() < maxRAMConsumption )) {
 		return;
 	}
@@ -451,6 +457,7 @@ void CBestPatternFirstComputationProcedure::adjustThreshold()
 		queue.erase(currItr);
 	}
 	lpChain->UpdateInterestThreshold( thld );
+	bestMap.SetMinKey(thld);
 }
 
 ///////////////////////////////////////////////////////////////////

@@ -56,8 +56,9 @@ public:
 	void SetMinKey(const Key& k) {
 		auto res = map.upper_bound(k);
 		if( res != Begin()) {
-			map.erase(Begin,res);
+			map.erase(Begin(),res);
 		}
+		assert(check());
 	}
 	// Get the front quality
 	const double& GetFrontQuality() const {
@@ -107,21 +108,31 @@ bool CThldBestPatternMap<Key,Value>::insert(const Key& k, Value v) {
 		map.insert(Begin(), std::pair<Key,Value>(k,v));
 		return true;
 	}
-	auto moreItr = map.upper_bound(k);
-	if(moreItr == End()) {
+	auto inserted=End();
+	auto moreEqItr = map.lower_bound(k);
+	assert(moreEqItr == End() || moreEqItr->first >= k);
+	if(moreEqItr == End()) {
 		// no such large numbers, should be inserted
-		map.insert(End(), std::pair<Key,Value>(k,v));
-		return true;
+		inserted = map.insert(End(), std::pair<Key,Value>(k,v));
+	} else if(moreEqItr->first == k) { // ? floating point operations ?
+		if(moreEqItr->second() < v()) {
+			// new pattern is better
+			moreEqItr->second=v;
+			inserted = moreEqItr;
+		} else {
+			return false;
+		}
+	} else {
+		if( moreEqItr->second() > v() ) {
+			// pattern is useless, since better pattern has better quality
+			return false;
+		}
+
+		// inserting to position
+		inserted = map.insert(moreEqItr, std::pair<Key,Value>(k,v));
 	}
-
-	if( moreItr->second() > v() ) {
-		// pattern is useless, since better pattern has better quality
-		return false;
-	}
-
-	// inserting to position
-	auto inserted = map.insert(moreItr, std::pair<Key,Value>(k,v));
-
+	
+	assert( inserted != End() );
 	assert(v() == inserted->second());
 
 	// now it can have better quality than some worser patterns, they should be removed
@@ -147,7 +158,11 @@ bool CThldBestPatternMap<Key,Value>::insert(const Key& k, Value v) {
 template<typename Key, typename Value>
 bool CThldBestPatternMap<Key,Value>::check()
 {
+	if( map.empty() ) {
+		return true;
+	}
 	auto itr = Begin();
+	assert(Begin() != End());
 	Key prevK = itr->first;
 	double prevQ = itr->second();
 	for(++itr; itr != End(); ++itr) {
