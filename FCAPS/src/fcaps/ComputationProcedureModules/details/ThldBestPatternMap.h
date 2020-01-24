@@ -40,7 +40,7 @@ public:
 	// returns if the element has been introduced
 	bool Insert(const Key& k, Value v) {
 		const bool res = insert(k,v);
-		assert(check);
+		assert(check());
 		return res;
 	}
 	// Returns the currently known quality for Key >= k
@@ -150,7 +150,7 @@ bool CThldBestPatternMap<Key,Value>::check()
 	auto itr = Begin();
 	Key prevK = itr->first;
 	double prevQ = itr->second();
-	for(+itr; itr != End(); ++itr) {
+	for(++itr; itr != End(); ++itr) {
 		assert( prevK < itr->first );
 		assert( prevQ > itr->second() );
 		prevK = itr->first;
