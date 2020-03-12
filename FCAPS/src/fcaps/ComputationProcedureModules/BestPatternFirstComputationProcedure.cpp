@@ -111,7 +111,7 @@ void CBestPatternFirstComputationProcedure::Run()
 	assert(oest != 0);
 	
 	if( !oest->CheckObjectNumber(lpChain->GetObjectNumber()) ) {
-		throw CTextException("CBestPatternFirstComputationProcedure::Run", "Number of objects in the projection chain and optimistic estimator are different");
+		throw new CTextException("CBestPatternFirstComputationProcedure::Run", "Number of objects in the projection chain and optimistic estimator are different");
 	}
 
 	lpChain->UpdateInterestThreshold( thld );

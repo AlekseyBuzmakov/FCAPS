@@ -270,7 +270,7 @@ JSON CLocalTreatmentEffectOEst::SaveParams() const
 bool CLocalTreatmentEffectOEst::operator()(int a, int b) const
 {
 	const bool res = cmp(a,b);
-	assert( res != cmp(b,a));
+	assert( !res || res != cmp(b,a));
 	return res;
 }
 inline bool CLocalTreatmentEffectOEst::cmp(int a, int b) const
@@ -324,18 +324,23 @@ void CLocalTreatmentEffectOEst::computeSignificantObjectNumbers()
 	assert(objY.size() == objTrt.size());
 	const int n = objY.size();
 	signifObjectNum.resize(n);
-	signifObjectNum[0]=0;
-	signifObjectNum[1]=0;
+	signifObjectNum[0]=-1;
+	signifObjectNum[1]=-1;
+	int signifMinObjNum = -1;
 	for( int i = 2; i < n; ++i) {
 		int j = signifObjectNum[i-1]+1;
 		for( ; j < i; ++j ) {
-			if( incompleteBeta(j, i - j + 1) < 1 -signifLevel) {
+			if( incompleteBeta(j+1, i - j) < 1 -signifLevel) {
 				break;
 			}
 		} 
 		assert(j < i);
 		signifObjectNum[i]= j - 1;
+		if(j == 0) {
+			signifMinObjNum = i+1;	
+		}
 	}
+	minObjNum = max(signifMinObjNum, minObjNum);
 }
 
 // Computes value for incomplete beta function i and j are positive integers
@@ -390,7 +395,7 @@ void CLocalTreatmentEffectOEst::computeDelta0Max()
 {
 	// TODO change function for dealing with other measures than median confidence interval
 	const int sObjNum = signifObjectNum[minObjNum];
-	assert(sObjNum < minObjNum);
+	assert(0 <= sObjNum && sObjNum < minObjNum);
 	assert(sObjNum < controlSize);
 	assert(sObjNum < objY.size() - controlSize);
 	const double cntrlY = objY[order[minObjNum - 1 - sObjNum + 1]];
@@ -473,7 +478,9 @@ void CLocalTreatmentEffectOEst::computeMedianConfidenceIntervalBounds() const
 
 	// Computing low bonuds for the Test set
 	for( int testStart = objValues.Test.size() - minObjNum; testStart >= 0; --testStart ) {
-		const int currConfIntObj = testStart + signifObjectNum[objValues.Test.size() - testStart]-1;
+		const int objNum = signifObjectNum[objValues.Test.size() - testStart];
+		assert(0 <= objNum);
+		const int currConfIntObj = testStart + objNum -1;
 		objValues.TestConfLowBound[testStart] = objValues.Test[currConfIntObj];
 	}
 	for( int testStart = objValues.Test.size() - minObjNum + 1; testStart < objValues.Test.size(); ++testStart ) {
@@ -482,7 +489,9 @@ void CLocalTreatmentEffectOEst::computeMedianConfidenceIntervalBounds() const
 
 	// Computing upper bound for Control set
 	for( int cntrlSize = minObjNum; cntrlSize <= objValues.Cntrl.size(); ++cntrlSize ) {
-		const int currConfIntObj = cntrlSize - signifObjectNum[cntrlSize];
+		const int objNum = signifObjectNum[cntrlSize];
+		assert(0 <= objNum);
+		const int currConfIntObj = cntrlSize - objNum;
 		objValues.CntrlConfUpperBound[cntrlSize - 1] = objValues.Cntrl[currConfIntObj];
 	}
 	for( int cntrlSize = minObjNum - 1; cntrlSize > 0; --cntrlSize ) {
@@ -683,7 +692,7 @@ bool CLocalTreatmentEffectOEst::checkObjValues() const
 	// objValues.CntrlToTestPosition
 	for( int i = minObjNum-1; i < objValues.CntrlToTestPosition.size(); ++i ) {
 		const int testPos = objValues.CntrlToTestPosition[i];
-		if( testPos == -1 && objValues.CntrlConfUpperBound[i] < objValues.TestConfLowBound[objValues.Test.size() - minObjNum] ) {
+		if( testPos == -1 && objValues.CntrlConfUpperBound[i] < objValues.TestConfLowBound[objValues.Test.size() - minObjNum] - delta0 ) {
 			// -1 pos means that it is not possible to find any larger value in the Test set respecting the minimal size of the tidset
 			return false;
 		}
@@ -695,7 +704,7 @@ bool CLocalTreatmentEffectOEst::checkObjValues() const
 		}
 		assert( i < objValues.Cntrl.size() );
 		assert( testPos < objValues.Test.size() );
-		if( objValues.CntrlConfUpperBound[i] >= objValues.TestConfLowBound[testPos]) {
+		if( objValues.CntrlConfUpperBound[i] >= objValues.TestConfLowBound[testPos]-delta0) {
 			// The returned value should be lager
 			return false;
 		}

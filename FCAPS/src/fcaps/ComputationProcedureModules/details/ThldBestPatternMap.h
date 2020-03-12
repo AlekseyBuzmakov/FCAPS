@@ -123,13 +123,13 @@ bool CThldBestPatternMap<Key,Value>::insert(const Key& k, Value v) {
 			return false;
 		}
 	} else {
-		if( moreEqItr->second() > v() ) {
+		if( moreEqItr->second() < v() ) {
+			// inserting to position
+			inserted = map.insert(moreEqItr, std::pair<Key,Value>(k,v));
+		} else {
 			// pattern is useless, since better pattern has better quality
 			return false;
 		}
-
-		// inserting to position
-		inserted = map.insert(moreEqItr, std::pair<Key,Value>(k,v));
 	}
 	
 	assert( inserted != End() );
