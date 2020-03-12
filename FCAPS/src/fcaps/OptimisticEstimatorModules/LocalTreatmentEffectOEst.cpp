@@ -289,7 +289,9 @@ inline bool CLocalTreatmentEffectOEst::cmp(int a, int b) const
 // Computes the multiplier of SIGMA for the correct quantile
 void CLocalTreatmentEffectOEst::setZP()
 {
-	if(signifLevel > 0.3) {
+	if(signifLevel > 0.99) {
+		zp = 0;
+	} else if(signifLevel > 0.3) {
 		zp = 1;
 	} else if(signifLevel > 0.2-1e-10) {
 		zp = 1.282;
