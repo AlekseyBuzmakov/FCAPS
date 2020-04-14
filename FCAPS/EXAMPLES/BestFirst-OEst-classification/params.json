@@ -8,7 +8,7 @@
             "Params": {
                 "ContextAttributes": {
                     "Type": "ContextAttributesModules",
-                    "Name": "JsonContextAttributesModule",
+                    "Name": "SAXJsonContextAttributesModule",
                     "Params": {
                         "ContextFilePath": "titanic.json"
                     }
