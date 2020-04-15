@@ -550,6 +550,9 @@ const CPattern* CStabilityCbOLocalProjectionChain::initializeNewPattern(
 			delta = aDelta;
 			minAttr = a;
 		}
+		if( delta < thld ) {
+			return 0;
+		}
 	}
 	if( delta < thld ) {
 		return 0;
