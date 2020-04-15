@@ -70,6 +70,10 @@ STR(
 					"exclusiveMinimum": true,
 					"maximum": 1,
 					"exclusiveMaximum": true
+				},
+				"QualityMode":{
+					"description": "How to compute the quality function. Options are: 'linear', 'min_impact'.",
+					"type": "string"
 				}
 			}
 		}
@@ -93,6 +97,7 @@ CLocalTreatmentEffectOEst::CLocalTreatmentEffectOEst() :
 	delta0(0),
 	alpha(1),
 	beta(1),
+	qMode(QM_Linear),
 	confIntMode(CIM_Median)
 {
 	
@@ -231,6 +236,14 @@ void CLocalTreatmentEffectOEst::LoadParams( const JSON& json )
 		const double sl =p["SignificanceLevel"].GetDouble();
 		if( 0 < sl && sl < 1) {
 			signifLevel=sl;
+		}
+	}
+	if(p.HasMember("QualityMode") && p["QualityMode"].IsString()) {
+		const string mode =p["QualityMode"].GetString();
+		if( mode == "linear" || mode == "l") {
+			qMode = QM_Linear;
+		} else if( mode == "min_impact" || mode == "mi") {
+			qMode = QM_MinImpact;
 		}
 	}
 	
@@ -378,18 +391,31 @@ void CLocalTreatmentEffectOEst::buildOrder()
 // Computes delta for the whole dataset
 void CLocalTreatmentEffectOEst::computeDelta0()
 {
-	// TODO change function for dealing with other measures than median confidence interval
-	assert(controlSize < signifObjectNum.size());
-	assert(objY.size() - controlSize < signifObjectNum.size());
-	const int sObjNumCntrl = signifObjectNum[controlSize];
-	const int sObjNumTest = signifObjectNum[objY.size() - controlSize];
+	CPatternImage img;
+	img.ImageSize = objY.size();
+	int* objects = new int[objY.size()]; 
+	img.Objects = objects;
+	assert(objects != 0);
+	for(int i = 0; i < objY.size(); ++i) {
+		objects[i] = i;
+	}
+	extractObjValues(img);
+	delete[] objects;
 
-	assert(0 <= sObjNumCntrl && sObjNumCntrl < controlSize);
-	assert(0 <= sObjNumTest && sObjNumTest < objY.size() - controlSize);
-	const double cntrlY = objY[order[sObjNumCntrl]];
-	const double testY = objY[order[objY.size() - sObjNumTest - 1]];
+	delta0 = objValues.TestConfLowBound.front() - objValues.CntrlConfUpperBound.back();
+
+	// TODO change function for dealing with other measures than median confidence interval
+	// assert(controlSize < signifObjectNum.size());
+	// assert(objY.size() - controlSize < signifObjectNum.size());
+	// const int sObjNumCntrl = signifObjectNum[controlSize];
+	// const int sObjNumTest = signifObjectNum[objY.size() - controlSize];
+
+	// assert(0 <= sObjNumCntrl && sObjNumCntrl < controlSize);
+	// assert(0 <= sObjNumTest && sObjNumTest < objY.size() - controlSize);
+	// const double cntrlY = objY[order[sObjNumCntrl]];
+	// const double testY = objY[order[objY.size() - sObjNumTest - 1]];
    
-	delta0=testY-cntrlY;
+	// delta0=testY-cntrlY;
 }
 
 // Computes maximal delta for the whole dataset and the minimal number of observations in Trt and Ctrl
@@ -417,6 +443,11 @@ bool CLocalTreatmentEffectOEst::extractObjValues(const IExtent* ext) const
 	CPatternImage img;
 	CPatternImageHolder imgHolder(ext,img);
 
+	return extractObjValues(img);
+}
+
+bool CLocalTreatmentEffectOEst::extractObjValues(const CPatternImage& img) const
+{
 	currentObjects.resize(objY.size());
 	std::fill(currentObjects.begin(),currentObjects.end(),false);
 
@@ -552,8 +583,35 @@ void CLocalTreatmentEffectOEst::compute2SigmasConfidenceIntervalBounds() const
 	}
 }
 
-// Return the best subset estimate based on objValues object
+// Route the get value request to the correct function
+double CLocalTreatmentEffectOEst::getValue() const
+{
+	switch(qMode) {
+	case QM_Linear:
+		return getValueLinear();
+	case QM_MinImpact:
+		return getValueMinImpact();
+	default:
+		assert(false);
+		return getValueLinear();
+	}
+}
+// Route the best subset estimate request to the correct function
 double CLocalTreatmentEffectOEst::getBestSubsetEstimate() const
+{
+	switch(qMode) {
+	case QM_Linear:
+		return getBestSubsetEstimateLinear();
+	case QM_MinImpact:
+		return getBestSubsetEstimateMinImpact();
+	default:
+		assert(false);
+		return getBestSubsetEstimateLinear();
+	}
+}
+
+// Return the best subset estimate based on objValues object
+double CLocalTreatmentEffectOEst::getBestSubsetEstimateLinear() const
 {
 	objValues.CntrlToTestPosition.resize(objValues.Cntrl.size());
 	objValues.BestTestValueChange.resize(objValues.Test.size());
@@ -590,7 +648,7 @@ double CLocalTreatmentEffectOEst::getBestSubsetEstimate() const
 	assert(checkObjValues());
 
 	//  Now just iterate over possible conf interval position in cntrl set and finds the corresponding the best value in the test set
-	const double minObjNumValue = getValue(objValues.TestConfLowBound[minNumObjTestPosition] - objValues.CntrlConfUpperBound[minObjNum - 1], 2 * minObjNum); 
+	const double minObjNumValue = getValueLinear(objValues.TestConfLowBound[minNumObjTestPosition] - objValues.CntrlConfUpperBound[minObjNum - 1], 2 * minObjNum); 
 	double bestDiff = 0;
 	for(int i = minObjNum; i < objValues.CntrlToTestPosition.size(); ++i) {
 		const int testStart = objValues.CntrlToTestPosition[i];
@@ -609,19 +667,19 @@ double CLocalTreatmentEffectOEst::getBestSubsetEstimate() const
 }
 
 // Returns the exact value for a set based on objValues object
-double CLocalTreatmentEffectOEst::getValue() const
+double CLocalTreatmentEffectOEst::getValueLinear() const
 {
 	const double delta = objValues.TestConfLowBound.front()
 		- objValues.CntrlConfUpperBound.back();
 	if( delta - delta0 <= 1e-10 ) {
 		return 0;
 	} else {
-		return getValue(delta,objValues.Test.size() + objValues.Cntrl.size()); // Only linear functions are supported
+		return getValueLinear(delta,objValues.Test.size() + objValues.Cntrl.size()); // Only linear functions are supported
 	}
 }
 
 // Computes a linear function of delta and size
-double CLocalTreatmentEffectOEst::getValue(const double& delta, int size) const
+double CLocalTreatmentEffectOEst::getValueLinear(const double& delta, int size) const
 {
 	return alpha * (delta-delta0)/delta0Max  + beta * size/objY.size();
 }
@@ -642,7 +700,7 @@ double CLocalTreatmentEffectOEst::getBestValueForSubsets(int cntrlLastObject, in
 	for( int testStart = testFirstObject; testStart <= objValues.Test.size() - minObjNum; ++testStart) {
 		const double delta = objValues.TestConfLowBound[testStart] - objValues.CntrlConfUpperBound[cntrlLastObject];
 		const int nTest = objValues.Test.size() - testStart;
-		const double value = getValue(delta, nTest+nCntrl);
+		const double value = getValueLinear(delta, nTest+nCntrl);
 		if( value > bestValue) {
 			bestValue = value;
 			bestTestStart = testStart;
@@ -720,4 +778,52 @@ bool CLocalTreatmentEffectOEst::checkObjValues() const
 	// ??
 
 	return true;
+}
+
+// Computes the quality function wrt MinImpact
+double CLocalTreatmentEffectOEst::getValueMinImpact() const
+{
+	const double delta = objValues.TestConfLowBound.front()
+		- objValues.CntrlConfUpperBound.back();
+	if( delta - delta0 <= 1e-10 ) {
+		return 0;
+	} else {
+		// If the proportion is different from 0.5 is natural to compare the same proportion
+		const double cntrlProp = (objY.size() - controlSize) / static_cast<double>( controlSize );
+		return min<double>(cntrlProp * objValues.Cntrl.size(), objValues.Test.size()) * (delta - delta0); // TODO: add alpha and beta
+	}
+}
+// Computes the best subset estimate for the MinImapct
+double CLocalTreatmentEffectOEst::getBestSubsetEstimateMinImpact() const
+{
+	// If the proportion is different from 0.5 is natural to compare the same proportion
+	const double cntrlProp = (objY.size() - controlSize) / static_cast<double>( controlSize );
+
+	double maxQ = 0;
+	// First test size plays role in the minimum, i.e.
+	for(int size = minObjNum; size < objValues.Test.size(); ++size) {
+		if(ceil(size/cntrlProp) >= objValues.Cntrl.size()) {
+			break;
+		}
+		const double delta = objValues.TestConfLowBound[objValues.Test.size()-size]
+			- objValues.CntrlConfUpperBound[ceil(size / cntrlProp) - 1];
+		if( delta - delta0 < 1e-10 ) {
+			break;
+		}
+		maxQ = max<double>(maxQ, size * (delta-delta0));
+	}
+
+	// Now iterates over the control set sizes
+	for(int size = minObjNum; size < objValues.Cntrl.size(); ++size) {
+		if(ceil(cntrlProp * size) >= objValues.Test.size()) {
+			break;
+		}
+		const double delta = objValues.TestConfLowBound[objValues.Test.size()- ceil(cntrlProp * size)]
+			- objValues.CntrlConfUpperBound[size - 1];
+		if( delta - delta0 < 1e-10 ) {
+			break;
+		}
+		maxQ = max<double>(maxQ, cntrlProp * size * (delta-delta0));
+	}
+	return maxQ;
 }

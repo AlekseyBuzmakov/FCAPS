@@ -68,6 +68,12 @@ private:
 
 		CIM_EnumCount
 	};
+	enum TQualityMode {
+		QM_Linear = 0, // A linear sum of LATE and the regularizer term N
+		QM_MinImpact, // A product of minimal of N1 and N0 and LATE
+
+		QM_EnumCount
+	};
 
 private:
 	static const CModuleRegistrar<CLocalTreatmentEffectOEst> registrar;
@@ -87,6 +93,8 @@ private:
 	// The parameters to compute the linear combianiton of delta and size
 	double alpha;
 	double beta;
+	// The mode for computing the quality function
+	TQualityMode qMode;
 	// The way to compute the confidence interval
 	TConfIntervalMode confIntMode;
 
@@ -108,6 +116,7 @@ private:
 	// The object that contains Test and control objects for current pattern
 	mutable CObjValues objValues;
 
+	bool cmp(int a, int b) const;
 	void setZP();
 	void computeSignificantObjectNumbers();
 	static double incompleteBeta(int i, int j);
@@ -115,16 +124,22 @@ private:
 	void computeDelta0Max();
 	void computeDelta0();
 	bool extractObjValues(const IExtent* ext) const;
+	bool extractObjValues(const CPatternImage& img) const;
 	void computeMedianConfidenceIntervalBounds() const;
 	void compute2SigmasConfidenceIntervalBounds() const;
-	double getBestSubsetEstimate() const;
+
 	double getValue() const;
-	double getValue(const double& delta, int size) const;
+	double getBestSubsetEstimate() const;
+
+	double getBestSubsetEstimateLinear() const;
+	double getValueLinear() const;
+	double getValueLinear(const double& delta, int size) const;
 	double getDeltaValue(const double& ddelta, int dsize) const;
 	double getBestValueForSubsets(int cntrlLastObject, int testFirstObject) const;
 	bool checkObjValues() const;
 
-	bool cmp(int a, int b) const;
+	double getValueMinImpact() const;
+	double getBestSubsetEstimateMinImpact() const;
 };
 
 #endif // LOCALTREATMENTEFFECTOEST_H
