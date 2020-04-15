@@ -245,7 +245,7 @@ void CThisConsoleApplication::ReportProgress( const double& p, const std::string
 {
 	lastCtxProcessorInfo = info;
 	time_t tt = time(NULL);
-	if( tt - lastStatusTime < 1 ) {
+	if( tt - lastStatusTime < 2 ) {
 		return;
 	}
 	lastStatusTime = tt;

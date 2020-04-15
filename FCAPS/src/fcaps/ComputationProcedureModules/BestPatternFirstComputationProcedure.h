@@ -86,6 +86,9 @@ private:
 		const CSharedPtr<ILocalProjectionChain>& lpChain;
 	};
 
+	// The queue class
+	typedef typename std::set<CPattern,CPatternPotentialComparator> TQueue;
+
 private:
 	static const CModuleRegistrar<CBestPatternFirstComputationProcedure> registrar;
 	// Callback for reporting the progress
@@ -110,19 +113,24 @@ private:
 	bool shouldBreakOnFirst;
 	// Should compute best SD for every possible Thld, or only for the first found one?
 	bool shouldComputeForAllThlds;
+	// The number of beams to expand every concept from the queue.
+	DWORD beamsNum;
 
 	// The correspondnce between stability (interest of a pattern) and the best quality for patterns of at least certain interest
 	CThldBestPatternMap<double,CBestPattern> bestMap;
 	// Class for comparing patterns
 	CPatternPotentialComparator potentialCmp;
 	// The priority queue (with operations for random access removal)
-	std::set<CPattern,CPatternPotentialComparator> queue;
+	TQueue queue;
 	// A flag indicating if the patterns are Swappable. -1 is not known, 0 -- not Swappable, 1 -- are swappable
 	int arePatternsSwappable;
 	// The number of patterns to be remaind in memory in the case of swapping
 	DWORD numInMemoryPatterns;
 
-	void addNewPatterns( const ILocalProjectionChain::CPatternList& newPatterns );
+	void convertPattern(const IPatternDescriptor* d, CPattern& p) const;
+	void addPatternToQueue(const CPattern& p,TQueue& queue);
+	void addNewPatterns( const ILocalProjectionChain::CPatternList& newPatterns, TQueue& queue );
+	void startBeamSearch(const CPattern& p);
 	void checkForBestConcept(const CPattern& p);
 	void adjustThreshold();
 };

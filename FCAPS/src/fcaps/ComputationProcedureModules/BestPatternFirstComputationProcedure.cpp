@@ -64,9 +64,15 @@ STR(
 					"type":"boolean"
 				},
 				"ComputeForAllThlds":{
-				"description": "If false, then the computation stops when it understand that for the current threshold the best pattern is known. Otherwise it computes for all thlds, starting from the first one.",
+					"description": "If false, then the computation stops when it understand that for the current threshold the best pattern is known. Otherwise it computes for all thlds, starting from the first one.",
 					"type":"boolean"
+				},
+				"BeamsNumber":{
+					"description": "The number of beams to be used for expansion of a concept from the queue",
+					"type": "integer",
+					"minimum": 1
 				}
+				
 			}
 		}
 	}
@@ -91,6 +97,7 @@ CBestPatternFirstComputationProcedure::CBestPatternFirstComputationProcedure() :
 	shouldAdjustThld(false),
 	shouldBreakOnFirst(false),
 	shouldComputeForAllThlds(false),
+	beamsNum(1),
 	potentialCmp(lpChain),
 	queue( potentialCmp ),
 	arePatternsSwappable(-1),
@@ -118,7 +125,7 @@ void CBestPatternFirstComputationProcedure::Run()
 
 	ILocalProjectionChain::CPatternList newPatterns;
 	lpChain->ComputeZeroProjection( newPatterns );
-	addNewPatterns( newPatterns );
+	addNewPatterns( newPatterns, queue );
 
 	callback->ReportNextStage("Expansion");
 
@@ -133,19 +140,25 @@ void CBestPatternFirstComputationProcedure::Run()
 	       && (shouldComputeForAllThlds || queue.begin()->Potential > bestMap.GetFrontQuality() ) )
 	{
 		auto beginItr = queue.begin();
-		const CPattern& p = *beginItr;
-		newPatterns.Clear();
-		// The expansion of the pattern
-		const ILocalProjectionChain::TPreimageResult res = lpChain->Preimages(p.Pattern.get(), newPatterns);
+		CPattern p = *beginItr;
+		queue.erase(beginItr);
+
+		startBeamSearch(p);
 		++expansionCount;
-		addNewPatterns( newPatterns );
+
+		// newPatterns.Clear();
+		// // The expansion of the pattern
+		// const ILocalProjectionChain::TPreimageResult res = lpChain->Preimages(p.Pattern.get(), newPatterns);
+		// addNewPatterns( newPatterns, queue );
 		
-		if( res == ILocalProjectionChain::PR_Finished ) {
-			checkForBestConcept(p); // The expansion is finished and the concept is stable, should check for best quality
-		}
-		if( res != ILocalProjectionChain::PR_Expandable ) {
-			queue.erase(beginItr); // If no more expansion is possible than pattern is removed
-		}
+		// if( res == ILocalProjectionChain::PR_Finished ) {
+		// 	checkForBestConcept(p); // The expansion is finished and the concept is stable, should check for best quality
+		// }
+		// if( res != ILocalProjectionChain::PR_Expandable ) {
+		// 	queue.erase(beginItr); // If no more expansion is possible than pattern is removed
+		// }
+
+
 		if( queue.size() == 0 || shouldBreakOnFirst && bestMap.HasValues() ) {
 			break;
 		}
@@ -291,6 +304,12 @@ void CBestPatternFirstComputationProcedure::LoadParams( const JSON& json )
 			shouldComputeForAllThlds = atJson.GetBool();
 		}
 	}
+	if( p.HasMember( "BeamsNumber" )) {
+		const rapidjson::Value& beamsNumVal = params["Params"]["OEstMinQuality"];
+		if( beamsNumVal.IsUint() ) {
+			beamsNum = max(1,beamsNumVal.GetInt());
+		}
+	}
 
 	maxRAMConsumption = max( maxRAMConsumption, 2 * lpChain->GetTotalConsumedMemory());
 }
@@ -307,6 +326,7 @@ JSON CBestPatternFirstComputationProcedure::SaveParams() const
 			.AddMember( "MaxObjectNumber", rapidjson::Value().SetInt( mpn ), alloc )
 			.AddMember( "MaxRAMConsumption", rapidjson::Value().SetUint64( maxRAMConsumption ), alloc )
 			.AddMember( "AdjustThreshold", rapidjson::Value().SetBool( shouldAdjustThld ), alloc )
+			.AddMember( "BeamsNum", rapidjson::Value().SetUint( beamsNum ), alloc )
 			.AddMember( "OEstMinQuality", rapidjson::Value().SetDouble( bestMap.GetFrontQuality() ), alloc ),
 		alloc );
 
@@ -338,8 +358,47 @@ JSON CBestPatternFirstComputationProcedure::SaveParams() const
 	return result;
 }
 
+// Converts the original format of the pattern to CPattern
+void CBestPatternFirstComputationProcedure::convertPattern(const IPatternDescriptor* d, CPattern& p) const
+{
+	assert(oest != 0);
+
+	const IExtent* ext = dynamic_cast<const IExtent*>(d);
+	if( ext == 0) {
+		throw new CTextException("CBestPatternFirstComputationProcedure::convertPattern",
+									"Cannot extract extent from pattern. Local projection chain does not support it.");
+	}
+
+	IOptimisticEstimator::COEstValue val;
+	oest->GetValue(ext, val);
+
+	p.Pattern.reset(d, deleter);
+	p.Potential = val.BestSubsetEstimate;
+	p.Quality = val.Value;
+}
+
+// Adding a pattern to the queue
+void CBestPatternFirstComputationProcedure::addPatternToQueue(const CPattern& p,TQueue& queue)
+{
+	checkForBestConcept(p);
+
+	if( p.Potential <= max(
+			// We are not interested at all in smaller quality
+			bestMap.GetMinAcceptableQuality(),
+			// For the given interest (or better) the already found pattern is of better quality
+			bestMap.GetQuality(lpChain->GetPatternInterest(p.Pattern.get()))) )
+	{
+		return;
+	}
+
+	if( lpChain->IsExpandable(p.Pattern.get()) ) {
+		queue.insert(p);
+	}
+	
+}
+
 // Add new patterns to the queue and to the best found pattern. Removes unecessary patterns
-void CBestPatternFirstComputationProcedure::addNewPatterns( const ILocalProjectionChain::CPatternList& newPatterns )
+void CBestPatternFirstComputationProcedure::addNewPatterns( const ILocalProjectionChain::CPatternList& newPatterns, TQueue& queue )
 {
 	assert(oest != 0);
 	assert(lpChain != 0);
@@ -352,40 +411,59 @@ void CBestPatternFirstComputationProcedure::addNewPatterns( const ILocalProjecti
 	for( ;itr != newPatterns.End(); ) {
 		auto currItr = itr;
 		++itr;
-		const IExtent* ext = dynamic_cast<const IExtent*>(*currItr);
-		if( ext == 0) {
-			throw new CTextException("CBestPatternFirstComputationProcedure::computeOEstimate",
-									 "Cannot extract extent from pattern. Local projection chain does not support it.");
-		}
-
-		IOptimisticEstimator::COEstValue val;
-		oest->GetValue(ext, val);
 
 		CPattern p;
-		p.Pattern.reset(*currItr, deleter);
-		p.Potential = val.BestSubsetEstimate;
-		p.Quality = val.Value;
-		// The first element in the queue is the parent of this concept.
-		//  Thus OEst cannot increase
-		assert(queue.empty() || p.Potential < queue.begin()->Potential + 1e-10);
-
-		checkForBestConcept(p);
-		
-		if( p.Potential <= max(
-				// We are not interested at all in smaller quality
-				bestMap.GetMinAcceptableQuality(),
-				// For the given interest (or better) the already found pattern is of better quality
-				bestMap.GetQuality(lpChain->GetPatternInterest(p.Pattern.get()))) )
-		{
-			continue;
-		}
-		
-		if( lpChain->IsExpandable(p.Pattern.get()) ) {
-			queue.insert(p);
-		}
+		convertPattern(*currItr,p);
+		addPatternToQueue(p,queue);
 	}
 }
 
+// Starts a beams search for the most interesting pattern at p
+void CBestPatternFirstComputationProcedure::startBeamSearch(const CPattern& p)
+{
+	TQueue bsQueues[2] = {TQueue(potentialCmp), TQueue(potentialCmp)};
+	addPatternToQueue(p, bsQueues[0]);
+	int q = 0; // index of the currently expanded queue
+	ILocalProjectionChain::CPatternList newPatterns;
+
+	while(!bsQueues[q].empty()) {
+		// Iterating over all elements expanding them and adding queues to the other queue
+		auto itr = bsQueues[q].begin();
+		for(; itr != bsQueues[q].end(); ++itr ) {
+			newPatterns.Clear();
+			// The expansion of the pattern
+			const ILocalProjectionChain::TPreimageResult res = lpChain->Preimages(itr->Pattern.get(), newPatterns);
+
+			addNewPatterns( newPatterns, bsQueues[1-q] );
+
+			if( res == ILocalProjectionChain::PR_Finished ) {
+				checkForBestConcept(*itr); // The expansion is finished and the concept is stable, should check for best quality
+			}
+			if( res == ILocalProjectionChain::PR_Expandable ) {
+				bsQueues[1-q].insert(*itr);
+			}
+		}
+		// Switching queues
+		bsQueues[q].clear();
+		q = 1-q;
+		// Only beamsNum numbers of elements is preserved
+		int passedItems = 0;
+		itr = bsQueues[q].begin();
+		while(itr != bsQueues[q].end()) {
+			auto curItr = itr;
+			++passedItems;
+			++itr;
+			if( passedItems <= beamsNum ) {
+				continue;
+			}
+
+			CPattern p = *curItr;
+			queue.insert(p);
+
+			bsQueues[q].erase(curItr);
+		}
+	}
+}
 // If pattern is finished checks its quality and update the best concept
 void CBestPatternFirstComputationProcedure::checkForBestConcept(const CPattern& p)
 {
