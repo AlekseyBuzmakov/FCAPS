@@ -101,7 +101,8 @@ CBestPatternFirstComputationProcedure::CBestPatternFirstComputationProcedure() :
 	potentialCmp(lpChain),
 	queue( potentialCmp ),
 	arePatternsSwappable(-1),
-	numInMemoryPatterns(1000)
+	numInMemoryPatterns(1000),
+	conceptPreimagesCount(0)
 {
 }
 
@@ -129,7 +130,6 @@ void CBestPatternFirstComputationProcedure::Run()
 
 	callback->ReportNextStage("Expansion");
 
-	DWORD expansionCount = 0;
 	// Just takes one by one the most promissing patterns and expand them
 	while( !callback->IsInterrupted() // requested by the user
 	       && !queue.empty() // nothing to process
@@ -144,7 +144,6 @@ void CBestPatternFirstComputationProcedure::Run()
 		queue.erase(beginItr);
 
 		startBeamSearch(p);
-		++expansionCount;
 
 		// newPatterns.Clear();
 		// // The expansion of the pattern
@@ -164,17 +163,9 @@ void CBestPatternFirstComputationProcedure::Run()
 		}
 
 		adjustThreshold();
-
-		if( queue.size() > 0 ) {
-			callback->ReportProgress( expansionCount, string("Border: ") + StdExt::to_string(queue.size())
-			                          + ". Quality: " + StdExt::to_string(bestMap.GetFrontQuality()) + " / ["
-									+ StdExt::to_string(queue.rbegin()->Potential) + "; " + StdExt::to_string(queue.begin()->Potential) + "]"
-									+ ". Delta: " + StdExt::to_string(lpChain->GetInterestThreshold())
-									+ ". Memory: " + StdExt::to_string(boost::math::round(lpChain->GetTotalConsumedMemory() / (1024.0*1024))) + "Mb.   ");
-		}
 	}
 	// Last report of the progress
-	callback->ReportProgress( expansionCount, string("Border size is ") + StdExt::to_string(queue.size())
+	callback->ReportProgress( conceptPreimagesCount, string("Border size is ") + StdExt::to_string(queue.size())
 								+ ". Quality: " + StdExt::to_string(bestMap.GetFrontQuality()) 
 	                          + ". Delta: " + StdExt::to_string(lpChain->GetInterestThreshold()) + "                                 ");
 }
@@ -433,6 +424,7 @@ void CBestPatternFirstComputationProcedure::startBeamSearch(const CPattern& p)
 			newPatterns.Clear();
 			// The expansion of the pattern
 			const ILocalProjectionChain::TPreimageResult res = lpChain->Preimages(itr->Pattern.get(), newPatterns);
+			++conceptPreimagesCount;
 
 			addNewPatterns( newPatterns, bsQueues[1-q] );
 
@@ -462,6 +454,12 @@ void CBestPatternFirstComputationProcedure::startBeamSearch(const CPattern& p)
 
 			bsQueues[q].erase(curItr);
 		}
+
+		callback->ReportProgress( conceptPreimagesCount, string("Border: ") + StdExt::to_string(queue.size())
+									+ ". Quality: " + StdExt::to_string(bestMap.GetFrontQuality()) + " / ["
+								+ StdExt::to_string(queue.rbegin()->Potential) + "; " + StdExt::to_string(queue.begin()->Potential) + "]"
+								+ ". Delta: " + StdExt::to_string(lpChain->GetInterestThreshold())
+								+ ". Memory: " + StdExt::to_string(boost::math::round(lpChain->GetTotalConsumedMemory() / (1024.0*1024))) + "Mb.   ");
 	}
 }
 // If pattern is finished checks its quality and update the best concept

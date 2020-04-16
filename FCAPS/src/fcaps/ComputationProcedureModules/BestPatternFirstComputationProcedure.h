@@ -115,6 +115,8 @@ private:
 	bool shouldComputeForAllThlds;
 	// The number of beams to expand every concept from the queue.
 	DWORD beamsNum;
+	// The number of concepts preimages
+	DWORD conceptPreimagesCount;
 
 	// The correspondnce between stability (interest of a pattern) and the best quality for patterns of at least certain interest
 	CThldBestPatternMap<double,CBestPattern> bestMap;
