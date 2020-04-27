@@ -455,11 +455,14 @@ void CBestPatternFirstComputationProcedure::startBeamSearch(const CPattern& p)
 			bsQueues[q].erase(curItr);
 		}
 
-		callback->ReportProgress( conceptPreimagesCount, string("Border: ") + StdExt::to_string(queue.size())
-									+ ". Quality: " + StdExt::to_string(bestMap.GetFrontQuality()) + " / ["
-								+ StdExt::to_string(queue.rbegin()->Potential) + "; " + StdExt::to_string(queue.begin()->Potential) + "]"
-								+ ". Delta: " + StdExt::to_string(lpChain->GetInterestThreshold())
-								+ ". Memory: " + StdExt::to_string(boost::math::round(lpChain->GetTotalConsumedMemory() / (1024.0*1024))) + "Mb.   ");
+		string progress = string("Border: ") + StdExt::to_string(queue.size());
+		if( queue.size() > 0) {
+			progress += ". Quality: " + StdExt::to_string(bestMap.GetFrontQuality()) + " / ["
+				+ StdExt::to_string(queue.rbegin()->Potential) + "; " + StdExt::to_string(queue.begin()->Potential) + "]";
+		}
+		progress += ". Delta: " + StdExt::to_string(lpChain->GetInterestThreshold())
+			+ ". Memory: " + StdExt::to_string(boost::math::round(lpChain->GetTotalConsumedMemory() / (1024.0*1024))) + "Mb.   ";
+		callback->ReportProgress( conceptPreimagesCount, progress );
 	}
 }
 // If pattern is finished checks its quality and update the best concept
