@@ -87,7 +87,7 @@ private:
 	};
 
 	// The queue class
-	typedef typename std::set<CPattern,CPatternPotentialComparator> TQueue;
+	typedef std::set<CPattern,CPatternPotentialComparator> TQueue;
 
 private:
 	static const CModuleRegistrar<CBestPatternFirstComputationProcedure> registrar;

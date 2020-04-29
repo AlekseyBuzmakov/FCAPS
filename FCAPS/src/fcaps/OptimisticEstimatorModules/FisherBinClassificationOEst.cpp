@@ -12,8 +12,11 @@
 
 #include <boost/math/distributions/chi_squared.hpp>
 #include <sstream>
-#include <bits/stdc++.h>
+
+#include <boost/math/special_functions/gamma.hpp>s
+
 using namespace std;
+using namespace boost::math;
 
 ////////////////////////////////////////////////////////////////////
 #define STR(...) #__VA_ARGS__
