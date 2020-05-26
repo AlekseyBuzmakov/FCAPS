@@ -148,7 +148,7 @@ public:
 		ignoredAttrs[a] = true; 
 	}
 	bool IsIgnored(CIntentsTree::TAttribute a) const
-		{ return 0 <=a && a <= ignoredAttrs.size() && ignoredAttrs[a]; }
+		{ return 0 <=a && a < ignoredAttrs.size() && ignoredAttrs[a]; }
 	void Swap(CIgnoredAttrs& other) 
 		{ ignoredAttrs.swap(other.ignoredAttrs); }
 private:
