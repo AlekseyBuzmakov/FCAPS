@@ -366,6 +366,7 @@ void CBestPatternFirstComputationProcedure::convertPattern(const IPatternDescrip
 	p.Pattern.reset(d, deleter);
 	p.Potential = val.BestSubsetEstimate;
 	p.Quality = val.Value;
+	assert( p.Potential >= p.Quality );
 }
 
 // Adding a pattern to the queue
@@ -405,6 +406,9 @@ void CBestPatternFirstComputationProcedure::addNewPatterns( const ILocalProjecti
 
 		CPattern p;
 		convertPattern(*currItr,p);
+
+		// cout << lpChain->SaveIntent( p.Pattern.get() ) << endl;
+
 		addPatternToQueue(p,queue);
 	}
 }
@@ -424,7 +428,7 @@ void CBestPatternFirstComputationProcedure::startBeamSearch(const CPattern& p)
 			newPatterns.Clear();
 			// The expansion of the pattern
 			const ILocalProjectionChain::TPreimageResult res = lpChain->Preimages(itr->Pattern.get(), newPatterns);
-			++conceptPreimagesCount;
+			conceptPreimagesCount += newPatterns.Size();
 
 			addNewPatterns( newPatterns, bsQueues[1-q] );
 
@@ -443,6 +447,12 @@ void CBestPatternFirstComputationProcedure::startBeamSearch(const CPattern& p)
 		itr = bsQueues[q].begin();
 		while(itr != bsQueues[q].end()) {
 			auto curItr = itr;
+			if( p.Potential < curItr->Potential || curItr->Potential < curItr->Quality) {
+				cout << lpChain->SaveIntent(p.Pattern.get()) << endl;
+				cout << lpChain->SaveIntent(curItr->Pattern.get()) << endl;
+				assert(p.Potential >= curItr->Potential);
+				assert(p.Potential >= curItr->Quality);
+			}
 			++passedItems;
 			++itr;
 			if( passedItems <= beamsNum ) {

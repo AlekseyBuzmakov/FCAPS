@@ -23,6 +23,7 @@ class CBinarySetDescriptorsComparator;
 class CVectorBinarySetJoinComparator;
 class CVectorBinarySetDescriptor;
 class CBinarySetPatternDescriptor;
+class CIgnoredAttrs;
 ////////////////////////////////////////////////////////////////////
 
 const char StabilityCbOLocalProjectionChain[] = "StabilityCbOLocalProjectionChainModule";
@@ -91,6 +92,7 @@ private:
 class CStabilityCbOLocalProjectionChain : public ILocalProjectionChain, public IModule {
 public:
 	CStabilityCbOLocalProjectionChain();
+	~CStabilityCbOLocalProjectionChain();
 	// Methods of ILocalProjectionChain
 	virtual int GetObjectNumber() const;
 	virtual double GetInterestThreshold() const;
@@ -131,7 +133,7 @@ private:
 	// Object that enumerates attribute extents
 	CSharedPtr<IContextAttributes> attrs;
 	// Cached attributes
-	std::deque< CSharedPtr<const CVectorBinarySetDescriptor> > attrsHolder;
+	std::deque<const CVectorBinarySetDescriptor*> attrsHolder;
 	// The threshold for delta measure
 	double thld;
 	// Comparator for extents
@@ -152,8 +154,9 @@ private:
 	const CPattern* newPattern(
 		const CVectorBinarySetDescriptor* ext,
 		CIntentsTree::TIntent intent,
+		CIgnoredAttrs& ignored,
 		int nextAttr, DWORD delta, int clossestAttr = 0);
-	void getAttributeImg(int a, CSharedPtr<const CVectorBinarySetDescriptor>& rslt);
+	const CVectorBinarySetDescriptor* getAttributeImg(int a);
 	const CPattern* initializeNewPattern(
 		const CPattern& parent,
 		int genAttr,

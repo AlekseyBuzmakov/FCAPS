@@ -243,7 +243,7 @@ int CThisConsoleApplication::Execute()
 
 void CThisConsoleApplication::ReportProgress( const double& p, const std::string& info ) const
 {
-	lastCtxProcessorInfo = info;
+	lastCtxProcessorInfo = StdExt::to_string(p)+ " : " + info;
 	time_t tt = time(NULL);
 	if( tt - lastStatusTime < 2 ) {
 		return;

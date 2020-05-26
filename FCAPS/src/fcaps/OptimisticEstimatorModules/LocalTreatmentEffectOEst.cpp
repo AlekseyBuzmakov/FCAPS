@@ -59,6 +59,10 @@ STR(
 					"type": "number",
 					"minimum": 0
 				},
+				"Baseline":{
+					"description": "The baseline effect, the goal is to find group with the effect larger that the baseline. Default: ATE",
+					"type": "number"
+				},
 				"ConfidenceIntervalMode":{
 					"description": "How to compute the confidence interval. Options are: 'median', '2sigmas', and 'ttest'.",
 					"type": "string"
@@ -246,11 +250,20 @@ void CLocalTreatmentEffectOEst::LoadParams( const JSON& json )
 			qMode = QM_MinImpact;
 		}
 	}
+	bool isBaselineKnown = false;
+	if(p.HasMember("Baseline") && p["Baseline"].IsNumber()) {
+		const double b =p["Baseline"].GetDouble();
+		delta0=b;
+		isBaselineKnown = true;
+	}
+
 	
 	setZP();
 	computeSignificantObjectNumbers();
 	buildOrder();
-	computeDelta0();
+	if(!isBaselineKnown) {
+		computeDelta0();
+	}
 	computeDelta0Max();
 }
 
@@ -349,8 +362,11 @@ void CLocalTreatmentEffectOEst::computeSignificantObjectNumbers()
 				break;
 			}
 		} 
-		assert(j < i);
-		signifObjectNum[i]= j - 1;
+		if( j >= i ) {
+			signifObjectNum[i] = -1;
+		} else {
+			signifObjectNum[i]= j - 1;
+		}
 		if(j == 0) {
 			signifMinObjNum = i+1;	
 		}

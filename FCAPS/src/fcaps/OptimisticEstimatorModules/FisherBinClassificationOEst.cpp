@@ -13,7 +13,7 @@
 #include <boost/math/distributions/chi_squared.hpp>
 #include <sstream>
 
-#include <boost/math/special_functions/gamma.hpp>s
+#include <boost/math/special_functions/gamma.hpp>
 
 using namespace std;
 using namespace boost::math;
@@ -330,7 +330,9 @@ void CFisherBinClassificationOEst::LoadParams( const JSON& json )
 		exit(1);
 	}
 	// Initialise cache with appropriate values
-	for(x=0;x<=N;x++) loggamma[x] = lgamma(x+1);//Gamma(x) = (x-1)!
+	for(x=0;x<=N;x++) {
+		loggamma[x] = lgamma(static_cast<double>(x+1));//Gamma(x) = (x-1)!
+	}
 	// Initialise log_inv_binom_N_n
 		log_inv_binom_N_n = loggamma[n1] + loggamma[N-n1] - loggamma[N];
 }

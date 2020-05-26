@@ -12,7 +12,9 @@
 #include <ModuleJSONTools.h>
 #include <StdTools.h>
 
+#include <set>
 #include <stdint.h>
+
 
 using namespace std;
 
@@ -82,7 +84,8 @@ CIntentsTree::TIntent CIntentsTree::AddAttribute(TIntent intent, TAttribute newA
 	memory[nextNode].BranchesCount = 0;
 
 	if( currItr != -1 ) {
-		assert( memory[currItr].Attribute < newAttr);
+		// When computing closures some attributes with high number can arrive
+		// assert( memory[currItr].Attribute < newAttr);
 		assert( 0 <= memory[currItr].Attribute);
 		++memory[currItr].BranchesCount;
 	}
@@ -134,17 +137,41 @@ CIntentsTree::TIntentItr CIntentsTree::newNode()
 
 ////////////////////////////////////////////////////////////////////
 
+class CIgnoredAttrs {
+public:
+	void Ignore(CIntentsTree::TAttribute a) 
+	{
+		assert( a >= 0); 
+		if( a >= ignoredAttrs.size()) {
+			ignoredAttrs.resize(a+1);
+		} 
+		ignoredAttrs[a] = true; 
+	}
+	bool IsIgnored(CIntentsTree::TAttribute a) const
+		{ return 0 <=a && a <= ignoredAttrs.size() && ignoredAttrs[a]; }
+	void Swap(CIgnoredAttrs& other) 
+		{ ignoredAttrs.swap(other.ignoredAttrs); }
+private:
+	std::deque<bool> ignoredAttrs;
+};
+
+////////////////////////////////////////////////////////////////////
+
 class CPattern : public IExtent, public IPatternDescriptor, public ISwappable {
 	
 public:
 	// Pattern controls memor for the extent
-	CPattern( CVectorBinarySetJoinComparator& _cmp, const CVectorBinarySetDescriptor* e, CPatternDeleter dlt,
+	CPattern( CVectorBinarySetJoinComparator& _cmp, 
+			const CVectorBinarySetDescriptor* e, 
+			CPatternDeleter dlt,
 	          CIntentsTree& iTree, CIntentsTree::TIntent i,
+		  CIgnoredAttrs& ignored,
 	          int nextAttr, DWORD d, int closestAttribute ) :
 		cmp(_cmp), extent(e, dlt), swappedExtent(-1), extentSize(e->Size()), extentHash(e->Hash()),
 		intentsTree(iTree), intent(i), nextAttribute(nextAttr), delta(d), closestChildAttribute(closestAttribute)
 	{
 		assert( extent != 0 );
+		ignoredAttrs.Swap(ignored);
 	}
 	~CPattern()
 	{
@@ -188,7 +215,14 @@ public:
 	CIntentsTree::TIntent Intent() const
 		{return intent;}
 	void AddAttributeToIntent(CIntentsTree::TAttribute a) const
-		{ intent = intentsTree.AddAttribute(intent,a);}
+		{ intent = intentsTree.AddAttribute(intent,a); ignoredAttrs.Ignore(a); }
+
+	void IgnoreAttribute(CIntentsTree::TAttribute a) const
+		{ ignoredAttrs.Ignore(a);}
+	bool IsIgnored(CIntentsTree::TAttribute a) const
+		{ return ignoredAttrs.IsIgnored(a); }
+	const CIgnoredAttrs& IgnoredAttrs() const
+		{ return ignoredAttrs;}
 
 	int NextAttribute() const
 		{return nextAttribute;}
@@ -217,6 +251,7 @@ private:
 
 	CIntentsTree& intentsTree;
 	mutable CIntentsTree::TIntent intent;
+	mutable CIgnoredAttrs ignoredAttrs;
 
 	// The minimal number of the attribute that can be added to the pattern.
 	// This number also gives the reference to the "core" of the pattern in the CbO canonical order
@@ -258,6 +293,13 @@ CStabilityCbOLocalProjectionChain::CStabilityCbOLocalProjectionChain() :
 	totalAllocatedPatterns(0),
 	totalAllocatedPatternSize(0)
 {
+}
+CStabilityCbOLocalProjectionChain::~CStabilityCbOLocalProjectionChain()
+{
+	for(auto i = attrsHolder.begin(); i != attrsHolder.end(); ++i) {
+		extDeleter(*i);
+		*i = 0;
+	}
 }
 
 void CStabilityCbOLocalProjectionChain::LoadParams( const JSON& json )
@@ -361,7 +403,10 @@ void CStabilityCbOLocalProjectionChain::ComputeZeroProjection( CPatternList& ptr
 	for( DWORD i = 0; i < GetObjectNumber(); ++i ) {
 		extCmp->AddValue(i,*ptrn);
 	}
-	ptrns.PushBack( newPattern( ptrn.release(), intentsTree.Create(), 0, GetObjectNumber(), 0) );
+	CIgnoredAttrs dummyIgnored;
+	ptrns.PushBack( newPattern( ptrn.release(), intentsTree.Create(),
+				dummyIgnored,
+				0, GetObjectNumber(), -1) );
 }
 
 ILocalProjectionChain::TPreimageResult CStabilityCbOLocalProjectionChain::Preimages( const IPatternDescriptor* d, CPatternList& preimages )
@@ -373,14 +418,17 @@ ILocalProjectionChain::TPreimageResult CStabilityCbOLocalProjectionChain::Preima
 
 	int a = p.NextAttribute();
 	CPatternImage img;
-	CSharedPtr<const CVectorBinarySetDescriptor> nextImage;
 	while(attrs->HasAttribute(a)){
+		if(p.IsIgnored(a)){
+			a = attrs->GetNextAttribute(a);
+			continue;
+		}
 		// Getting next attribute
-		getAttributeImg(a,nextImage);
+		const CVectorBinarySetDescriptor& nextImage = *getAttributeImg(a);
 
 		// Computing the only possible preimage
 		unique_ptr<const CVectorBinarySetDescriptor, CPatternDeleter> res(
-			extCmp->CalculateSimilarity( p.Extent(), *nextImage ), extDeleter );
+			extCmp->CalculateSimilarity( p.Extent(), nextImage ), extDeleter );
 		const DWORD ptrnExtSize = p.Extent().Size();
 		const DWORD resExtSize = res->Size();
 		const DWORD extDiff = ptrnExtSize - resExtSize;
@@ -481,95 +529,140 @@ const CPattern& CStabilityCbOLocalProjectionChain::to_pattern(const IPatternDesc
 const CPattern* CStabilityCbOLocalProjectionChain::newPattern(
 	const CVectorBinarySetDescriptor* ext,
 	CIntentsTree::TIntent intent,
+	CIgnoredAttrs& ignored,
 	int nextAttr, DWORD delta, int clossestAttr)
 {
 	const CPattern* p = new CPattern(*extCmp, ext, extDeleter,
 	                    intentsTree, intent,
+			    ignored,
 	                    nextAttr,delta,clossestAttr);
 
 	++totalAllocatedPatterns;
 	totalAllocatedPatternSize += p->GetPatternMemorySize();
 	return p;
 }
-void CStabilityCbOLocalProjectionChain::getAttributeImg(int a, CSharedPtr<const CVectorBinarySetDescriptor>& rslt)
+const CVectorBinarySetDescriptor* CStabilityCbOLocalProjectionChain::getAttributeImg(int a)
 {
 	if( attrsHolder.size() <= a ) {
-		attrsHolder.resize(a+1);
+		attrsHolder.resize(a+1,0);
 	}
 	if( attrsHolder[a]!=0) {
-		rslt = attrsHolder[a];
-		return;
+		return attrsHolder[a];
 	}
+
+	CVectorBinarySetDescriptor* ext = extCmp->NewPattern();
+	assert(attrsHolder[a]==0);
+	attrsHolder[a] = ext;
+
 	CPatternImage img;
 	attrs->GetAttribute(a, img);
-
-	CVectorBinarySetDescriptor& ext = *extCmp->NewPattern();
-	rslt.reset( &ext, extDeleter );
-
 	for (DWORD i = 0; i < img.ImageSize; i++) {
-		extCmp->AddValue( static_cast<DWORD>( img.Objects[i]), ext );
+		extCmp->AddValue( static_cast<DWORD>( img.Objects[i]), *ext );
 	}
 	attrs->ClearMemory(img);
-	attrsHolder[a] = rslt;
+
+	return ext;
 }
 const CPattern* CStabilityCbOLocalProjectionChain::initializeNewPattern(
 	  const CPattern& parent,
 	  int genAttr,
-	  unique_ptr<const CVectorBinarySetDescriptor, CPatternDeleter>& ext)
+	  std::unique_ptr<const CVectorBinarySetDescriptor,CPatternDeleter>& ext)
 {
 	assert( ext != 0 );
+
+	// The intent of the new concept
+	CIntentsTree::TIntent intent = intentsTree.Copy(parent.Intent());
+	CIgnoredAttrs extIgnoredAttrs(parent.IgnoredAttrs());
+
+	intent = intentsTree.AddAttribute(intent, genAttr);
+	extIgnoredAttrs.Ignore(genAttr);
+	// The ignored attributes for the new concept
+
+	// First we should close the description of ext.
+	bool canBeUnclosed=false;
+	while(canBeUnclosed){
+		canBeUnclosed=false;
+		int a = attrs->GetNextAttribute(genAttr);
+		for(; attrs->HasAttribute(a); a = attrs->GetNextAttribute(a)) {
+			if(extIgnoredAttrs.IsIgnored(a)) {
+				continue;
+			}
+			const CVectorBinarySetDescriptor& attr = *getAttributeImg(a);
+			unique_ptr<const CVectorBinarySetDescriptor,CPatternDeleter> res(
+					extCmp->CalculateSimilarity( *ext, attr ), extDeleter);
+			const DWORD extDiff = ext->Size() - res->Size();
+			// TODO
+			// if( res->Size() < thld ) {
+			// ??? could we ignore it somehow
+			// }
+			if( res->Size() == 0 ) {
+				// can be ignored
+				extIgnoredAttrs.Ignore(a);
+			}
+			if(extDiff > thld ) {
+				// not in the closure wrt Delta
+				continue;
+			}
+			canBeUnclosed = true;
+
+			if( extDiff > 0 ) {
+				ext.reset(res.release());
+			}
+			extIgnoredAttrs.Ignore(a);
+			intent = intentsTree.AddAttribute(intent, a);
+		}
+	}
+
+
 	// If delta is zero, then the attribute is in the intent.
 	// However, according to canonical order it should not be there. Thus, such a pattern should also be ignored.
 	assert(thld >= 1);
 	DWORD delta = ext->Size();
-	int minAttr = genAttr + 1;
-	if( parent.ClosestChild() < genAttr ) {
-		getAttributeDelta(parent.ClosestChild(), *ext);
+	int minAttr = -1;
+	if( parent.ClosestChild() >= 0 ) {
+		assert(!parent.IsIgnored(parent.ClosestChild()));
+		delta = getAttributeDelta(parent.ClosestChild(), *ext);
 		minAttr = parent.ClosestChild();
 	}
 
-	intentStorage.clear();
-	CIntentsTree::TIntentItr itr = intentsTree.GetIterator(parent.Intent());
-	while(itr != -1) {
-		intentStorage.push_back(intentsTree.GetNextAttribute(itr));
-	}
-	auto intentItr = intentStorage.rbegin();
-	auto intentEnd = intentStorage.rend();
+	// intentStorage.clear();
+	// CIntentsTree::TIntentItr itr = intentsTree.GetIterator(parent.Intent());
+	// while(itr != -1) {
+		// intentStorage.push_back(intentsTree.GetNextAttribute(itr));
+	// }
+	// auto intentItr = intentStorage.rbegin();
+	// auto intentEnd = intentStorage.rend();
 
-	for(int a = 0;delta >= thld && a < genAttr && attrs->HasAttribute(a);a = attrs->GetNextNonChildAttribute(a)) {
-		while(intentItr != intentEnd && a > *intentItr) {
-			const DWORD ia = *intentItr;
-			++intentItr;
-			assert(intentItr == intentEnd || ia < *intentItr);
-		}
-		if(intentItr != intentEnd && a == *intentItr) {
+	for(int a = 0; delta >= thld && a < genAttr && attrs->HasAttribute(a); a = attrs->GetNextNonChildAttribute(a)) {
+		if(extIgnoredAttrs.IsIgnored(a)) {
 			continue;
 		}
+
 		const DWORD aDelta = getAttributeDelta(a, *ext);
 		if(aDelta < delta) {
 			delta = aDelta;
 			minAttr = a;
 		}
 		if( delta < thld ) {
+			intentsTree.Delete(intent);
 			return 0;
 		}
 	}
 	if( delta < thld ) {
+		intentsTree.Delete(intent);
 		return 0;
 	}
-	CIntentsTree::TIntent intent = intentsTree.Copy(parent.Intent());
-	intent = intentsTree.AddAttribute(intent, genAttr);
-	return(newPattern(ext.release(),intent,attrs->GetNextAttribute(genAttr), delta, minAttr));
+	return(newPattern(ext.release(), intent, extIgnoredAttrs,
+				attrs->GetNextAttribute(genAttr), delta, minAttr));
 }
 
 DWORD CStabilityCbOLocalProjectionChain::getAttributeDelta(int a, const CVectorBinarySetDescriptor& ext)
 {
-	CSharedPtr<const CVectorBinarySetDescriptor> attr;
-	getAttributeImg(a,attr);
+	const CVectorBinarySetDescriptor& attr = *getAttributeImg(a);
 
 	// Computing the only possible preimage
 	CSharedPtr<const CVectorBinarySetDescriptor> res(
-		extCmp->CalculateSimilarity( ext, *attr ), extDeleter );
+		extCmp->CalculateSimilarity( ext, attr ), extDeleter );
 	const DWORD extDiff = ext.Size() - res->Size();
 	return extDiff;
 }
