@@ -576,7 +576,7 @@ void CLocalTreatmentEffectOEst::compute2SigmasConfidenceIntervalBounds() const
 		// Changing the mean
 		sd2sum += n * meanDiff * meanDiff + 2 * (valSum - n * meanPrev) * meanDiff;
 		// TODO add t-test here, for now only quantiles of norm distribution
-		objValues.TestConfLowBound[i] = max(objValues.Test[i],valSum / n - sqrt(sd2sum / n) * zp);
+		objValues.TestConfLowBound[i] = max(objValues.Test[i],valSum / n - sqrt(sd2sum) / n * zp); // sqrt(sd2sum/n) is the standard deviation, which should be divided by sqrt(n) for the mean standard deviation
 	}
 	
 	sd2sum = 0;
@@ -595,7 +595,7 @@ void CLocalTreatmentEffectOEst::compute2SigmasConfidenceIntervalBounds() const
 		// Changing the mean
 		sd2sum += n * meanDiff * meanDiff + 2 * (valSum-n*meanPrev) * meanDiff;
 		// TODO add t-test here, for now only quantiles of norm distribution
-		objValues.CntrlConfUpperBound[i] = min(objValues.Cntrl[i],valSum / n + sqrt(sd2sum / n) * zp);
+		objValues.CntrlConfUpperBound[i] = min(objValues.Cntrl[i],valSum / n + sqrt(sd2sum) / n * zp); // sqrt(sd2sum/n) is the standard deviation, which should be divided by sqrt(n) for the mean standard deviation
 	}
 }
 
