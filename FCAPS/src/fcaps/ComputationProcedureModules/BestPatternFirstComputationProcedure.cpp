@@ -447,9 +447,13 @@ void CBestPatternFirstComputationProcedure::startBeamSearch(const CPattern& p)
 		itr = bsQueues[q].begin();
 		while(itr != bsQueues[q].end()) {
 			auto curItr = itr;
-			if( p.Potential < curItr->Potential || curItr->Potential < curItr->Quality) {
-				cout << lpChain->SaveIntent(p.Pattern.get()) << endl;
-				cout << lpChain->SaveIntent(curItr->Pattern.get()) << endl;
+			if( p.Potential < curItr->Potential -  abs(curItr->Potential) * 1e-6 || curItr->Potential < curItr->Quality) {
+				cerr << "OEst is WRONG!" << endl;
+				cerr << "P Potential: " << p.Potential << " Ch Potential: " << curItr->Potential << " Ch Quality: " << curItr->Quality << endl;
+				cerr << lpChain->SaveIntent(p.Pattern.get()) << endl;
+				cerr << oest->GetJsonQuality( dynamic_cast<const IExtent*>(p.Pattern.get()) ) << endl;
+				cerr << lpChain->SaveIntent(curItr->Pattern.get()) << endl;
+				cerr << oest->GetJsonQuality( dynamic_cast<const IExtent*>(curItr->Pattern.get()) ) << endl;
 				assert(p.Potential >= curItr->Potential);
 				assert(p.Potential >= curItr->Quality);
 			}
@@ -486,9 +490,13 @@ void CBestPatternFirstComputationProcedure::checkForBestConcept(const CPattern& 
 	
 	const double& interest = lpChain->GetPatternInterest(p.Pattern.get()); // since the pattern is not expandable, it is the final interest
 	const bool res = bestMap.Insert(interest,CBestPattern(p));
-	const ISwappable* swp = dynamic_cast<const ISwappable*>(p.Pattern.get());
-	assert(swp != 0);
-	swp->Swap();
+	if( arePatternsSwappable == -1 ) {
+		arePatternsSwappable  = ( dynamic_cast<const ISwappable*>(queue.begin()->Pattern.get()) != 0 ? 1 : 0);
+	}
+
+	// const ISwappable* swp = dynamic_cast<const ISwappable*>(p.Pattern.get());
+	// assert(swp != 0);
+	// swp->Swap();
 }
 
 // Adjusting threshold in order to maintain the limitted number of pattern candidates

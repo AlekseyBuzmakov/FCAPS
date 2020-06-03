@@ -138,6 +138,38 @@ JSON CLocalTreatmentEffectOEst::GetJsonQuality(const IExtent* ext) const
 		<< "\"N1\":" << objValues.Test.size() << ","
 		<< "\"TotalSize\":" << objY.size() << ","
 		<< "\"Value\":" << getValue()
+		// Debuging information about the optimistic estimator
+		<< ",\n\"OEst\":" << "{\n\"TestConfLowBound\":[";
+			for(int i = 0; i < objValues.TestConfLowBound.size(); ++i){
+				if( i!= 0) {
+					rslt << ",";
+				}
+				rslt << objValues.TestConfLowBound[i];
+			}
+		rslt << "],\n\"CntrlConfUpperBound\":[";
+			for(int i = 0; i < objValues.CntrlConfUpperBound.size(); ++i){
+				if( i!= 0) {
+					rslt << ",";
+				}
+				rslt << objValues.CntrlConfUpperBound[i];
+			}
+		rslt << "],\n\"YTest\":[";
+			for(int i = 0; i < objValues.Test.size(); ++i){
+				if( i!= 0) {
+					rslt << ",";
+				}
+				rslt << objValues.Test[i];
+			}
+		rslt << "],\n\"YCntrl\":[";
+			for(int i = 0; i < objValues.Cntrl.size(); ++i){
+				if( i!= 0) {
+					rslt << ",";
+				}
+				rslt << objValues.Cntrl[i];
+			}
+		rslt << "]"
+		<<"}"
+
 		<<"}";
 	return rslt.str();
 }
@@ -317,32 +349,46 @@ void CLocalTreatmentEffectOEst::setZP()
 {
 	if(signifLevel > 0.99) {
 		zp = 0;
+		signifLevel = 1;
 	} else if(signifLevel > 0.3) {
 		zp = 1;
+		signifLevel = 0.3;
 	} else if(signifLevel > 0.2-1e-10) {
 		zp = 1.282;
+		signifLevel = 0.2;
 	} else if(signifLevel > 0.1-1e-10) {
 		zp = 1.645;
+		signifLevel = 0.1;
 	} else if(signifLevel > 0.05-1e-10) {
 		zp = 1.96;
+		signifLevel = 0.05;
 	} else if(signifLevel > 0.02-1e-10) {
 		zp = 2.326;
+		signifLevel = 0.02;
 	} else if(signifLevel > 0.01-1e-10) {
 		zp = 2.576;
+		signifLevel = 0.01;
 	} else if(signifLevel > 0.005-1e-10) {
 		zp = 2.807;
+		signifLevel = 0.005;
 	} else if(signifLevel > 0.002-1e-10) {
 		zp = 3.09;
+		signifLevel = 0.002;
 	} else if(signifLevel > 0.001-1e-10) {
 		zp = 3.29;
+		signifLevel = 0.001;
 	} else if(signifLevel > 0.0001-1e-10) {
 		zp = 3.89;
+		signifLevel = 0.0001;
 	} else if(signifLevel > 0.00001-1e-10) {
 		zp = 4.417;
+		signifLevel = 0.00001;
 	} else if(signifLevel > 0.000001-1e-10) {
 		zp = 4.891;
+		signifLevel = 0.000001;
 	} else {
 		zp = 5.327; // For 1e-6
+		signifLevel = 0.0000001;
 	}
 }
 
@@ -806,7 +852,7 @@ double CLocalTreatmentEffectOEst::getValueMinImpact() const
 	} else {
 		// If the proportion is different from 0.5 is natural to compare the same proportion
 		const double cntrlProp = (objY.size() - controlSize) / static_cast<double>( controlSize );
-		return min<double>(cntrlProp * objValues.Cntrl.size(), objValues.Test.size()) * (delta - delta0); // TODO: add alpha and beta
+		return min<double>(objValues.Cntrl.size() / static_cast<double>(controlSize), objValues.Test.size() / static_cast<double>(objY.size() - controlSize)) * (delta - delta0); // TODO: add alpha and beta
 	}
 }
 // Computes the best subset estimate for the MinImapct
@@ -818,28 +864,32 @@ double CLocalTreatmentEffectOEst::getBestSubsetEstimateMinImpact() const
 	double maxQ = 0;
 	// First test size plays role in the minimum, i.e.
 	for(int size = minObjNum; size < objValues.Test.size(); ++size) {
-		if(ceil(size/cntrlProp) >= objValues.Cntrl.size()) {
+		const int cntrlInds = ceil(size / cntrlProp) - 1;
+		const int testInds = objValues.Test.size()-size;
+		if(cntrlInds >= objValues.Cntrl.size()) {
 			break;
 		}
-		const double delta = objValues.TestConfLowBound[objValues.Test.size()-size]
-			- objValues.CntrlConfUpperBound[ceil(size / cntrlProp) - 1];
+		const double delta = objValues.TestConfLowBound[testInds]
+			- objValues.CntrlConfUpperBound[cntrlInds];
 		if( delta - delta0 < 1e-10 ) {
 			break;
 		}
-		maxQ = max<double>(maxQ, size * (delta-delta0));
+		maxQ = max<double>(maxQ, size / static_cast<double>(objY.size() - controlSize) * (delta-delta0));
 	}
 
 	// Now iterates over the control set sizes
 	for(int size = minObjNum; size < objValues.Cntrl.size(); ++size) {
+		const int cntrlInds = size-1;
+		const int testInds = objValues.Test.size()- ceil(cntrlProp * size);
 		if(ceil(cntrlProp * size) >= objValues.Test.size()) {
 			break;
 		}
-		const double delta = objValues.TestConfLowBound[objValues.Test.size()- ceil(cntrlProp * size)]
-			- objValues.CntrlConfUpperBound[size - 1];
+		const double delta = objValues.TestConfLowBound[testInds];
+			- objValues.CntrlConfUpperBound[cntrlInds];
 		if( delta - delta0 < 1e-10 ) {
 			break;
 		}
-		maxQ = max<double>(maxQ, cntrlProp * size * (delta-delta0));
+		maxQ = max<double>(maxQ, size / static_cast<double>(controlSize) * (delta-delta0));
 	}
 	return maxQ;
 }
