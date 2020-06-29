@@ -94,9 +94,9 @@ void CFisherBinClassificationOEst::GetValue(const IExtent* ext, COEstValue& val 
 	/*
 	val.Value = getValue(curWPlus,curWAll);	
         double maxQuality;
-	int N=(int)wAll;
-	int n1=(int)wPlus;	
-	int x=(int)curWAll;
+	int N=(int)(wAll+0.5);
+	int n1=(int)(wPlus+0.5);	
+	int x=(int)(curWAll+0.5);
 	
 	if(x<=N&&x>n1)
 	{
@@ -320,8 +320,8 @@ void CFisherBinClassificationOEst::LoadParams( const JSON& json )
 	/**********************************************************************************/
 	//Initialization 
 	/**********************************************************************************/
-	int N=(int)wAll;
-	int n1=(int)wPlus;
+	int N=(int)(wAll+0.5);
+	int n1=(int)(wPlus+0.5);
 	int x;
 	// Allocate memory for log-gamma cache, raising error if it fails
 	loggamma = (double *)malloc((N+1)*sizeof(double));
@@ -334,7 +334,7 @@ void CFisherBinClassificationOEst::LoadParams( const JSON& json )
 		loggamma[x] = lgamma(static_cast<double>(x+1));//Gamma(x) = (x-1)!
 	}
 	// Initialise log_inv_binom_N_n
-		log_inv_binom_N_n = loggamma[n1] + loggamma[N-n1] - loggamma[N];
+	log_inv_binom_N_n = loggamma[n1] + loggamma[N-n1] - loggamma[N];
 }
 
 JSON CFisherBinClassificationOEst::SaveParams() const
@@ -397,14 +397,14 @@ double CFisherBinClassificationOEst::getValue( const double& curWPlus, const dou
 	//cout<<"\n curWPlus: "<<curWPlus<<" curWAll: "<<curWAll;
 	double pre_comp_xterms, pval, p_left, p_right , p_left_log, p_right_log , pval_log;
 	int a, a_min, a_max;
-	int N=(int)wAll;
-	int n1=(int)wPlus;	
-	int x=(int)curWAll;
+	int N=(int)(wAll+0.5);
+	int n1=(int)(wPlus+0.5);	
+	int x=(int)(curWAll+0.5);
 
 	pre_comp_xterms = loggamma[x] + loggamma[N-x];
 	a_min = ((n1+x-N) > 0) ? (n1+x-N) : 0;//max(0,n+x-N)
 	a_max = (x > n1) ? n1 : x;//min(x,n)
-	a=(int)curWPlus;
+	a=(int)(curWPlus+0.5);
 	// Precompute the hypergeometric PDF in the range of interest
 	//double hypergeom_pvals_a = exp(pre_comp_xterms + log_inv_binom_N_n - (loggamma[a] + loggamma[n1-a] + loggamma[x-a] + loggamma[(N-n1)-(x-a)]));
 	double temp_value = pre_comp_xterms + log_inv_binom_N_n - (loggamma[a] + loggamma[n1-a] + loggamma[x-a] + loggamma[(N-n1)-(x-a)]);
