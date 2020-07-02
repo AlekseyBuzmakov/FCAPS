@@ -6,7 +6,7 @@ solution "Sofia-PS"
 	language "C++"
 	startproject "Sofia-PS"
 
-	configurations { "final", "release", "debug" }
+	configurations { "final", "release", "debug", "debug_opt" }
 	platforms {"x64","x32"}
 	filter { "platforms:x64" }
 	    architecture "x64"
@@ -14,6 +14,10 @@ solution "Sofia-PS"
 	    architecture "x32"
 	filter{"configurations:debug"}
 		defines { "DEBUG", "_DEBUG" }
+		symbols "On"
+	filter{"configurations:debug_opt"}
+		defines { "DEBUG", "_DEBUG" }
+		optimize "On"
 		symbols "On"
 	filter{"configurations:release"}
 		defines { "NDEBUG", "BOOST_DISABLE_ASSERTS" }
