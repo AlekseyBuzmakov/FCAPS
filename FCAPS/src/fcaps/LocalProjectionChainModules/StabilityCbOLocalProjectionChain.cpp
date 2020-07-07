@@ -419,6 +419,11 @@ ILocalProjectionChain::TPreimageResult CStabilityCbOLocalProjectionChain::Preima
 	int a = p.NextAttribute();
 	CPatternImage img;
 	while(attrs->HasAttribute(a)){
+		if( p.Delta() < thld) {
+			// Unstable concep cannot probuce stable concepts
+			break;
+		}
+
 		if(p.IsIgnored(a)){
 			a = attrs->GetNextAttribute(a);
 			continue;
@@ -438,7 +443,16 @@ ILocalProjectionChain::TPreimageResult CStabilityCbOLocalProjectionChain::Preima
 			a = attrs->GetNextAttribute(a);
 			continue;
 		}
+
 		unique_ptr<const CPattern> newPtrn( initializeNewPattern( p, a, res ) );
+
+		// Updating the measure of the current pattern.
+		//    It is here, because initializeNewPattern relies on the p.GetClossestChild()
+		if( p.Delta() > extDiff ) {
+			p.SetDelta(extDiff);
+			p.SetClosestChild(a);
+		}
+
 		if( newPtrn == 0 ) {
 			// Pattern 'res' is not stable
 			// Any more specific attribute can be ignored
@@ -453,14 +467,8 @@ ILocalProjectionChain::TPreimageResult CStabilityCbOLocalProjectionChain::Preima
 		assert(newPtrn->Delta() >= thld);
 		preimages.PushBack( newPtrn.release() );
 
-		// Updating the measure of the current pattern.
-		if( p.Delta() > extDiff ) {
-			p.SetDelta(extDiff);
-			p.SetClosestChild(a);
-		}
-
 		a = attrs->GetNextAttribute(a);
-		if(!areAllInOnce || p.Delta() < thld) {
+		if(!areAllInOnce) {
 			break;
 		}
 	}

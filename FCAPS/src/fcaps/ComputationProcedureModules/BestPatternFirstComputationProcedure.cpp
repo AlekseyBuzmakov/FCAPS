@@ -407,8 +407,6 @@ void CBestPatternFirstComputationProcedure::addNewPatterns( const ILocalProjecti
 		CPattern p;
 		convertPattern(*currItr,p);
 
-		// cout << lpChain->SaveIntent( p.Pattern.get() ) << endl;
-
 		addPatternToQueue(p,queue);
 	}
 }
@@ -426,11 +424,18 @@ void CBestPatternFirstComputationProcedure::startBeamSearch(const CPattern& p)
 		auto itr = bsQueues[q].begin();
 		for(; itr != bsQueues[q].end(); ++itr ) {
 			newPatterns.Clear();
+
+			// cerr << endl << "===============================================" << endl;
+			// cerr << lpChain->SaveIntent(itr->Pattern.get()) << endl;
+			// cerr << "\nQuality: " << itr->Quality << " Potential:" << itr->Potential << endl ;
+
 			// The expansion of the pattern
 			const ILocalProjectionChain::TPreimageResult res = lpChain->Preimages(itr->Pattern.get(), newPatterns);
 			conceptPreimagesCount += newPatterns.Size();
 
 			addNewPatterns( newPatterns, bsQueues[1-q] );
+
+			// cerr << "RES:" << res << " Stab: " << lpChain->GetPatternInterest(itr->Pattern.get()) << endl;
 
 			if( res == ILocalProjectionChain::PR_Finished ) {
 				checkForBestConcept(*itr); // The expansion is finished and the concept is stable, should check for best quality
@@ -447,6 +452,7 @@ void CBestPatternFirstComputationProcedure::startBeamSearch(const CPattern& p)
 		itr = bsQueues[q].begin();
 		while(itr != bsQueues[q].end()) {
 			auto curItr = itr;
+
 			if( p.Potential < curItr->Potential -  abs(curItr->Potential) * 1e-6 || curItr->Potential < curItr->Quality) {
 				cerr << "OEst is WRONG!" << endl;
 				cerr << "P Potential: " << p.Potential << " Ch Potential: " << curItr->Potential << " Ch Quality: " << curItr->Quality << endl;
