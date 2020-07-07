@@ -33,6 +33,7 @@ class CThldBestPatternMap {
 public:
 	typedef std::map< Key,Value,CThldBestPatternKeyLess<Key> > Storage;
 	typedef typename Storage::const_iterator const_iterator;
+	typedef typename Storage::iterator iterator;
 public:
 	CThldBestPatternMap() :
 		minAcceptQ(-1e10) {}
@@ -42,6 +43,11 @@ public:
 		const bool res = insert(k,v);
 		assert(check());
 		return res;
+	}
+	bool CanBeInserted(const Key& k, Value v) {
+		iterator inserted = map.end();
+		TInsertPositionMode res = findInsertPosition(k,v,inserted);
+		return res != IPM_Skip;
 	}
 	// Returns the currently known quality for Key >= k
 	const double& GetQuality(const Key& k) const {
@@ -86,6 +92,15 @@ public:
 	bool HasValues() const { return !map.empty(); }
 
 private:
+	enum TInsertPositionMode {
+		IPM_Skip = 0, // No needs to insert, a better concept is known
+		IPM_Insert, // The concept should be inserted
+		IPM_Substitute, // The concept should substitute an existing concept
+
+		IPM_EnumCount
+	};
+
+private:
 	// The storage
 	Storage map;
 	// The minimal quality of a value that can be accepted
@@ -93,45 +108,71 @@ private:
 
 	// A functions that insert an element with no checking
 	bool insert(const Key& k, Value v);
+	// Finds the insert position for the value function
+	TInsertPositionMode findInsertPosition(const Key& k, const Value& v, iterator& resPos);
+
 	// A functions that check the correctness of the internal structure
 	bool check();
 };
 
 template<typename Key, typename Value>
-bool CThldBestPatternMap<Key,Value>::insert(const Key& k, Value v) {
+typename CThldBestPatternMap<Key,Value>::TInsertPositionMode CThldBestPatternMap<Key,Value>::findInsertPosition(const Key& k, const Value& v, iterator& resPos) {
 	if( v() < minAcceptQ ) {
 		// too bad
-		return false;
+		return IPM_Skip;
 	}
 	if( Begin() == End() ) {
 		// empty storage, just inserting
 		map.insert(Begin(), std::pair<Key,Value>(k,v));
-		return true;
+		resPos = map.end();
+		return IPM_Insert;
 	}
-	auto inserted=End();
 	auto moreEqItr = map.lower_bound(k);
 	assert(moreEqItr == End() || moreEqItr->first >= k);
 	if(moreEqItr == End()) {
 		// no such large numbers, should be inserted
-		inserted = map.insert(End(), std::pair<Key,Value>(k,v));
+		resPos = map.end();
+		return IPM_Insert;
 	} else if(moreEqItr->first == k) { // ? floating point operations ?
 		if(moreEqItr->second() < v()) {
 			// new pattern is better
-			moreEqItr->second=v;
-			inserted = moreEqItr;
+			resPos = moreEqItr;
+			return IPM_Substitute;
 		} else {
-			return false;
+			return IPM_Skip;
 		}
 	} else {
 		if( moreEqItr->second() < v() ) {
 			// inserting to position
-			inserted = map.insert(moreEqItr, std::pair<Key,Value>(k,v));
+			resPos = moreEqItr;
+			return IPM_Insert;
 		} else {
 			// pattern is useless, since better pattern has better quality
-			return false;
+			return IPM_Skip;
 		}
 	}
-	
+
+	assert(false);
+	return IPM_Skip;
+}
+template<typename Key, typename Value>
+bool CThldBestPatternMap<Key,Value>::insert(const Key& k, Value v) {
+	iterator inserted = map.end();
+	TInsertPositionMode res = findInsertPosition(k,v,inserted);
+	switch(res) {
+	case IPM_Skip:
+		return false;
+	case IPM_Insert:
+		inserted = map.insert(inserted, std::pair<Key,Value>(k,v));
+		break;
+	case IPM_Substitute:
+		inserted->second = v;
+		break;
+	default:
+		assert(false);
+		return false;
+	}
+
 	assert( inserted != End() );
 	assert(v() == inserted->second());
 

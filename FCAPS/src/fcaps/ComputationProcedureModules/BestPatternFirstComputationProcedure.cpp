@@ -437,12 +437,16 @@ void CBestPatternFirstComputationProcedure::startBeamSearch(const CPattern& p)
 
 			// cerr << "RES:" << res << " Stab: " << lpChain->GetPatternInterest(itr->Pattern.get()) << endl;
 
-			if( res == ILocalProjectionChain::PR_Finished ) {
-				checkForBestConcept(*itr); // The expansion is finished and the concept is stable, should check for best quality
+			if( res != ILocalProjectionChain::PR_Uninteresting) {
+				// It will check if it is expandable and register it either for expnasion or as the best pattern
+				addPatternToQueue(*itr, bsQueues[1-q]);
 			}
-			if( res == ILocalProjectionChain::PR_Expandable ) {
-				bsQueues[1-q].insert(*itr);
-			}
+			// if( res == ILocalProjectionChain::PR_Finished ) {
+			// 	checkForBestConcept(*itr); // The expansion is finished and the concept is stable, should check for best quality
+			// }
+			// if( res == ILocalProjectionChain::PR_Expandable ) {
+			// 	bsQueues[1-q].insert(*itr);
+			// }
 		}
 		// Switching queues
 		bsQueues[q].clear();
@@ -454,7 +458,7 @@ void CBestPatternFirstComputationProcedure::startBeamSearch(const CPattern& p)
 			auto curItr = itr;
 
 			if( p.Potential < curItr->Potential -  abs(curItr->Potential) * 1e-6 || curItr->Potential < curItr->Quality) {
-				cerr << "OEst is WRONG!" << endl;
+				cerr << endl << "OEst is WRONG!" << endl;
 				cerr << "P Potential: " << p.Potential << " Ch Potential: " << curItr->Potential << " Ch Quality: " << curItr->Quality << endl;
 				cerr << lpChain->SaveIntent(p.Pattern.get()) << endl;
 				cerr << oest->GetJsonQuality( dynamic_cast<const IExtent*>(p.Pattern.get()) ) << endl;
@@ -496,9 +500,10 @@ void CBestPatternFirstComputationProcedure::checkForBestConcept(const CPattern& 
 	
 	const double& interest = lpChain->GetPatternInterest(p.Pattern.get()); // since the pattern is not expandable, it is the final interest
 	const bool res = bestMap.Insert(interest,CBestPattern(p));
-	if( arePatternsSwappable == -1 ) {
-		arePatternsSwappable  = ( dynamic_cast<const ISwappable*>(queue.begin()->Pattern.get()) != 0 ? 1 : 0);
-	}
+
+	// if( arePatternsSwappable == -1 ) {
+	// 	arePatternsSwappable  = ( dynamic_cast<const ISwappable*>(queue.begin()->Pattern.get()) != 0 ? 1 : 0);
+	// }
 
 	// const ISwappable* swp = dynamic_cast<const ISwappable*>(p.Pattern.get());
 	// assert(swp != 0);
