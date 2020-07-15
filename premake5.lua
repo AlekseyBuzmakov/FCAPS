@@ -199,33 +199,33 @@ solution "Sofia-PS"
 --				"pthread",
 --			}
 --		filter{}
+
+--	project "ClassifierModules"
+--		DefaultConfig("modules")
+--		kind "SharedLib"
+--		language "C++"
+--		includedirs { 
+--			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
+--			"rapidjson/include",
+--			"FCAPS/include/", 
+--			"FCAPS/src/", 
+--			"Tools/inc/", 
+--			"Sofia-PS/inc/"
+--		}
+--		files{ "FCAPS/src/fcaps/ClassifierModules/**.h", "FCAPS/src/fcaps/ClassifierModules/**.cpp" }
+--		filter{ "system:windows" }
+--			files{ "FCAPS/src/fcaps/ClassifierModules/**.def" }
+--		filter{}
 --
-	project "ClassifierModules"
-		DefaultConfig("modules")
-		kind "SharedLib"
-		language "C++"
-		includedirs { 
-			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
-			"rapidjson/include",
-			"FCAPS/include/", 
-			"FCAPS/src/", 
-			"Tools/inc/", 
-			"Sofia-PS/inc/"
-		}
-		files{ "FCAPS/src/fcaps/ClassifierModules/**.h", "FCAPS/src/fcaps/ClassifierModules/**.cpp" }
-		filter{ "system:windows" }
-			files{ "FCAPS/src/fcaps/ClassifierModules/**.def" }
-		filter{}
-
-		libdirs {
-			"boost/stage/lib/",
-		}
-
-		links{ 
-			"SharedTools",
-			"SharedModulesLib",
-			"Storages"
-		}
+--		libdirs {
+--			"boost/stage/lib/",
+--		}
+--
+--		links{ 
+--			"SharedTools",
+--			"SharedModulesLib",
+--			"Storages"
+--		}
 
 	project "StabilityEstimatorContextProcessorModules"
 		DefaultConfig("modules")
@@ -411,6 +411,35 @@ solution "Sofia-PS"
 		files{ "FCAPS/src/fcaps/ContextAttributesModules/**.h", "FCAPS/src/fcaps/ContextAttributesModules/**.cpp" }
 		filter{ "system:windows" }
 			files{ "FCAPS/src/fcaps/ContextAttributesModules/**.def" }
+		filter{}
+
+		libdirs {
+			"boost/stage/lib/",
+		}
+		links{ 
+			"SharedTools",
+			"SharedModulesLib"
+		}
+		filter{ "system:not windows" }
+			links{ 
+			}
+		filter{}
+
+	project "BinContextReaderModules"
+		DefaultConfig("modules")
+		kind "SharedLib"
+		language "C++"
+		includedirs { 
+			"boost/", -- There is no search for the include dirs (in particular on windows it is prety difficult
+			"rapidjson/include",
+			"FCAPS/include/", 
+			"FCAPS/src/", 
+			"Tools/inc/", 
+			"Sofia-PS/inc/"
+		}
+		files{ "FCAPS/src/fcaps/BinContextReaderModules/**.h", "FCAPS/src/fcaps/BinContextReaderModules/**.cpp" }
+		filter{ "system:windows" }
+			files{ "FCAPS/src/fcaps/BinContextReaderModules/**.def" }
 		filter{}
 
 		libdirs {

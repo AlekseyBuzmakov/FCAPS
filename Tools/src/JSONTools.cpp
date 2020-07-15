@@ -95,6 +95,8 @@ bool ReadJsonString( const std::string& str, rapidjson::Document& doc, CJsonErro
 		error.Error="Empty input";
 		return false;
 	}
+	doc.Parse( str.c_str() );
+	/* It is the old behaviour for allowing parsing single value jsons
 	if( str[0] == '{' || str[0] == '[' ) {
 		// We are in the valid from rapidjson point of view JSON.
 		doc.Parse( str.c_str() );
@@ -103,8 +105,9 @@ bool ReadJsonString( const std::string& str, rapidjson::Document& doc, CJsonErro
 		COneValueReader handler( doc );
 		Reader reader;
 		StringStream ss(str.c_str());
-		reader.ParseValueOnly(ss, handler);
+		reader.ParseValue<kParseDefaultFlags>(ss, handler);
 	}
+	*/
 	if( doc.HasParseError () ) {
 		error.Data = str;
 		error.Error = rapidjson::GetParseError_En( doc.GetParseError() );

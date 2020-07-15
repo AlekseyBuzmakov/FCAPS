@@ -1,0 +1,4 @@
+LIBRARY	"BinContextReaderModules"
+EXPORTS
+	InitializeModule	@1
+	GetModuleDescription	@2

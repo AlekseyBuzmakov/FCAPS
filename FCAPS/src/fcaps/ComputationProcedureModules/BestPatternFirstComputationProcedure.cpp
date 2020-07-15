@@ -520,7 +520,7 @@ void CBestPatternFirstComputationProcedure::adjustThreshold()
 	// }
 
 	// Nothing is wory about...
-	if( !shouldAdjustThld || (queue.size() < mpn * 2 && lpChain->GetTotalConsumedMemory() < maxRAMConsumption )) {
+	if( (!shouldAdjustThld || queue.size() < mpn * 2) && lpChain->GetTotalConsumedMemory() < maxRAMConsumption  ) {
 		return;
 	}
 
