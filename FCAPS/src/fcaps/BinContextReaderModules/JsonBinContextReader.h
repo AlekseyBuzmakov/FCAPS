@@ -95,7 +95,8 @@ private:
 	CPtrOwner<CSAXAttributeReader> saxReader;
 
 	// Saves the next object to be reported
-	std::vector<int> nextObject;
+	int nextObjectAttrCount;
+	const int* nextObjectData; 
 
 	void loadContext();
 };

@@ -101,7 +101,6 @@ public:
 		assert(attrsAddedObjects.size() == 0);
 		assert(attributes.size() != 0);
 		attrsAddedObjects.resize(attributes.size(), 0);
-		totalObjectNumber = curObjectNumber+1;
 		attrBuffer.reserve(totalObjectNumber);
 
 		clear();
@@ -113,7 +112,7 @@ public:
 	}
 
 	// Reads the intent of the next object, returns false if no more object is available
-	bool ReadNextObject(int& attrCount, int* attrs) {
+	bool ReadNextObject(int& attrCount, const int*& attrs) {
 		isObjectRead = false;
 		while (!isObjectRead && !reader.IterativeParseComplete()) {
 			if( !reader.IterativeParseNext<rapidjson::kParseDefaultFlags>(*is, *this) ) {
@@ -262,12 +261,14 @@ public:
 		assert(last.Type == SET_Array);
 
 		isInsideAttributes = false; // Entering on array-open and always exiting on array-close
-		if(dataEntryPoint >= 0 && curIndex.Key == "Inds") {
+		if(dataEntryPoint >= 0 && last.Index.Key == "Inds") {
 			isObjectRead = true;
 		}
 		if( dataEntryPoint == stack.size() - 1) {
 			assert(last.Index.Key == "Data");
 			dataEntryPoint = -1;
+			totalObjectNumber = curObjectNumber+1;
+			curObjectNumber = -1;
 		}
 
 		curIndex = last.Index;
@@ -404,8 +405,8 @@ void CJsonBinContextReader::Start()
 {
 	assert(saxReader != 0);
 	
-	nextObject.clear();
-	nextObject.reserve(saxReader->GetObjectNumber());
+	nextObjectAttrCount = 0;
+	nextObjectData = 0; 
 
 	saxReader->StartReadingObjects();
 }
@@ -413,25 +414,30 @@ int CJsonBinContextReader::GetNextObjectIntentSize()
 {
 	assert(saxReader != 0);
 
-	int attrCount = 0;
-	nextObject.resize(saxReader->GetObjectNumber());
-	const bool res = saxReader->ReadNextObject(attrCount, nextObject.data());
+	nextObjectAttrCount = 0;
+	nextObjectData = 0; 
+	const bool res = saxReader->ReadNextObject(nextObjectAttrCount, nextObjectData);
 	if( !res ) {
 		return -1;
 	}
-	assert(attrCount >=0);
-	nextObject.resize(attrCount);
+	assert(nextObjectAttrCount >=0);
+	assert(nextObjectAttrCount <= attributes.size() );
 
-	return attrCount;
+	return nextObjectAttrCount;
 }
 void CJsonBinContextReader::GetNextObject(CObjectIntent& intent)
 {
-	if( intent.Size < nextObject.size()) {
+	if( intent.Size < nextObjectAttrCount) {
 		throw new CTextException("CJsonBinContextReader::GetNextObject", "Insuffisient intent memory");
 	}
 	assert(sizeof(int) == sizeof(IBinContextReader::TAttributeID));
-	memcpy(intent.Attributes, nextObject.data(), sizeof(TAttributeID) * nextObject.size());
+	for(int i = 0; i < nextObjectAttrCount; ++i) {
+		const TAttributeID curAttr = nextObjectData[i];
+		assert(0 <= curAttr && curAttr < reverseAttrOrder.size());
+		intent.Attributes[i] = reverseAttrOrder[curAttr];
+	}
 }
+
 
 void CJsonBinContextReader::LoadParams( const JSON& json )
 {
