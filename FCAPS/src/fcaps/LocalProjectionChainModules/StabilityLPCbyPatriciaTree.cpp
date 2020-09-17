@@ -51,83 +51,6 @@ const char* const CStabilityLPCbyPatriciaTree::Desc()
 
 ////////////////////////////////////////////////////////////////////
 
-const CIntentsTree::TAttribute CIntentsTree::InvalidAttribute = static_cast<CIntentsTree::TAttribute>(-1);
-
-CIntentsTree::TAttribute CIntentsTree::GetNextAttribute(TIntentItr& itr) const
-{
-	assert(0 <= itr && itr < memory.size());
-	assert(memory[itr].Attribute != InvalidAttribute);
-	const TAttribute res = memory[itr].Attribute;
-	itr = memory[itr].Next;
-	return res;
-}
-
-CIntentsTree::TIntent CIntentsTree::AddAttribute(TIntent intent, TAttribute newAttr)
-{
-	TIntentItr nextNode = newNode();
-	assert(0 <= nextNode && nextNode < memory.size());
-
-	const TIntentItr currItr = GetIterator(intent);
-	assert(currItr == -1 || 0 <= currItr && currItr < memory.size());
-
-	memory[nextNode].Next = currItr;
-	memory[nextNode].Attribute = newAttr;
-	memory[nextNode].BranchesCount = 0;
-
-	if( currItr != -1 ) {
-		// When computing closures some attributes with high number can arrive
-		// assert( memory[currItr].Attribute < newAttr);
-		assert( 0 <= memory[currItr].Attribute);
-		++memory[currItr].BranchesCount;
-	}
-	return nextNode;
-}
-
-void CIntentsTree::Delete(TIntent intent)
-{
-	TIntentItr itr = GetIterator(intent);
-	TIntentItr prevItr = -1;
-
-	while(itr != -1) {
-		assert(0 <= itr && itr < memory.size());
-		if(memory[itr].BranchesCount > 0) {
-			--memory[itr].BranchesCount;
-			if( prevItr != -1 ) {
-				assert(0 <= prevItr && prevItr < memory.size());
-				memory[prevItr].Next = freeNode;
-				freeNode = GetIterator(intent);
-			}
-
-			// We have found the branching something else exists, so stop it.
-			break;
-		} else {
-			memory[itr].Attribute = InvalidAttribute;
-			itr = memory[itr].Next;
-		}
-	}
-	if( itr == -1 && prevItr != -1) {
-		assert(0 <= prevItr && prevItr < memory.size());
-		memory[prevItr].Next = freeNode;
-		freeNode = GetIterator(intent);
-	}
-}
-
-// Creates a new node dealing with free memory if any
-CIntentsTree::TIntentItr CIntentsTree::newNode()
-{
-	if( freeNode == -1) {
-		memory.emplace_back();
-		return memory.size() - 1;
-	} else {
-		assert(0 <= freeNode < memory.size());
-		const TIntentItr res = freeNode;
-		freeNode = memory[freeNode].Next;
-		return res;
-	}
-}
-
-////////////////////////////////////////////////////////////////////
-
 class CIgnoredAttrs {
 public:
 	void Ignore(CIntentsTree::TAttribute a) 
@@ -323,41 +246,46 @@ void CStabilityLPCbyPatriciaTree::LoadParams( const JSON& json )
 	}
 	extCmp->SetMaxAttrNumber(attrs->GetObjectNumber());
 
+	buildPatritiaTree();
+
 	// Debuging
-	cout << "Object Number " << attrs->GetObjectNumber() << endl;
-	int a = 0;
-	while(attrs->HasAttribute(a)) {
-		cout << a << " " << attrs->GetAttributeName(a) << " (" << attrs->GetSupport(a) << ")" << endl;
-		++a;
-	}
-	cout << endl;
+	// cout << "Object Number " << attrs->GetObjectNumber() << endl;
+	// int a = 0;
+	// while(attrs->HasAttribute(a)) {
+	// 	cout << a << " " << attrs->GetAttributeName(a) << " (" << attrs->GetSupport(a) << ")" << endl;
+	// 	++a;
+	// }
+	// cout << endl;
 
 
-	// Starting reading the context object by object
-	attrs->Start();
+	// // Starting reading the context object by object
+	// attrs->Start();
 
-	IBinContextReader::CObjectIntent intent;
-	vector<int> buffer;
+	// IBinContextReader::CObjectIntent intent;
+	// vector<int> buffer;
 
-	while( true ) {
-		intent.Size = attrs->GetNextObjectIntentSize();
-		if(intent.Size < 0) {
-			break;
-		}
-		buffer.resize(intent.Size);
-		intent.Attributes = buffer.data();
+	// while( true ) {
+	// 	intent.Size = attrs->GetNextObjectIntentSize();
+	// 	if(intent.Size < 0) {
+	// 		break;
+	// 	}
+	// 	buffer.resize(intent.Size);
+	// 	intent.Attributes = buffer.data();
 
-		attrs->GetNextObject(intent);
+	// 	attrs->GetNextObject(intent);
 
-		assert(intent.Size <= buffer.size());
+	// 	assert(intent.Size <= buffer.size());
 
-		cout << "Intent: ";
-		for(int i = 0; i < intent.Size; ++i) {
-			assert(attrs->HasAttribute(intent.Attributes[i]));
-			cout << attrs->GetAttributeName(intent.Attributes[i]) << " ";
-		}
-		cout << endl;
-	}
+	// 	cout << "Intent: ";
+	// 	for(int i = 0; i < intent.Size; ++i) {
+	// 		assert(attrs->HasAttribute(intent.Attributes[i]));
+	// 		cout << attrs->GetAttributeName(intent.Attributes[i]) << " ";
+	// 	}
+	// 	cout << endl;
+	// }
+
+
+	
 	throw new CTextException("STOP","STOP");
 }
 
@@ -552,26 +480,71 @@ size_t CStabilityLPCbyPatriciaTree::GetTotalConsumedMemory() const
 	return totalAllocatedPatternSize + intentsTree.MemorySize() + extCmp->GetMemoryConsumption();
 }
 
+void CStabilityLPCbyPatriciaTree::buildPatritiaTree()
+{
+	// Starting reading the context object by object
+	attrs->Start();
+
+	IBinContextReader::CObjectIntent intent;
+	vector<int> buffer;
+
+	// Insertion of all objects to partitia tree
+	std::multimap<CPatritiaTree::TNodeIndex, CPatritiaTree::TObject> nodeToObjectMap;
+	for(int objectId = 0; true; ++objectId) {
+		intent.Size = attrs->GetNextObjectIntentSize();
+		if(intent.Size < 0) {
+			break;
+		}
+		buffer.resize(intent.Size);
+		intent.Attributes = buffer.data();
+
+		attrs->GetNextObject(intent);
+
+		assert(intent.Size == buffer.size());
+
+		sort(buffer.begin(), buffer.end());
+
+		CPatritiaTree::TNodeIndex nodeId =  pTree.GetRoot(); // Root node with no generator attribute
+
+		for( auto i = buffer.begin(); i!= buffer.end(); ++i) {
+			nodeId = pTree.GetAttributeNode(nodeId, *i);
+		}
+		nodeToObjectMap.insert(std::pair<CPatritiaTree::TNodeIndex, CPatritiaTree::TObject>( nodeId, objectId ));
+	}
+
+	// The set of previously processed attibutes
+	std::deque<TAttribute> childrenCAttrs;
+    std::list<TAttribute> currentNodeAttrs;
+	// Compressing of the Tree
+	CDeepFirstPatritiaTreeIterator treeItr(pTree);
+	for(; !treeItr.IsEnd(); ++treeItr) {
+		if( treeItr.Status() != CDeepFirstPatritiaTreeIterator::T_Exit) {
+			continue;
+		}
+		// Status is exit and thus all children are compressed
+		auto& children = treeItr->Children();
+		auto ch = treeItr->Children().rbegin();
+		if( ch == children.rend() ) {
+			// No children, i.e., all attributes are described
+			continue;
+		}
+		// Filling the common attributes storage with the last children closed attributes.
+		CPatritiaTree::TNodeIndex lastNodeId = *ch;
+		const auto& lastNode = pTree.GetNode(lastNodeId);
+		currentNodeAttrs.clear();
+		for(int i = lastNode.ClosureAttrStart; i < lastNode.ClosureAttrEnd; ++i) {
+			assert(currentNodeAttrs.empty() || 0 <= i && childrenCAttrs.size() && currentNodeAttrs.back() > childrenCAttrs[i]);
+			currentNodeAttrs.push_back(childrenCAttrs[i]);
+		}
+		// Adding the generated attribute. It is the only possible generated attribute among the children that can be common to all of children
+		currentNodeAttrs.push_back(lastNode.GenAttr);
+	}
+}
+
 const CPattern& CStabilityLPCbyPatriciaTree::to_pattern(const IPatternDescriptor* d) const
 {
 	assert(d != 0);
 	return debug_cast<const CPattern&>(*d);
-}
-
-const CPattern* CStabilityLPCbyPatriciaTree::newPattern(
-	const CVectorBinarySetDescriptor* ext,
-	CIntentsTree::TIntent intent,
-	CIgnoredAttrs& ignored,
-	int nextAttr, DWORD delta, int clossestAttr)
-{
-	const CPattern* p = new CPattern(*extCmp, ext, extDeleter,
-	                    intentsTree, intent,
-			    ignored,
-	                    nextAttr,delta,clossestAttr);
-
-	++totalAllocatedPatterns;
-	totalAllocatedPatternSize += p->GetPatternMemorySize();
-	return p;
 }
 const CVectorBinarySetDescriptor* CStabilityLPCbyPatriciaTree::getAttributeImg(int a)
 {

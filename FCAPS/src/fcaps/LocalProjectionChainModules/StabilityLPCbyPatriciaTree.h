@@ -28,82 +28,18 @@ class CIgnoredAttrs;
 
 const char StabilityLPCbyPatriciaTree[] = "StabilityLPCbyPatriciaTreeModule";
 
-////////////////////////////////////////////////////////////////////
-// A class for storing intents in a tree
-namespace {
-class CIntentsTree {
-public:
-	typedef uint_fast32_t TAttribute;
-	typedef int_fast32_t TIntent;
-	typedef TIntent TIntentItr;
-
-	static const TAttribute InvalidAttribute;
-
-public:
-	CIntentsTree() :
-		freeNode(-1) {}
-
-	// Returns the iterator to the END of the list
-	TIntentItr GetIterator(TIntent intent) const
-		{return intent;};
-	
-	// Returns the value of the next attribute,
-	//  and changes the iterator to the next position
-	TAttribute GetNextAttribute(TIntentItr& itr) const;
-
-	// Add attributes to the intent
-	//  the old intent is INVALIDATED
-	TIntent AddAttribute(TIntent intent, TAttribute newAttr);
-
-	// Creating of a new intent
-	TIntent Create()
-		{return -1;}
-	// Copying an existing intent
-	TIntent Copy(TIntent intent)
-		{return intent;}
-	// Deletion of an intent
-	void Delete(TIntent intent);
-
-	//TOKILL
-	int Size() const
-		{return memory.size();}
-	int MemorySize() const { return memory.size() * sizeof(TTreeNode) + sizeof(CIntentsTree);}
-
-private:
-	struct TTreeNode{
-		TAttribute Attribute;
-		TIntentItr Next;
-		int_fast32_t BranchesCount;
-
-		TTreeNode() :
-			Attribute(InvalidAttribute),Next(-1),BranchesCount(0) {}
-	};
-
-private:
-	// The memory the whole tree is stored in
-	std::deque<TTreeNode> memory;
-	// The pointer to the next free node
-	TIntentItr freeNode;
-
-	TIntentItr newNode();
-};
-
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 class CStabilityLPCbyPatriciaTree : public ILocalProjectionChain, public IModule {
 public:
 	CStabilityLPCbyPatriciaTree();
 	~CStabilityLPCbyPatriciaTree();
+
 	// Methods of ILocalProjectionChain
 	virtual int GetObjectNumber() const;
 	virtual double GetInterestThreshold() const;
 	virtual void UpdateInterestThreshold( const double& thld );
 	virtual double GetPatternInterest( const IPatternDescriptor* p );
-	// TODO: probably will be used later
-	// virtual bool AreEqual(const IPatternDescriptor* p, const IPatternDescriptor* q) const;
-	// virtual bool IsSmaller(const IPatternDescriptor* p, const IPatternDescriptor* q) const;
 	virtual bool IsTopoSmaller(const IPatternDescriptor* p, const IPatternDescriptor* q) const;
 	virtual void FreePattern(const IPatternDescriptor* p ) const;
 	virtual void ComputeZeroProjection( CPatternList& ptrns );
@@ -135,6 +71,8 @@ private:
 	static const CModuleRegistrar<CStabilityLPCbyPatriciaTree> registrar;
 	// Object that enumerates attribute extents
 	CSharedPtr<IBinContextReader> attrs;
+	// The patricia tree of the context
+	CPatritiaTree pTree;
 	// Cached attributes
 	std::deque<const CVectorBinarySetDescriptor*> attrsHolder;
 	// The threshold for delta measure
@@ -142,17 +80,14 @@ private:
 	// Comparator for extents
 	CSharedPtr<CVectorBinarySetJoinComparator> extCmp;
 	CPatternDeleter extDeleter;
-	// Holder for the intents
-	CIntentsTree intentsTree;
 	// A temporary storage for intents. Here for not allocating memory too often
 	std::vector<int> intentStorage;
-	// A flag indicating if all attributes for a concept should be processed in once
-	bool areAllInOnce;
 
 	// Memory consumption
 	mutable size_t totalAllocatedPatterns;
 	mutable size_t totalAllocatedPatternSize;
 
+	void buildPatritiaTree();
 	const CPattern& to_pattern(const IPatternDescriptor* d) const;
 	const CPattern* newPattern(
 		const CVectorBinarySetDescriptor* ext,
