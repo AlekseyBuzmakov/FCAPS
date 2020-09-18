@@ -19,7 +19,7 @@ public:
 	typedef int TNodeIndex;
 	typedef int TAttribute;
 	typedef int TObject;
-	typedef std::set<TNodeIndex, CPatritiaTree> CChildrenSet;
+	typedef std::set<TNodeIndex, CPatritiaTreeNode> CChildrenSet;
 	typedef CPatritiaTreeNode CNode;
 
 public:
@@ -63,6 +63,17 @@ public:
 			return AddNode(id, a);
 		}
 	}
+	// Adds objects to tree
+	template<typename TItr>
+	void AddObjects(const TItr& begin, const TItr end, std::pair<int,int>& indices) {
+		indices.first = objects.size();
+		objects.insert(begin, end);
+		indices.second = objects.size();
+	}
+	int AddAttribute(TAttribute a) {
+		closureAttrs.push_back(a);
+		return closureAttrs.size() - 1;
+	}
 	// Comparator
 	bool operator()( const TNodeIndex& lhs, const TNodeIndex& rhs ) const
 	{
@@ -93,6 +104,7 @@ public:
 	CPatritiaTreeNode( TNodeIndex _parent, TAttribute a ) :
 		parent( _parent ), genAttr(a),
 		closureAttrStart(-1), closureAttrEnd(-1),
+		objStart(-1), objEnd(-1),
 		beforeAttrsCount(0), afterAttrsCount(0)
 	{}
 
@@ -111,20 +123,30 @@ public:
 		}
 	}
 
+	// Cleans the data minimizin the memory consumption
+	void Clear() {
+		closureAttrStart =-1;
+		closureAttrEnd = -1;
+		objStart = -1;
+		objEnd = -1;
+		Children.clear();
+	}
+
 	// The set of children
 	CChildrenSet Children;
 
-	// Generator Attribute
+	// Generator Attribute the attributes that splits the object in the parrent vertex in two disjoint sets.
 	TAttribute GenAttr;
 
-	// The interval [] of sorted set of closure attributes
+	// The interval [] of sorted set of closure attributes in the CPatritiaTree.closureAttrs
 	int ClosureAttrStart;
 	int ClosureAttrEnd;
 
-	// The interval [] specifying the objects belonging to the node
+	// The interval [] specifying the objects belonging to the node in CPatritiaTree.objects
 	int ObjStart;
 	int ObjEnd;
 
+	// Optimization in order to fastly compute the number of attributes before (left) and after the generator
 	// The number of common attributes after the genAttr
 	int AfterAttrsCount;
 	// The number of common attributes before the genAttr (it is always more ore equal the depth of the node)

@@ -74,7 +74,7 @@ private:
 class CPattern : public IExtent, public IPatternDescriptor, public ISwappable {
 	
 public:
-	// Pattern controls memor for the extent
+	// Pattern controls memory for the extent
 	CPattern( CVectorBinarySetJoinComparator& _cmp, 
 			const CVectorBinarySetDescriptor* e, 
 			CPatternDeleter dlt,
@@ -489,10 +489,12 @@ void CStabilityLPCbyPatriciaTree::buildPatritiaTree()
 	vector<int> buffer;
 
 	// Insertion of all objects to partitia tree
+	// The correspondance between nodes in the patritia tree and the objectID
 	std::multimap<CPatritiaTree::TNodeIndex, CPatritiaTree::TObject> nodeToObjectMap;
 	for(int objectId = 0; true; ++objectId) {
 		intent.Size = attrs->GetNextObjectIntentSize();
 		if(intent.Size < 0) {
+			// end of object iteration
 			break;
 		}
 		buffer.resize(intent.Size);
@@ -512,32 +514,130 @@ void CStabilityLPCbyPatriciaTree::buildPatritiaTree()
 		nodeToObjectMap.insert(std::pair<CPatritiaTree::TNodeIndex, CPatritiaTree::TObject>( nodeId, objectId ));
 	}
 
+	// Now we will add objects to the nodes
+	
+	CDeepFirstPatritiaTreeIterator treeItr(pTree);
+	for(; !treeItr.End(); ++treeItr) {
+		if( treeItr.Status() != CDeepFirstPatritiaTreeIterator::T_Exit) {
+			// The objects are collected on exit from the node
+			continue;
+		}
+		auto objItrs = nodeToObjectMap.equal_range(*treeItr);
+		std::pair<int,int> inserted;
+		pTree.AddObjects(objItrs.first, objItrs.second, inserted);
+		if(!treeItr->Children.empty()) {
+			assert(inserted.first > treeItr->Children.begin()->ObjStart);
+			treeItr->ObjStart = treeItr->Children.begin()->ObjStart;
+		} else {
+			treeItr->ObjStart = inserted.first;
+		}
+		treeItr->ObjEnd = inserted.second;
+	}
+
 	// The set of previously processed attibutes
 	std::deque<TAttribute> childrenCAttrs;
     std::list<TAttribute> currentNodeAttrs;
 	// Compressing of the Tree
-	CDeepFirstPatritiaTreeIterator treeItr(pTree);
+    //  Now all attributes that are in the closure should be added to the node and the corresponding tree should be removed
+	treeItr.Reset(pTree);
 	for(; !treeItr.IsEnd(); ++treeItr) {
 		if( treeItr.Status() != CDeepFirstPatritiaTreeIterator::T_Exit) {
 			continue;
 		}
 		// Status is exit and thus all children are compressed
 		auto& children = treeItr->Children();
-		auto ch = treeItr->Children().rbegin();
+		auto ch = children.rbegin();
 		if( ch == children.rend() ) {
 			// No children, i.e., all attributes are described
 			continue;
 		}
-		// Filling the common attributes storage with the last children closed attributes.
+
+		// Now if there are objects associated with the node, then these objects do not have other attributes and thus there is no attributes in the closure.
+		if( nodeToObjectMap.find(*treeItr) != nodeToObjectMap.end() ) {
+			continue;
+		}
+		// Only the attributes after the last one can be in the closure,
+		// since the previous children are generated with the attribute which definetly upson in the last children
 		CPatritiaTree::TNodeIndex lastNodeId = *ch;
 		const auto& lastNode = pTree.GetNode(lastNodeId);
 		currentNodeAttrs.clear();
+		// Adding the generated attribute for the last children.
+		// It is the only possible generated attribute among the children that can be common to all of children
+		currentNodeAttrs.push_back(lastNode.GenAttr);
+		// Adding all attributes for the last node as candidates.
 		for(int i = lastNode.ClosureAttrStart; i < lastNode.ClosureAttrEnd; ++i) {
-			assert(currentNodeAttrs.empty() || 0 <= i && childrenCAttrs.size() && currentNodeAttrs.back() > childrenCAttrs[i]);
+			assert(currentNodeAttrs.empty() || 0 <= i && childrenCAttrs.size() && currentNodeAttrs.back() < childrenCAttrs[i]);
 			currentNodeAttrs.push_back(childrenCAttrs[i]);
 		}
-		// Adding the generated attribute. It is the only possible generated attribute among the children that can be common to all of children
-		currentNodeAttrs.push_back(lastNode.GenAttr);
+		// A flag indicating if all attributes from the last node are presented in prevous children
+		bool areAllLastChildAttributesCommon = true;
+		// Now we itearate over the previous children and compute the common attributes
+		++ch; // Now it is the last but one child
+		for(; ch != children.rend(); ++ch) {
+			auto attrItr = currentNodeAttrs.begin();
+			int i = ch->ClosureAttrStart;
+			for(; attrItr != currentNodeAttrs.end(); ) {
+				auto a = attrItr;
+				++attrItr;
+
+				// Skiping all attributes that are missed in the current child
+				while( i < ch->ClosureAttrEnd && childrenCAttrs[i] < *a) {
+					++i;
+				}
+
+				if( i >= ch->ClosureAttrEnd || childrenCAttrs[i] != *a ) {
+					// The attribute a is missed from the current child
+					currentNodeAttrs.erase(a);
+					areAllLastChildAttributesCommon = false;
+					continue;
+				}
+
+				assert(childrenCAttrs[i] == *a);
+				// The attribute can  be potentailly common just continue
+			}
+		}
+
+		// Now currentNodeAttrs has all common attributes
+		assert(treeItr->ClosureAttrStart >= treeItr->ClosureAttrEnd); // No attributes should be in the closure for this node.
+		const int commonAttributeNum = currentNodeAttrs.size();
+		if( commonAttributeNum == 0 ) {
+			// There is no common attribute, i.e., there is nothing in the closure
+			continue;
+		}
+
+		// Saving attributes in the closure.
+		treeItr->ClosureAttrStart = childrenCAttrs.size();
+		childrenCAttrs.push_back(currentNodeAttrs.begin(), currenNodeAttrs.end());
+		treeItr->ClosureAttrEnd = childrenCAttrs.size();
+
+		ch = children.rbegin();
+		assert( ch != children.end());
+		if(areAllLastChildAttributesCommon) {
+			++ch; // The last node will be removed later
+		}
+
+		// Now for all children (sometimes but the last one) we collect the attributes in the closure and register them in the tree
+		for( ; ch != children.end(); ++ch) {
+			int clsAttrInds = ch->ClosureAttrStart;
+			const int clsAttrEnd = ch->ClosureAttrEnd;
+			if( clsAttrInds >= clsAttrEnd ) {
+				continue;
+			}
+			ch->ClosureAttrStart = pTree.AddAtribute(childrenCAttrs.at(clsAttrInds));
+			ch->ClosureAttrEnd = ch->ClosureAttrStart;
+			++clsAttrInds;
+			for(; clsAttrInds < clsAttrEnd; ++clsAttrInds) {
+				ch->ClosureAttrEnd = pTree.AddAtribute(childrenCAttrs.at(clsAttrInds));
+			}
+			++ch->ClosureAttrEnd;
+		}
+
+		if( areAllLastChildAttributesCommon ) {
+			// Then the last child should be merged with the current node
+			treeItr->Children.insert(lastNode.Children.begin(),lastNode.Children.end());
+			lastNode.Clear();
+			treeItr->Children.erase(treeItr->Children.rbegin());
+		}
 	}
 }
 

@@ -1,7 +1,7 @@
 // Initial software, Aleksey Buzmakov, Copyright (c) Higher School of Economics, Russia, GPL v2 license, 2020, v0.7
 
 // Author: Aleksey Buzmakov
-// Description: A simple interface for accesing objects encoded sets of attributes
+// Description: A simple interface for accesing objects encoded as sets of attributes
 
 #ifndef PATTERNENUMERATOR_H_INCLUDED
 #define PATTERNENUMERATOR_H_INCLUDED
@@ -26,7 +26,7 @@ interface IBinContextReader : public virtual IObject {
     // Returns the total number of objects in the dataset
     virtual int GetObjectNumber() const = 0;
 
-    // Check if an attribute exits
+    // Check if an attribute exists
     virtual bool HasAttribute(TAttributeID a) const = 0;
     // Get the name of the attribute.
     //   Returns the JSON string, i.e., in the form "NAME" including the parethesis
