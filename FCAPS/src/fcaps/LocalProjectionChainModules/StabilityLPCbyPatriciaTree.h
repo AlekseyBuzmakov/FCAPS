@@ -12,6 +12,8 @@
 
 #include <deque>
 
+#include "details/PatritiaTree.h"
+
 ////////////////////////////////////////////////////////////////////
 
 interface IPatternDescriptor;
@@ -91,7 +93,7 @@ private:
 	const CPattern& to_pattern(const IPatternDescriptor* d) const;
 	const CPattern* newPattern(
 		const CVectorBinarySetDescriptor* ext,
-		CIntentsTree::TIntent intent,
+		// CIntentsTree::TIntent intent,
 		CIgnoredAttrs& ignored,
 		int nextAttr, DWORD delta, int clossestAttr = 0);
 	const CVectorBinarySetDescriptor* getAttributeImg(int a);

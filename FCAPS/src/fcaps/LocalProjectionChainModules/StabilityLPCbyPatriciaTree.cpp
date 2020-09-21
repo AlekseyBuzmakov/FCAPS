@@ -13,6 +13,7 @@
 #include <StdTools.h>
 
 #include <set>
+#include <map>
 #include <stdint.h>
 
 
@@ -51,150 +52,149 @@ const char* const CStabilityLPCbyPatriciaTree::Desc()
 
 ////////////////////////////////////////////////////////////////////
 
-class CIgnoredAttrs {
-public:
-	void Ignore(CIntentsTree::TAttribute a) 
-	{
-		assert( a >= 0); 
-		if( a >= ignoredAttrs.size()) {
-			ignoredAttrs.resize(a+1);
-		} 
-		ignoredAttrs[a] = true; 
-	}
-	bool IsIgnored(CIntentsTree::TAttribute a) const
-		{ return 0 <=a && a < ignoredAttrs.size() && ignoredAttrs[a]; }
-	void Swap(CIgnoredAttrs& other) 
-		{ ignoredAttrs.swap(other.ignoredAttrs); }
-private:
-	std::deque<bool> ignoredAttrs;
-};
+// class CIgnoredAttrs {
+// public:
+// 	void Ignore(TAttribute a) 
+// 	{
+// 		assert( a >= 0); 
+// 		if( a >= ignoredAttrs.size()) {
+// 			ignoredAttrs.resize(a+1);
+// 		} 
+// 		ignoredAttrs[a] = true; 
+// 	}
+// 	bool IsIgnored(CIntentsTree::TAttribute a) const
+// 	{ return 0 <=a && a < ignoredAttrs.size() && ignoredAttrs[a]; }
+// 	void Swap(CIgnoredAttrs& other) 
+// 		{ ignoredAttrs.swap(other.ignoredAttrs); }
+// private:
+// 	std::deque<bool> ignoredAttrs;
+// };
 
 ////////////////////////////////////////////////////////////////////
 
 class CPattern : public IExtent, public IPatternDescriptor, public ISwappable {
-	
 public:
-	// Pattern controls memory for the extent
-	CPattern( CVectorBinarySetJoinComparator& _cmp, 
-			const CVectorBinarySetDescriptor* e, 
-			CPatternDeleter dlt,
-	          CIntentsTree& iTree, CIntentsTree::TIntent i,
-		  CIgnoredAttrs& ignored,
-	          int nextAttr, DWORD d, int closestAttribute ) :
-		cmp(_cmp), extent(e, dlt), swappedExtent(-1), extentSize(e->Size()), extentHash(e->Hash()),
-		intentsTree(iTree), intent(i), nextAttribute(nextAttr), delta(d), closestChildAttribute(closestAttribute)
-	{
-		assert( extent != 0 );
-		ignoredAttrs.Swap(ignored);
-	}
-	~CPattern()
-	{
-		intentsTree.Delete(intent);
-		if( IsSwapped() ) {
-			assert(swappedExtent != static_cast<CVectorBinarySetJoinComparator::TSwappedPattern>(-1));
-			cmp.SwapRemove(swappedExtent);
-			swappedExtent = -1;
-		}
-	}
+// 	// Pattern controls memory for the extent
+// 	CPattern( CVectorBinarySetJoinComparator& _cmp, 
+// 			const CVectorBinarySetDescriptor* e, 
+// 			CPatternDeleter dlt,
+// 	          CIntentsTree& iTree, TIntent i,
+// 		  CIgnoredAttrs& ignored,
+// 	          int nextAttr, DWORD d, int closestAttribute ) :
+// 		cmp(_cmp), extent(e, dlt), swappedExtent(-1), extentSize(e->Size()), extentHash(e->Hash()),
+// 		intentsTree(iTree), intent(i), nextAttribute(nextAttr), delta(d), closestChildAttribute(closestAttribute)
+// 	{
+// 		assert( extent != 0 );
+// 		ignoredAttrs.Swap(ignored);
+// 	}
+// 	~CPattern()
+// 	{
+// 		intentsTree.Delete(intent);
+// 		if( IsSwapped() ) {
+// 			assert(swappedExtent != static_cast<CVectorBinarySetJoinComparator::TSwappedPattern>(-1));
+// 			cmp.SwapRemove(swappedExtent);
+// 			swappedExtent = -1;
+// 		}
+// 	}
 
-	// Methods of IExtent
-	virtual DWORD Size() const
-		{ return extentSize;}
-    virtual void GetExtent( CPatternImage& extent ) const
-		{initPatternImage(extent);}
-	virtual void ClearMemory( CPatternImage& e) const
-		{ delete[] e.Objects;}
+// 	// Methods of IExtent
+// 	virtual DWORD Size() const
+// 		{ return extentSize;}
+//     virtual void GetExtent( CPatternImage& extent ) const
+// 		{initPatternImage(extent);}
+// 	virtual void ClearMemory( CPatternImage& e) const
+// 		{ delete[] e.Objects;}
 
-	// Methos of IPatternDescriptor
-	virtual bool IsMostGeneral() const
-		{return intent == -1;}
-	virtual size_t Hash() const
-		{ return extentHash; }
+// 	// Methos of IPatternDescriptor
+// 	virtual bool IsMostGeneral() const
+// 		{return intent == -1;}
+// 	virtual size_t Hash() const
+// 		{ return extentHash; }
 
-	// Methods of ISwappable
-	virtual bool IsSwapped() const
-		{ return extent == 0;}
-	virtual void Swap() const
-	{
-		if( extent == 0 ) {
-			return;
-		}
-		swappedExtent = cmp.SwapPattern(extent.release());
-		assert(extent == 0);
-	}
+// 	// Methods of ISwappable
+// 	virtual bool IsSwapped() const
+// 		{ return extent == 0;}
+// 	virtual void Swap() const
+// 	{
+// 		if( extent == 0 ) {
+// 			return;
+// 		}
+// 		swappedExtent = cmp.SwapPattern(extent.release());
+// 		assert(extent == 0);
+// 	}
 
-	// Methods of the class
-	const CVectorBinarySetDescriptor& Extent() const
-		{ restore(); assert(extent != 0); return *extent;}
-	CIntentsTree::TIntent Intent() const
-		{return intent;}
-	void AddAttributeToIntent(CIntentsTree::TAttribute a) const
-		{ intent = intentsTree.AddAttribute(intent,a); ignoredAttrs.Ignore(a); }
+// 	// Methods of the class
+// 	const CVectorBinarySetDescriptor& Extent() const
+// 		{ restore(); assert(extent != 0); return *extent;}
+// 	TIntent Intent() const
+// 		{return intent;}
+// 	// void AddAttributeToIntent(CIntentsTree::TAttribute a) const
+// 	// 	{ intent = intentsTree.AddAttribute(intent,a); ignoredAttrs.Ignore(a); }
 
-	void IgnoreAttribute(CIntentsTree::TAttribute a) const
-		{ ignoredAttrs.Ignore(a);}
-	bool IsIgnored(CIntentsTree::TAttribute a) const
-		{ return ignoredAttrs.IsIgnored(a); }
-	const CIgnoredAttrs& IgnoredAttrs() const
-		{ return ignoredAttrs;}
+// 	void IgnoreAttribute(CIntentsTree::TAttribute a) const
+// 		{ ignoredAttrs.Ignore(a);}
+// 	bool IsIgnored(CIntentsTree::TAttribute a) const
+// 		{ return ignoredAttrs.IsIgnored(a); }
+// 	const CIgnoredAttrs& IgnoredAttrs() const
+// 		{ return ignoredAttrs;}
 
-	int NextAttribute() const
-		{return nextAttribute;}
-	void SetNextAttribute(int a) const
-		{nextAttribute = a;}
+// 	int NextAttribute() const
+// 		{return nextAttribute;}
+// 	void SetNextAttribute(int a) const
+// 		{nextAttribute = a;}
 	DWORD Delta() const
 		{return delta;}
-	void SetDelta(DWORD d) const
-		{assert(d <= delta); delta = d;}
-	int ClosestChild() const
-		{return closestChildAttribute;}
-	void SetClosestChild( int a ) const
-		{closestChildAttribute = a;}
+// 	void SetDelta(DWORD d) const
+// 		{assert(d <= delta); delta = d;}
+// 	int ClosestChild() const
+// 		{return closestChildAttribute;}
+// 	void SetClosestChild( int a ) const
+// 		{closestChildAttribute = a;}
 
-	// TOKILL
+// 	// TOKILL
 	size_t GetPatternMemorySize() const
 		{ return sizeof(CPattern); }
 
 
-private:
-	CVectorBinarySetJoinComparator& cmp;
-	mutable unique_ptr<const CVectorBinarySetDescriptor, CPatternDeleter> extent;
-	mutable CVectorBinarySetJoinComparator::TSwappedPattern swappedExtent;
-	const DWORD extentSize;
-	const DWORD extentHash;
+// private:
+// 	CVectorBinarySetJoinComparator& cmp;
+// 	mutable unique_ptr<const CVectorBinarySetDescriptor, CPatternDeleter> extent;
+// 	mutable CVectorBinarySetJoinComparator::TSwappedPattern swappedExtent;
+// 	const DWORD extentSize;
+// 	const DWORD extentHash;
 
-	CIntentsTree& intentsTree;
-	mutable CIntentsTree::TIntent intent;
-	mutable CIgnoredAttrs ignoredAttrs;
+// 	CIntentsTree& intentsTree;
+// 	mutable TIntent intent;
+// 	mutable CIgnoredAttrs ignoredAttrs;
 
-	// The minimal number of the attribute that can be added to the pattern.
-	// This number also gives the reference to the "core" of the pattern in the CbO canonical order
-	mutable int nextAttribute;
-	// The delta measure of the pattern w.r.t. the projection not including the @var nextAttribute attribute
+// 	// The minimal number of the attribute that can be added to the pattern.
+// 	// This number also gives the reference to the "core" of the pattern in the CbO canonical order
+// 	mutable int nextAttribute;
+// 	// The delta measure of the pattern w.r.t. the projection not including the @var nextAttribute attribute
 	mutable DWORD delta;
-	// The attribute of a clossest child. In intersection of the pattern and the attribute the result is the clossest child
-	// Used as an optimization for earlier detection of new unstable patterns
-	mutable int closestChildAttribute;
+// 	// The attribute of a clossest child. In intersection of the pattern and the attribute the result is the clossest child
+// 	// Used as an optimization for earlier detection of new unstable patterns
+// 	mutable int closestChildAttribute;
 
-	void initPatternImage(CPatternImage& img) const {
-		img.PatternId = Hash();
-		img.ImageSize = Extent().Size();
-		img.Objects = 0;
+// 	void initPatternImage(CPatternImage& img) const {
+// 		img.PatternId = Hash();
+// 		img.ImageSize = Extent().Size();
+// 		img.Objects = 0;
 
-		unique_ptr<int[]> objects (new int[img.ImageSize]);
-		img.Objects = objects.get(); 
-		cmp.EnumValues(Extent(), objects.get(), img.ImageSize);
-		objects.release(); 
-	}
-	void restore() const {
-		if( extent != 0 ) {
-			return;
-		}
-		assert(swappedExtent != static_cast<CVectorBinarySetJoinComparator::TSwappedPattern>(-1));
-		extent.reset(cmp.SwapRestore(swappedExtent));
-		swappedExtent = -1;
-		assert(extent != 0);
-	}
+// 		unique_ptr<int[]> objects (new int[img.ImageSize]);
+// 		img.Objects = objects.get(); 
+// 		cmp.EnumValues(Extent(), objects.get(), img.ImageSize);
+// 		objects.release(); 
+// 	}
+// 	void restore() const {
+// 		if( extent != 0 ) {
+// 			return;
+// 		}
+// 		assert(swappedExtent != static_cast<CVectorBinarySetJoinComparator::TSwappedPattern>(-1));
+// 		extent.reset(cmp.SwapRestore(swappedExtent));
+// 		swappedExtent = -1;
+// 		assert(extent != 0);
+// 	}
 };
 
 ////////////////////////////////////////////////////////////////////
@@ -203,7 +203,6 @@ CStabilityLPCbyPatriciaTree::CStabilityLPCbyPatriciaTree() :
 	thld(1),
 	extCmp(new CVectorBinarySetJoinComparator),
 	extDeleter(extCmp),
-	areAllInOnce(false),
 	totalAllocatedPatterns(0),
 	totalAllocatedPatternSize(0)
 {
@@ -443,11 +442,11 @@ bool CStabilityLPCbyPatriciaTree::IsExpandable( const IPatternDescriptor* d ) co
 }
 int CStabilityLPCbyPatriciaTree::GetExtentSize( const IPatternDescriptor* d ) const
 {
-	return to_pattern(d).Extent().Size();
+	return 0;//to_pattern(d).Extent().Size();
 }
 JSON CStabilityLPCbyPatriciaTree::SaveExtent( const IPatternDescriptor* d ) const
 {
-	return extCmp->SavePattern( &to_pattern(d).Extent() );
+	return "";//extCmp->SavePattern( &to_pattern(d).Extent() );
 }
 JSON CStabilityLPCbyPatriciaTree::SaveIntent( const IPatternDescriptor* d ) const
 {
@@ -477,7 +476,7 @@ size_t CStabilityLPCbyPatriciaTree::GetTotalAllocatedPatterns() const
 }
 size_t CStabilityLPCbyPatriciaTree::GetTotalConsumedMemory() const
 {
-	return totalAllocatedPatternSize + intentsTree.MemorySize() + extCmp->GetMemoryConsumption();
+	return totalAllocatedPatternSize + 0 + extCmp->GetMemoryConsumption();
 }
 
 void CStabilityLPCbyPatriciaTree::buildPatritiaTree()
@@ -517,17 +516,24 @@ void CStabilityLPCbyPatriciaTree::buildPatritiaTree()
 	// Now we will add objects to the nodes
 	
 	CDeepFirstPatritiaTreeIterator treeItr(pTree);
-	for(; !treeItr.End(); ++treeItr) {
-		if( treeItr.Status() != CDeepFirstPatritiaTreeIterator::T_Exit) {
+	for(; !treeItr.IsEnd(); ++treeItr) {
+		if( treeItr.Status() != CDeepFirstPatritiaTreeIterator::S_Exit) {
 			// The objects are collected on exit from the node
 			continue;
 		}
 		auto objItrs = nodeToObjectMap.equal_range(*treeItr);
-		std::pair<int,int> inserted;
-		pTree.AddObjects(objItrs.first, objItrs.second, inserted);
+		std::pair<int,int> inserted(-1,-1);
+		for(auto obj = objItrs.first; obj != objItrs.second; ++obj) {
+			const int objId = pTree.AddObject( obj->second );
+			inserted.first = inserted.first < 0 ? objId : inserted.first;
+			inserted.second = objId + 1;
+		}
+		
 		if(!treeItr->Children.empty()) {
-			assert(inserted.first > treeItr->Children.begin()->ObjStart);
-			treeItr->ObjStart = treeItr->Children.begin()->ObjStart;
+			const CPatritiaTree::TNodeIndex firstChildId = *treeItr->Children.begin();
+			const CPatritiaTree::CNode& firstChild =  pTree.GetNode(firstChildId);
+			assert(inserted.first > firstChild.ObjStart);
+			treeItr->ObjStart = firstChild.ObjStart;
 		} else {
 			treeItr->ObjStart = inserted.first;
 		}
@@ -535,17 +541,17 @@ void CStabilityLPCbyPatriciaTree::buildPatritiaTree()
 	}
 
 	// The set of previously processed attibutes
-	std::deque<TAttribute> childrenCAttrs;
-    std::list<TAttribute> currentNodeAttrs;
+	std::deque<CPatritiaTree::TAttribute> childrenCAttrs;
+	std::list<CPatritiaTree::TAttribute> currentNodeAttrs;
 	// Compressing of the Tree
     //  Now all attributes that are in the closure should be added to the node and the corresponding tree should be removed
 	treeItr.Reset(pTree);
 	for(; !treeItr.IsEnd(); ++treeItr) {
-		if( treeItr.Status() != CDeepFirstPatritiaTreeIterator::T_Exit) {
+		if( treeItr.Status() != CDeepFirstPatritiaTreeIterator::S_Exit) {
 			continue;
 		}
 		// Status is exit and thus all children are compressed
-		auto& children = treeItr->Children();
+		auto& children = treeItr->Children;
 		auto ch = children.rbegin();
 		if( ch == children.rend() ) {
 			// No children, i.e., all attributes are described
@@ -559,7 +565,7 @@ void CStabilityLPCbyPatriciaTree::buildPatritiaTree()
 		// Only the attributes after the last one can be in the closure,
 		// since the previous children are generated with the attribute which definetly upson in the last children
 		CPatritiaTree::TNodeIndex lastNodeId = *ch;
-		const auto& lastNode = pTree.GetNode(lastNodeId);
+		auto& lastNode = pTree.GetNode(lastNodeId);
 		currentNodeAttrs.clear();
 		// Adding the generated attribute for the last children.
 		// It is the only possible generated attribute among the children that can be common to all of children
@@ -575,17 +581,19 @@ void CStabilityLPCbyPatriciaTree::buildPatritiaTree()
 		++ch; // Now it is the last but one child
 		for(; ch != children.rend(); ++ch) {
 			auto attrItr = currentNodeAttrs.begin();
-			int i = ch->ClosureAttrStart;
+			const CPatritiaTree::TNodeIndex chId = *ch;
+			const CPatritiaTree::CNode& chNode = pTree.GetNode(chId);
+			int i = chNode.ClosureAttrStart;
 			for(; attrItr != currentNodeAttrs.end(); ) {
 				auto a = attrItr;
 				++attrItr;
 
 				// Skiping all attributes that are missed in the current child
-				while( i < ch->ClosureAttrEnd && childrenCAttrs[i] < *a) {
+				while( i < chNode.ClosureAttrEnd && childrenCAttrs[i] < *a) {
 					++i;
 				}
 
-				if( i >= ch->ClosureAttrEnd || childrenCAttrs[i] != *a ) {
+				if( i >= chNode.ClosureAttrEnd || childrenCAttrs[i] != *a ) {
 					// The attribute a is missed from the current child
 					currentNodeAttrs.erase(a);
 					areAllLastChildAttributesCommon = false;
@@ -607,36 +615,42 @@ void CStabilityLPCbyPatriciaTree::buildPatritiaTree()
 
 		// Saving attributes in the closure.
 		treeItr->ClosureAttrStart = childrenCAttrs.size();
-		childrenCAttrs.push_back(currentNodeAttrs.begin(), currenNodeAttrs.end());
+		for( auto aa = currentNodeAttrs.begin(); aa != currentNodeAttrs.end(); ++aa) {
+			childrenCAttrs.push_back(*aa);
+		}
 		treeItr->ClosureAttrEnd = childrenCAttrs.size();
 
 		ch = children.rbegin();
-		assert( ch != children.end());
+		assert( ch != children.rend());
 		if(areAllLastChildAttributesCommon) {
 			++ch; // The last node will be removed later
 		}
 
 		// Now for all children (sometimes but the last one) we collect the attributes in the closure and register them in the tree
-		for( ; ch != children.end(); ++ch) {
-			int clsAttrInds = ch->ClosureAttrStart;
-			const int clsAttrEnd = ch->ClosureAttrEnd;
+		for( ; ch != children.rend(); ++ch) {
+			const CPatritiaTree::TNodeIndex chId = *ch;
+			CPatritiaTree::CNode& chNode = pTree.GetNode(chId);
+			int clsAttrInds = chNode.ClosureAttrStart;
+			const int clsAttrEnd = chNode.ClosureAttrEnd;
 			if( clsAttrInds >= clsAttrEnd ) {
 				continue;
 			}
-			ch->ClosureAttrStart = pTree.AddAtribute(childrenCAttrs.at(clsAttrInds));
-			ch->ClosureAttrEnd = ch->ClosureAttrStart;
+			chNode.ClosureAttrStart = pTree.AddAttribute(childrenCAttrs.at(clsAttrInds));
+			chNode.ClosureAttrEnd = chNode.ClosureAttrStart;
 			++clsAttrInds;
 			for(; clsAttrInds < clsAttrEnd; ++clsAttrInds) {
-				ch->ClosureAttrEnd = pTree.AddAtribute(childrenCAttrs.at(clsAttrInds));
+				chNode.ClosureAttrEnd = pTree.AddAttribute(childrenCAttrs.at(clsAttrInds));
 			}
-			++ch->ClosureAttrEnd;
+			++chNode.ClosureAttrEnd;
 		}
 
 		if( areAllLastChildAttributesCommon ) {
 			// Then the last child should be merged with the current node
 			treeItr->Children.insert(lastNode.Children.begin(),lastNode.Children.end());
 			lastNode.Clear();
-			treeItr->Children.erase(treeItr->Children.rbegin());
+			auto tmpItr = treeItr->Children.end();
+			--tmpItr;
+			treeItr->Children.erase(tmpItr);
 		}
 	}
 }

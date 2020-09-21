@@ -473,8 +473,6 @@ solution "Sofia-PS"
 		rapidjsonDir="rapidjson/"
 		if ( not os.isdir(rapidjsonDir)  ) then
 			os.execute( "git clone https://github.com/miloyip/rapidjson.git " .. rapidjsonDir )
-			os.execute( "git --git-dir " .. rapidjsonDir .. ".git --work-tree " .. rapidjsonDir .. " reset --hard c745c953adf68" )
-			os.execute( "git --git-dir " .. rapidjsonDir .. ".git --work-tree " .. rapidjsonDir .. " apply --whitespace=fix rapidjson.patch" )
 		end
 
 		links{ 
