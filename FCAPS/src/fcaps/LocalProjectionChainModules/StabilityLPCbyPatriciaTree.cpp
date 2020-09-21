@@ -522,24 +522,29 @@ void CStabilityLPCbyPatriciaTree::buildPatritiaTree()
 			continue;
 		}
 		auto objItrs = nodeToObjectMap.equal_range(*treeItr);
-		std::pair<int,int> inserted(-1,-1);
+		std::pair<int,int> inserted(-1,-2);
 		for(auto obj = objItrs.first; obj != objItrs.second; ++obj) {
 			const int objId = pTree.AddObject( obj->second );
 			inserted.first = inserted.first < 0 ? objId : inserted.first;
 			inserted.second = objId + 1;
 		}
-		
+
 		if(!treeItr->Children.empty()) {
 			const CPatritiaTree::TNodeIndex firstChildId = *treeItr->Children.begin();
 			const CPatritiaTree::CNode& firstChild =  pTree.GetNode(firstChildId);
-			assert(inserted.first > firstChild.ObjStart);
+			assert(inserted.first == -1 || inserted.first >= firstChild.ObjStart);
 			treeItr->ObjStart = firstChild.ObjStart;
+			auto lastChItr = treeItr->Children.end();
+			--lastChItr;
+			treeItr->ObjEnd = max(inserted.second, pTree.GetNode(*lastChItr).ObjEnd);
 		} else {
 			treeItr->ObjStart = inserted.first;
+			treeItr->ObjEnd = inserted.second;
 		}
-		treeItr->ObjEnd = inserted.second;
 	}
 
+	pTree.Print();
+	
 	// The set of previously processed attibutes
 	std::deque<CPatritiaTree::TAttribute> childrenCAttrs;
 	std::list<CPatritiaTree::TAttribute> currentNodeAttrs;
@@ -608,10 +613,6 @@ void CStabilityLPCbyPatriciaTree::buildPatritiaTree()
 		// Now currentNodeAttrs has all common attributes
 		assert(treeItr->ClosureAttrStart >= treeItr->ClosureAttrEnd); // No attributes should be in the closure for this node.
 		const int commonAttributeNum = currentNodeAttrs.size();
-		if( commonAttributeNum == 0 ) {
-			// There is no common attribute, i.e., there is nothing in the closure
-			continue;
-		}
 
 		// Saving attributes in the closure.
 		treeItr->ClosureAttrStart = childrenCAttrs.size();
@@ -642,17 +643,22 @@ void CStabilityLPCbyPatriciaTree::buildPatritiaTree()
 				chNode.ClosureAttrEnd = pTree.AddAttribute(childrenCAttrs.at(clsAttrInds));
 			}
 			++chNode.ClosureAttrEnd;
+			assert(chNode.ClosureAttrStart < chNode.ClosureAttrEnd);
 		}
 
 		if( areAllLastChildAttributesCommon ) {
 			// Then the last child should be merged with the current node
-			treeItr->Children.insert(lastNode.Children.begin(),lastNode.Children.end());
-			lastNode.Clear();
 			auto tmpItr = treeItr->Children.end();
 			--tmpItr;
+			treeItr->Children.insert(lastNode.Children.begin(),lastNode.Children.end());
+
+			lastNode.Clear();
 			treeItr->Children.erase(tmpItr);
 		}
 	}
+
+	pTree.Print();
+	
 }
 
 const CPattern& CStabilityLPCbyPatriciaTree::to_pattern(const IPatternDescriptor* d) const

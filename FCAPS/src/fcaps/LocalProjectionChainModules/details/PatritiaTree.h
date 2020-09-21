@@ -13,12 +13,25 @@
 ////////////////////////////////////////////////////////////////////
 
 class CPatritiaTreeNode;
+class CPatritiaTree;
+
+class CPatritiaTreeNodeCmp {
+public:
+	typedef int TNodeIndex;
+public:
+	CPatritiaTreeNodeCmp(const CPatritiaTree& _tree):
+		tree(_tree) {}
+
+	bool operator()( const TNodeIndex& lhs, const TNodeIndex& rhs ) const;
+private:
+	const CPatritiaTree& tree;
+};
 
 class CPatritiaTree {
 public:
+	typedef CPatritiaTreeNodeCmp::TNodeIndex TNodeIndex;
 	typedef int TAttribute;
-	typedef int TNodeIndex;
-	typedef std::set<TNodeIndex, CPatritiaTree> CChildrenSet;
+	typedef std::set<TNodeIndex, CPatritiaTreeNodeCmp> CChildrenSet;
 
 	typedef int TObject;
 	typedef CPatritiaTreeNode CNode;
@@ -54,6 +67,9 @@ public:
 	// Comparator
 	bool operator()( const TNodeIndex& lhs, const TNodeIndex& rhs ) const;
 
+	// Prints the structure of the tree
+	void Print();
+
 private:
 	std::deque<CNode> nodes;
 	std::vector<TAttribute> closureAttrs;
@@ -69,7 +85,8 @@ public:
 	typedef typename CPatritiaTree::TNodeIndex TNodeIndex;
 
 public:
-	CPatritiaTreeNode( TNodeIndex _parent, TAttribute a ) :
+	CPatritiaTreeNode( TNodeIndex _parent, TAttribute a, CPatritiaTree& tree ) :
+		Children(CPatritiaTreeNodeCmp(tree)),
 		parent( _parent ), GenAttr(a),
 		ClosureAttrStart(-1), ClosureAttrEnd(-1),
 		ObjStart(-1), ObjEnd(-1)
@@ -221,6 +238,7 @@ inline void CDeepFirstPatritiaTreeIterator::next()
 		child = tree->GetNode(node).Children.begin();
 		break;
 	case S_Return:
+		assert(child != tree->GetNode(node).Children.end());
 		++child;
 		break;
 	default:
@@ -236,7 +254,7 @@ inline void CDeepFirstPatritiaTreeIterator::next()
 	stack.PushBack( CState( node, child ) );
 	node = *child;
 	child = tree->GetNode(node).Children.end();
-	status == S_Forward;
+	status = S_Forward;
 }
 
 #include "PatritiaTree.inl"
