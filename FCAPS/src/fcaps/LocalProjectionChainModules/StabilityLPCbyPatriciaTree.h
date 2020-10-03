@@ -13,6 +13,7 @@
 #include <deque>
 
 #include "details/PatritiaTree.h"
+#include "details/CountingAllocator.h"
 
 ////////////////////////////////////////////////////////////////////
 
@@ -71,25 +72,25 @@ public:
 
 private:
 	static const CModuleRegistrar<CStabilityLPCbyPatriciaTree> registrar;
+	// An object that counts the consumed memory
+	CMemoryCounter memoryCounter;
+
 	// Object that enumerates attribute extents
 	CSharedPtr<IBinContextReader> attrs;
 	// The patricia tree of the context
 	CPatritiaTree pTree;
-	// Cached attributes
-	std::deque<const CVectorBinarySetDescriptor*> attrsHolder;
+	// The correspondance between the attributes and the nodes of pTree
+	std::deque< std::list<const CPatritiaTreeNode*> > attributes;
 	// The threshold for delta measure
 	double thld;
-	// Comparator for extents
-	CSharedPtr<CVectorBinarySetJoinComparator> extCmp;
-	CPatternDeleter extDeleter;
-	// A temporary storage for intents. Here for not allocating memory too often
-	std::vector<int> intentStorage;
 
 	// Memory consumption
 	mutable size_t totalAllocatedPatterns;
-	mutable size_t totalAllocatedPatternSize;
 
 	void buildPatritiaTree();
+	void extractAttrsFromPatritiaTree();
+	void addAttributeNode(CPatritiaTree::TAttribute attr, const CPatritiaTreeNode& node);
+
 	const CPattern& to_pattern(const IPatternDescriptor* d) const;
 	const CPattern* newPattern(
 		const CVectorBinarySetDescriptor* ext,

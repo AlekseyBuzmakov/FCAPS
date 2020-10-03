@@ -52,149 +52,90 @@ const char* const CStabilityLPCbyPatriciaTree::Desc()
 
 ////////////////////////////////////////////////////////////////////
 
-// class CIgnoredAttrs {
-// public:
-// 	void Ignore(TAttribute a) 
-// 	{
-// 		assert( a >= 0); 
-// 		if( a >= ignoredAttrs.size()) {
-// 			ignoredAttrs.resize(a+1);
-// 		} 
-// 		ignoredAttrs[a] = true; 
-// 	}
-// 	bool IsIgnored(CIntentsTree::TAttribute a) const
-// 	{ return 0 <=a && a < ignoredAttrs.size() && ignoredAttrs[a]; }
-// 	void Swap(CIgnoredAttrs& other) 
-// 		{ ignoredAttrs.swap(other.ignoredAttrs); }
-// private:
-// 	std::deque<bool> ignoredAttrs;
-// };
-
-////////////////////////////////////////////////////////////////////
-
 class CPattern : public IExtent, public IPatternDescriptor, public ISwappable {
 public:
-// 	// Pattern controls memory for the extent
-// 	CPattern( CVectorBinarySetJoinComparator& _cmp, 
-// 			const CVectorBinarySetDescriptor* e, 
-// 			CPatternDeleter dlt,
-// 	          CIntentsTree& iTree, TIntent i,
-// 		  CIgnoredAttrs& ignored,
-// 	          int nextAttr, DWORD d, int closestAttribute ) :
-// 		cmp(_cmp), extent(e, dlt), swappedExtent(-1), extentSize(e->Size()), extentHash(e->Hash()),
-// 		intentsTree(iTree), intent(i), nextAttribute(nextAttr), delta(d), closestChildAttribute(closestAttribute)
-// 	{
-// 		assert( extent != 0 );
-// 		ignoredAttrs.Swap(ignored);
-// 	}
-// 	~CPattern()
-// 	{
-// 		intentsTree.Delete(intent);
-// 		if( IsSwapped() ) {
-// 			assert(swappedExtent != static_cast<CVectorBinarySetJoinComparator::TSwappedPattern>(-1));
-// 			cmp.SwapRemove(swappedExtent);
-// 			swappedExtent = -1;
-// 		}
-// 	}
+	CPattern(CMemoryCounter& _cnt) :
+		extent( CountingAllocator<const CPatritiaTreeNode*>(_cnt) ),
+		extentSize(0),
+		extentHash(0),
+		kernelAttr(0),
+		clossestAttr( - 1),
+		delta(0)
+	{}
+		
+	// Methods of IExtent
+	virtual DWORD Size() const
+		{ return extentSize;}
+    virtual void GetExtent( CPatternImage& extent ) const
+		{initPatternImage(extent);}
+	virtual void ClearMemory( CPatternImage& e) const
+		{ delete[] e.Objects;}
 
-// 	// Methods of IExtent
-// 	virtual DWORD Size() const
-// 		{ return extentSize;}
-//     virtual void GetExtent( CPatternImage& extent ) const
-// 		{initPatternImage(extent);}
-// 	virtual void ClearMemory( CPatternImage& e) const
-// 		{ delete[] e.Objects;}
+	// Methos of IPatternDescriptor
+	virtual bool IsMostGeneral() const
+		{ return extent.empty() || extent.front().GetParent() == -1; }
+	virtual size_t Hash() const
+		{ return extentHash; }
 
-// 	// Methos of IPatternDescriptor
-// 	virtual bool IsMostGeneral() const
-// 		{return intent == -1;}
-// 	virtual size_t Hash() const
-// 		{ return extentHash; }
+	// Methods of ISwappable
+	virtual bool IsSwapped() const
+		{ return false;}
+	virtual void Swap() const
+	{
+		// Nothing for the moment
+	}
 
-// 	// Methods of ISwappable
-// 	virtual bool IsSwapped() const
-// 		{ return extent == 0;}
-// 	virtual void Swap() const
-// 	{
-// 		if( extent == 0 ) {
-// 			return;
-// 		}
-// 		swappedExtent = cmp.SwapPattern(extent.release());
-// 		assert(extent == 0);
-// 	}
+	// Methods of the class
+	// Adding new Patritia tree node to the extent
+	void AddPTNode(const CPatritiaTreeNode& node)
+	{
+		assert(extent.empty() || extent.back().ObjEnd < node.ObjStart && node.ObjStart < node.ObjEnd);
+		extent.push_back(node);
+		extentSize += node.ObjEnd - node.ObjStart;
+		extentHash ^= node.ObjStart ^ (node.ObjEnd << 16)
+	}
 
-// 	// Methods of the class
-// 	const CVectorBinarySetDescriptor& Extent() const
-// 		{ restore(); assert(extent != 0); return *extent;}
-// 	TIntent Intent() const
-// 		{return intent;}
-// 	// void AddAttributeToIntent(CIntentsTree::TAttribute a) const
-// 	// 	{ intent = intentsTree.AddAttribute(intent,a); ignoredAttrs.Ignore(a); }
+	// Get/Set the kernel attribute
+	CPatritiaTree::TAttribute GetKernelAttribute() const
+		{ return kernelAttr; }
+	void SetKernelAttribute( CPatritiaTree::TAttribute a )
+		{ kernelAttr = a; }
 
-// 	void IgnoreAttribute(CIntentsTree::TAttribute a) const
-// 		{ ignoredAttrs.Ignore(a);}
-// 	bool IsIgnored(CIntentsTree::TAttribute a) const
-// 		{ return ignoredAttrs.IsIgnored(a); }
-// 	const CIgnoredAttrs& IgnoredAttrs() const
-// 		{ return ignoredAttrs;}
+	// Get/Set the closest child attribute
+	CPatritiaTree::TAttribute GetClosestAttribute() const
+		{ return clossestAttr; }
+	void SetClosestAttribute( CPatritiaTree::TAttribute a )
+		{ clossestAttr = a; }
 
-// 	int NextAttribute() const
-// 		{return nextAttribute;}
-// 	void SetNextAttribute(int a) const
-// 		{nextAttribute = a;}
+	// Get/Set the delta value of the pattern
 	DWORD Delta() const
 		{return delta;}
-// 	void SetDelta(DWORD d) const
-// 		{assert(d <= delta); delta = d;}
-// 	int ClosestChild() const
-// 		{return closestChildAttribute;}
-// 	void SetClosestChild( int a ) const
-// 		{closestChildAttribute = a;}
+	void SetDelta(DWORD d) const
+		{assert(d <= delta); delta = d;}
 
-// 	// TOKILL
-	size_t GetPatternMemorySize() const
-		{ return sizeof(CPattern); }
+private:
+	const DWORD extentSize;
+	const DWORD extentHash;
 
-
-// private:
-// 	CVectorBinarySetJoinComparator& cmp;
-// 	mutable unique_ptr<const CVectorBinarySetDescriptor, CPatternDeleter> extent;
-// 	mutable CVectorBinarySetJoinComparator::TSwappedPattern swappedExtent;
-// 	const DWORD extentSize;
-// 	const DWORD extentHash;
-
-// 	CIntentsTree& intentsTree;
-// 	mutable TIntent intent;
-// 	mutable CIgnoredAttrs ignoredAttrs;
-
-// 	// The minimal number of the attribute that can be added to the pattern.
-// 	// This number also gives the reference to the "core" of the pattern in the CbO canonical order
-// 	mutable int nextAttribute;
-// 	// The delta measure of the pattern w.r.t. the projection not including the @var nextAttribute attribute
+	// The minimal attribute number that can be added to the pattern
+	CPatritiaTree::TAttribute kernelAttr;
+	
+	// The delta measure of the pattern w.r.t. the projection not including the @var nextAttribute attribute
 	mutable DWORD delta;
-// 	// The attribute of a clossest child. In intersection of the pattern and the attribute the result is the clossest child
-// 	// Used as an optimization for earlier detection of new unstable patterns
-// 	mutable int closestChildAttribute;
+	// The attribute of a clossest child. In intersection of the pattern and the attribute the result is the clossest child
+	// Used as an optimization for earlier detection of new unstable patterns
+	mutable int clossestAttr;
 
-// 	void initPatternImage(CPatternImage& img) const {
-// 		img.PatternId = Hash();
-// 		img.ImageSize = Extent().Size();
-// 		img.Objects = 0;
+	void initPatternImage(CPatternImage& img) const {
+		img.PatternId = Hash();
+		img.ImageSize = Extent().Size();
+		img.Objects = 0;
 
-// 		unique_ptr<int[]> objects (new int[img.ImageSize]);
-// 		img.Objects = objects.get(); 
-// 		cmp.EnumValues(Extent(), objects.get(), img.ImageSize);
-// 		objects.release(); 
-// 	}
-// 	void restore() const {
-// 		if( extent != 0 ) {
-// 			return;
-// 		}
-// 		assert(swappedExtent != static_cast<CVectorBinarySetJoinComparator::TSwappedPattern>(-1));
-// 		extent.reset(cmp.SwapRestore(swappedExtent));
-// 		swappedExtent = -1;
-// 		assert(extent != 0);
-// 	}
+		unique_ptr<int[]> objects (new int[img.ImageSize]);
+		img.Objects = objects.get(); 
+		cmp.EnumValues(Extent(), objects.get(), img.ImageSize);
+		objects.release(); 
+	}
 };
 
 ////////////////////////////////////////////////////////////////////
@@ -246,6 +187,10 @@ void CStabilityLPCbyPatriciaTree::LoadParams( const JSON& json )
 	extCmp->SetMaxAttrNumber(attrs->GetObjectNumber());
 
 	buildPatritiaTree();
+	extractAttrsFromPatritiaTree();
+
+	assert(pTree.GetNode(pTree.GetRoot()).ObjStart == 0);
+	assert(pTree.GetNode(pTree.GetRoot()).ObjEnd == attr->GetObjectNumber());
 
 	// Debuging
 	// cout << "Object Number " << attrs->GetObjectNumber() << endl;
@@ -282,37 +227,32 @@ void CStabilityLPCbyPatriciaTree::LoadParams( const JSON& json )
 	// 	}
 	// 	cout << endl;
 	// }
-
-
-	
-	throw new CTextException("STOP","STOP");
 }
 
 JSON CStabilityLPCbyPatriciaTree::SaveParams() const
 {
-	// rapidjson::Document params;
-	// rapidjson::MemoryPoolAllocator<>& alloc = params.GetAllocator();
-	// params.SetObject()
-	// 	.AddMember( "Type", rapidjson::StringRef(Type()), alloc )
-	// 	.AddMember( "Name", rapidjson::StringRef(Name()), alloc )
-	// 	.AddMember( "Params", rapidjson::Value().SetObject()
-	// 	            .AddMember("AllAttributesInOnce",rapidjson::Value(areAllInOnce),alloc), alloc );
+	rapidjson::Document params;
+	rapidjson::MemoryPoolAllocator<>& alloc = params.GetAllocator();
+	params.SetObject()
+		.AddMember( "Type", rapidjson::StringRef(Type()), alloc )
+		.AddMember( "Name", rapidjson::StringRef(Name()), alloc )
+		.AddMember( "Params", rapidjson::Value().SetObject(), alloc );
 
-	// IModule* m = dynamic_cast<IModule*>(attrs.get());
+	IModule* m = dynamic_cast<IModule*>(attrs.get());
 
-	// JSON peParams;
-	// rapidjson::Document peParamsDoc;
-    // assert( m!=0);
-	// if( m != 0 ) {
-	// 	peParams = m->SaveParams();
-	// 	CJsonError error;
-	// 	const bool rslt = ReadJsonString( peParams, peParamsDoc, error );
-	// 	assert(rslt);
-	// 	params["Params"].AddMember("ContextAttributes", peParamsDoc.Move(), alloc );
-	// }
+	JSON peParams;
+	rapidjson::Document peParamsDoc;
+    assert( m!=0);
+	if( m != 0 ) {
+		peParams = m->SaveParams();
+		CJsonError error;
+		const bool rslt = ReadJsonString( peParams, peParamsDoc, error );
+		assert(rslt);
+		params["Params"].AddMember("ContextReader", peParamsDoc.Move(), alloc );
+	}
 
 	JSON result;
-	// CreateStringFromJSON( params, result );
+	CreateStringFromJSON( params, result );
 	return result;
 }
 
@@ -339,22 +279,16 @@ bool CStabilityLPCbyPatriciaTree::IsTopoSmaller(const IPatternDescriptor* p, con
 }
 void CStabilityLPCbyPatriciaTree::FreePattern(const IPatternDescriptor* p ) const
 {
-
 	--totalAllocatedPatterns;
-	totalAllocatedPatternSize -= to_pattern(p).GetPatternMemorySize();
 
 	delete &to_pattern(p);
 }
 void CStabilityLPCbyPatriciaTree::ComputeZeroProjection( CPatternList& ptrns )
 {
-	// unique_ptr<CVectorBinarySetDescriptor,CPatternDeleter> ptrn(extCmp->NewPattern(), extDeleter);
-	// for( DWORD i = 0; i < GetObjectNumber(); ++i ) {
-	// 	extCmp->AddValue(i,*ptrn);
-	// }
-	// CIgnoredAttrs dummyIgnored;
-	// ptrns.PushBack( newPattern( ptrn.release(), intentsTree.Create(),
-	// 			dummyIgnored,
-	// 			0, GetObjectNumber(), -1) );
+	unique_ptr<CPattern> ptrnHolder( new CPattern(memoryCounter));
+	ptrHolder->AddPTNode(pTree.GetNode(pTree.GetRoot()));
+	ptrHolder->SetDelta(ptrHolder->Size());
+	ptrns.PushBack( ptrHolder.release() );
 }
 
 ILocalProjectionChain::TPreimageResult CStabilityLPCbyPatriciaTree::Preimages( const IPatternDescriptor* d, CPatternList& preimages )
@@ -433,16 +367,15 @@ ILocalProjectionChain::TPreimageResult CStabilityLPCbyPatriciaTree::Preimages( c
 }
 bool CStabilityLPCbyPatriciaTree::IsExpandable( const IPatternDescriptor* d ) const
 {
-	// assert(attrs != 0);
+	assert(attrs != 0);
 
-	// const CPattern& p = to_pattern(d);
-    // assert(p.Delta() >= thld);
-    // return attrs->HasAttribute(p.NextAttribute());
-	return false;
+	const CPattern& p = to_pattern(d);
+	assert(p.Delta() >= thld);
+	return p.GetKernelAttribute() < attributes.size();
 }
 int CStabilityLPCbyPatriciaTree::GetExtentSize( const IPatternDescriptor* d ) const
 {
-	return 0;//to_pattern(d).Extent().Size();
+	return to_pattern(d).Size();
 }
 JSON CStabilityLPCbyPatriciaTree::SaveExtent( const IPatternDescriptor* d ) const
 {
@@ -476,9 +409,10 @@ size_t CStabilityLPCbyPatriciaTree::GetTotalAllocatedPatterns() const
 }
 size_t CStabilityLPCbyPatriciaTree::GetTotalConsumedMemory() const
 {
-	return totalAllocatedPatternSize + 0 + extCmp->GetMemoryConsumption();
+	return totalAllocatedPatterns * sizeof(CPattern) + memoryCounter.GetMemoryConsumption();
 }
 
+// Builds patritia tree from the contex
 void CStabilityLPCbyPatriciaTree::buildPatritiaTree()
 {
 	// Starting reading the context object by object
@@ -658,37 +592,47 @@ void CStabilityLPCbyPatriciaTree::buildPatritiaTree()
 	}
 
 	pTree.Print();
-	
 }
+
+// Based on patritia tree extracts the description of every attribute
+void CStabilityLPCbyPatriciaTree::extractAttrsFromPatritiaTree()
+{
+	CDeepFirstPatritiaTreeIterator treeItr(pTree);
+	for(; !treeItr.IsEnd(); ++treeItr) {
+		if( treeItr.Status() != CDeepFirstPatritiaTreeIterator::S_Forward) {
+			// Entering the node we will register this node as the node for the attribute
+			continue;
+		}
+		CPatritiaTree::TAttribute attr = treeItr->GenAttr;
+		addAttributeNode(attr, *treeItr);
+		int clsAttr = treeItr->ClosureAttrStart;
+		for(; clsAttr != treeItr->ClosureAttrEnd; ++clsAttr) {
+			attr = pTree.GetClsAttribute(clsAttr);
+			addAttributeNode(attr, *treeItr);
+		}
+	}
+}
+// Adds new node in the description of the attribute
+void addAttributeNode(CPatritiaTree::TAttribute attr, const CPatritiaTreeNode& node)
+{
+	if( attributes.size() <= attr ) {
+		attributes.resize(attr+1);
+		assert(attr < attributes.size());
+	}
+	const list<const CPatritiaTreeNode*>& attrList = attributes[attr];
+	assert( attrList.empty()
+	        || attrList.back()->ObjEnd > node.ObjStart); // The nodes cannot intersect, they should form an antichain
+
+	attrList->push_back(&node);
+}
+
 
 const CPattern& CStabilityLPCbyPatriciaTree::to_pattern(const IPatternDescriptor* d) const
 {
 	assert(d != 0);
 	return debug_cast<const CPattern&>(*d);
 }
-const CVectorBinarySetDescriptor* CStabilityLPCbyPatriciaTree::getAttributeImg(int a)
-{
-	if( attrsHolder.size() <= a ) {
-		attrsHolder.resize(a+1,0);
-	}
-	if( attrsHolder[a]!=0) {
-		return attrsHolder[a];
-	}
 
-	// CVectorBinarySetDescriptor* ext = extCmp->NewPattern();
-	// assert(attrsHolder[a]==0);
-	// attrsHolder[a] = ext;
-
-	// CPatternImage img;
-	// attrs->GetAttribute(a, img);
-	// for (DWORD i = 0; i < img.ImageSize; i++) {
-	// 	extCmp->AddValue( static_cast<DWORD>( img.Objects[i]), *ext );
-	// }
-	// attrs->ClearMemory(img);
-
-	// return ext;
-	return 0;
-}
 const CPattern* CStabilityLPCbyPatriciaTree::initializeNewPattern(
 	  const CPattern& parent,
 	  int genAttr,

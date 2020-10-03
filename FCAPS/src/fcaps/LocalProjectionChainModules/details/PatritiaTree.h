@@ -60,10 +60,16 @@ public:
 		objects.push_back(obj);
 		return objects.size() - 1;
 	}
+	TObject GetObject(int index)
+		{ assert( 0 <= index && index < objects.size()); return objects[index];}
+	// Add attributes in the closure
 	int AddAttribute(TAttribute a) {
 		closureAttrs.push_back(a);
 		return closureAttrs.size() - 1;
 	}
+	TAttribute GetClsAttribute(int index)
+		{ assert( 0 <= index && index < closureAttrs.size()); return closureAttrs[index];}
+
 	// Comparator
 	bool operator()( const TNodeIndex& lhs, const TNodeIndex& rhs ) const;
 
