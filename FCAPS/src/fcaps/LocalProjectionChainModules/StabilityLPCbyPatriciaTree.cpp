@@ -56,11 +56,11 @@ const char* const CStabilityLPCbyPatriciaTree::Desc()
 
 ////////////////////////////////////////////////////////////////////
 
-class CPattern : public IExtent, public IPatternDescriptor, public ISwappable {
+class CPTPattern : public IExtent, public IPatternDescriptor, public ISwappable {
 public:
 	typedef list<const CPatritiaTreeNode*, CountingAllocator<const CPatritiaTreeNode*> > CExtentHolder;
 	struct CIntentAttribute{
-		friend CPattern; // For accessing the counter
+		friend CPTPattern; // For accessing the counter
 
 		// The link to the previous attribute
 		CIntentAttribute* Prev;
@@ -75,17 +75,17 @@ public:
 	};
 
 public:
-	CPattern(CPatritiaTree& _pTree, CMemoryCounter& _cnt) :
+	CPTPattern(CPatritiaTree& _pTree, CMemoryCounter& _cnt) :
 		pTree(_pTree),
 		extent( CountingAllocator<const CPatritiaTreeNode*>(_cnt) ),
 		extentSize(0),
 		extentHash(0),
 		kernelAttr(0),
 		clossestAttr( - 1),
-		delta(0),
+		delta(-1),
 		intent(0)
 	{}
-	~CPattern()
+	~CPTPattern()
 	{
 		while(intent != 0) {
 			assert(intent->counter > 0);
@@ -125,7 +125,7 @@ public:
 	// Adding new Patritia tree node to the extent
 	void AddPTNode(const CPatritiaTreeNode& node)
 	{
-		assert(extent.empty() || extent.back()->ObjEnd < node.ObjStart && node.ObjStart < node.ObjEnd);
+		assert(extent.empty() || extent.back()->ObjEnd <= node.ObjStart && node.ObjStart < node.ObjEnd);
 		extent.push_back(&node);
 		extentSize += node.ObjEnd - node.ObjStart;
 		extentHash ^= node.ObjStart ^ (node.ObjEnd << 16);
@@ -156,7 +156,13 @@ public:
 		{ return false; }
 	// Adding new attribute to the intent
 	void AddNewAttributeToIntent(CPatritiaTree::TAttribute a) const
-		{ assert(intent==0 || intent->Attr < a); ++intent->counter; intent = new CIntentAttribute(intent, a); }
+	{
+		assert(intent==0 || intent->Attr < a);
+		if(intent != 0) {
+			++intent->counter;
+		}
+		intent = new CIntentAttribute(intent, a);
+	}
 	const CIntentAttribute* GetLastIntentAttribute() const
 		{ return intent; }
 
@@ -190,7 +196,7 @@ private:
 		int currentImgPos = 0;
 		auto itr = extent.begin();
 		for( ; itr != extent.end(); ++itr) {
-			assert(lastObj < (*itr)->ObjStart);
+			assert(lastObj <= (*itr)->ObjStart);
 			assert((*itr)->ObjStart < (*itr)->ObjEnd);
 			for( lastObj = (*itr)->ObjStart; lastObj < (*itr)->ObjEnd; ++lastObj ) {
 				assert(currentImgPos < img.ImageSize);
@@ -249,6 +255,7 @@ void CStabilityLPCbyPatriciaTree::LoadParams( const JSON& json )
 	buildPatritiaTree();
 	extractAttrsFromPatritiaTree();
 	computeCommonAttributesinPT();
+	computeNextAttributeIntersectionsinPT();
 
 	assert(pTree.GetNode(pTree.GetRoot()).ObjStart == 0);
 	assert(pTree.GetNode(pTree.GetRoot()).ObjEnd == attrs->GetObjectNumber());
@@ -346,7 +353,7 @@ void CStabilityLPCbyPatriciaTree::FreePattern(const IPatternDescriptor* p ) cons
 }
 void CStabilityLPCbyPatriciaTree::ComputeZeroProjection( CPatternList& ptrns )
 {
-	unique_ptr<CPattern> ptrnHolder( new CPattern(pTree, memoryCounter));
+	unique_ptr<CPTPattern> ptrnHolder( new CPTPattern(pTree, memoryCounter));
 	ptrnHolder->AddPTNode(pTree.GetNode(pTree.GetRoot()));
 	ptrnHolder->SetDelta(ptrnHolder->Size());
 	ptrns.PushBack( ptrnHolder.release() );
@@ -356,7 +363,7 @@ ILocalProjectionChain::TPreimageResult CStabilityLPCbyPatriciaTree::Preimages( c
 {
 	assert( attrs != 0);
 
-	const CPattern& p = to_pattern(d);
+	const CPTPattern& p = to_pattern(d);
     assert(p.Delta() >= thld);
 
 	int a = p.GetKernelAttribute();
@@ -370,7 +377,7 @@ ILocalProjectionChain::TPreimageResult CStabilityLPCbyPatriciaTree::Preimages( c
 			continue;
 		}
 		// Computing the only possible preimage
-		unique_ptr<CPattern> res(computePreimage(p, a));
+		unique_ptr<CPTPattern> res(computePreimage(p, a));
 		const DWORD extDiff = p.Size() - res->Size();
 		if(extDiff == 0 ) {
 			// Attribute is in the closure
@@ -397,6 +404,7 @@ ILocalProjectionChain::TPreimageResult CStabilityLPCbyPatriciaTree::Preimages( c
 		preimages.PushBack( res.release() );
 
 		if(!areAllInOnce) {
+			++a;
 			break;
 		}
 	}
@@ -415,7 +423,7 @@ bool CStabilityLPCbyPatriciaTree::IsExpandable( const IPatternDescriptor* d ) co
 {
 	assert(attrs != 0);
 
-	const CPattern& p = to_pattern(d);
+	const CPTPattern& p = to_pattern(d);
 	assert(p.Delta() >= thld);
 	return p.GetKernelAttribute() < attributes.size();
 }
@@ -425,7 +433,7 @@ int CStabilityLPCbyPatriciaTree::GetExtentSize( const IPatternDescriptor* d ) co
 }
 JSON CStabilityLPCbyPatriciaTree::SaveExtent( const IPatternDescriptor* d ) const
 {
-	const CPattern& p = to_pattern(d);
+	const CPTPattern& p = to_pattern(d);
 	CPatternImage img;
 	p.GetExtent(img);
 
@@ -448,7 +456,7 @@ JSON CStabilityLPCbyPatriciaTree::SaveExtent( const IPatternDescriptor* d ) cons
 }
 JSON CStabilityLPCbyPatriciaTree::SaveIntent( const IPatternDescriptor* d ) const
 {
-	const CPattern& p = to_pattern(d);
+	const CPTPattern& p = to_pattern(d);
 
 	vector<int> intent;
 	intent.resize(attributes.size(), 0);
@@ -466,8 +474,10 @@ JSON CStabilityLPCbyPatriciaTree::SaveIntent( const IPatternDescriptor* d ) cons
 			}
 			// Adding the generator attribute
 			const int closureAttr = node->GenAttr;
-			assert( 0 <= closureAttr && closureAttr < intent.size());
-			++intent[closureAttr];
+			if( closureAttr != -1 ) {
+				assert( 0 <= closureAttr && closureAttr < intent.size());
+				++intent[closureAttr];
+			}
 			// Switching to parent node
 			const CPatritiaTree::TNodeIndex parentId = node->GetParent();
 			if( parentId == -1) {
@@ -496,9 +506,7 @@ JSON CStabilityLPCbyPatriciaTree::SaveIntent( const IPatternDescriptor* d ) cons
 		names.PushBack( rapidjson::Value().SetString(name.c_str(), name.length(), alloc), alloc);
 	}
 
-	assert(names.Size() > 0);
-	intentJson
-		.AddMember( "Count", rapidjson::Value().SetUint(names.Size()), alloc );
+	intentJson.AddMember( "Count", rapidjson::Value().SetUint(names.Size()), alloc );
 
 	JSON result;
 	CreateStringFromJSON( intentJson, result );
@@ -510,7 +518,7 @@ size_t CStabilityLPCbyPatriciaTree::GetTotalAllocatedPatterns() const
 }
 size_t CStabilityLPCbyPatriciaTree::GetTotalConsumedMemory() const
 {
-	return totalAllocatedPatterns * sizeof(CPattern) + memoryCounter.GetMemoryConsumption();
+	return totalAllocatedPatterns * sizeof(CPTPattern) + memoryCounter.GetMemoryConsumption();
 }
 
 // Builds patritia tree from the contex
@@ -705,7 +713,9 @@ void CStabilityLPCbyPatriciaTree::extractAttrsFromPatritiaTree()
 			continue;
 		}
 		CPatritiaTree::TAttribute attr = treeItr->GenAttr;
-		addAttributeNode(attr, pTree.GetNode(*treeItr));
+		if( attr >= 0 ) {
+			addAttributeNode(attr, pTree.GetNode(*treeItr));
+		}
 		int clsAttr = treeItr->ClosureAttrStart;
 		for(; clsAttr != treeItr->ClosureAttrEnd; ++clsAttr) {
 			attr = pTree.GetClsAttribute(clsAttr);
@@ -722,7 +732,7 @@ void CStabilityLPCbyPatriciaTree::addAttributeNode(CPatritiaTree::TAttribute att
 	}
 	list<const CPatritiaTreeNode*>& attrList = attributes[attr];
 	assert( attrList.empty()
-	        || attrList.back()->ObjEnd > node.ObjStart); // The nodes cannot intersect, they should form an antichain
+	        || attrList.back()->ObjEnd <= node.ObjStart); // The nodes cannot intersect, they should form an antichain
 
 	attrList.push_back(&node);
 }
@@ -773,10 +783,11 @@ void CStabilityLPCbyPatriciaTree::computeNextAttributeIntersectionsinPT()
 		}
 
 		for( int i = treeItr->ClosureAttrStart; i < treeItr->ClosureAttrEnd; ++i ) {
-			if( i <= treeItr->GenAttr) {
+			const CPatritiaTree::TAttribute a = pTree.GetClsAttribute(i);
+			if( a <= treeItr->GenAttr) {
 				continue;
 			}
-			treeItr->NextAttributeIntersections.insert(CPatritiaTreeNode::TNextAttributeIntersections::value_type(pTree.GetClsAttribute(i), &pTree.GetNode(*treeItr)));
+			treeItr->NextAttributeIntersections.insert(CPatritiaTreeNode::TNextAttributeIntersections::value_type(a, &pTree.GetNode(*treeItr)));
 		}
 		// Adding intersection information from children
 		auto chItr = treeItr->Children.begin();
@@ -788,19 +799,23 @@ void CStabilityLPCbyPatriciaTree::computeNextAttributeIntersectionsinPT()
 			treeItr->NextAttributeIntersections.insert(ch->NextAttributeIntersections.begin(), ch->NextAttributeIntersections.end());
 		}
 	}
+	auto tmp = pTree.GetNode(pTree.GetRoot()).NextAttributeIntersections;
+	for(auto itr = tmp.begin(); itr != tmp.end(); ++itr){
+		cout << itr->first << " " << itr->second->GenAttr << endl;
+	}
 }
 
 // Converts the general pattern to specific pattern
-const CPattern& CStabilityLPCbyPatriciaTree::to_pattern(const IPatternDescriptor* d) const
+const CPTPattern& CStabilityLPCbyPatriciaTree::to_pattern(const IPatternDescriptor* d) const
 {
 	assert(d != 0);
-	return debug_cast<const CPattern&>(*d);
+	return debug_cast<const CPTPattern&>(*d);
 }
 
 // Computes the preimage of p w.r.t. the attribute a
-CPattern* CStabilityLPCbyPatriciaTree::computePreimage(const CPattern& p, CPatritiaTree::TAttribute a)
+CPTPattern* CStabilityLPCbyPatriciaTree::computePreimage(const CPTPattern& p, CPatritiaTree::TAttribute a)
 {
-	unique_ptr<CPattern> result( new CPattern(pTree, memoryCounter) );
+	unique_ptr<CPTPattern> result( new CPTPattern(pTree, memoryCounter) );
 	auto itr = p.Begin();
 	for(; itr != p.End(); ++itr) {
 		auto range = (*itr)->NextAttributeIntersections.equal_range(a);
@@ -813,7 +828,7 @@ CPattern* CStabilityLPCbyPatriciaTree::computePreimage(const CPattern& p, CPatri
 	return result.release();
 }
 
-bool CStabilityLPCbyPatriciaTree::initializePreimage(const CPattern& parent, int genAttr, CPattern& res)
+bool CStabilityLPCbyPatriciaTree::initializePreimage(const CPTPattern& parent, int genAttr, CPTPattern& res)
 {
 	// If delta is zero, then the attribute is in the intent.
 	// However, according to canonical order it should not be there. Thus, such a pattern should also be ignored.
@@ -828,7 +843,7 @@ bool CStabilityLPCbyPatriciaTree::initializePreimage(const CPattern& parent, int
 		minAttr = parent.GetClosestAttribute();
 	}
 
-	const CPattern::CIntentAttribute* lastIntentAttr = res.GetLastIntentAttribute();
+	const CPTPattern::CIntentAttribute* lastIntentAttr = res.GetLastIntentAttribute();
 
 	for(int a = genAttr - 1; delta >= thld && a >=0; --a) {
 		if(a == parent.GetClosestAttribute()) {
@@ -838,7 +853,7 @@ bool CStabilityLPCbyPatriciaTree::initializePreimage(const CPattern& parent, int
 		while(lastIntentAttr != 0 && lastIntentAttr->Attr > a) {
 			lastIntentAttr = lastIntentAttr->Prev;
 		}
-		if( lastIntentAttr->Attr == a ) {
+		if( lastIntentAttr != 0 && lastIntentAttr->Attr == a ) {
 			// Already in the pattern
 			continue;
 		}
@@ -863,7 +878,7 @@ bool CStabilityLPCbyPatriciaTree::initializePreimage(const CPattern& parent, int
 
 // Finds the delta-stability of a pattern p wrt the attribute a.
 //   If the delta-stability is larger than maxDelta, then maxDelta+1 is returned
-DWORD CStabilityLPCbyPatriciaTree::getAttributeDelta(const CPattern& p, CPatritiaTree::TAttribute a, DWORD maxDelta)
+DWORD CStabilityLPCbyPatriciaTree::getAttributeDelta(const CPTPattern& p, CPatritiaTree::TAttribute a, DWORD maxDelta)
 {
 	DWORD currentDelta = 0;
 	auto itr = p.Begin();

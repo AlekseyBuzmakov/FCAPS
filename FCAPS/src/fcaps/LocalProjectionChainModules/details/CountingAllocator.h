@@ -8,6 +8,8 @@
 // A special class for counting memory consumption
 
 struct CMemoryCounter {
+	CMemoryCounter() :
+		memoryConsumption(0) {}
 	void RegisterAllocation(size_t n)
 	  {memoryConsumption += n;}
 	void UnregisterAllocation(size_t n)

@@ -21,7 +21,7 @@ interface IPatternDescriptor;
 interface IBinContextReader;
 
 ////////////////////////////////////////////////////////////////////
-class CPattern;
+class CPTPattern;
 class CBinarySetDescriptorsComparator;
 class CVectorBinarySetJoinComparator;
 class CVectorBinarySetDescriptor;
@@ -96,11 +96,11 @@ private:
 	void computeCommonAttributesinPT();
 	void computeNextAttributeIntersectionsinPT();
 
-	const CPattern& to_pattern(const IPatternDescriptor* d) const;
-	CPattern* computePreimage(const CPattern& p, CPatritiaTree::TAttribute a);
+	const CPTPattern& to_pattern(const IPatternDescriptor* d) const;
+	CPTPattern* computePreimage(const CPTPattern& p, CPatritiaTree::TAttribute a);
 
-	bool initializePreimage(const CPattern& parent, int genAttr, CPattern& res);
-	DWORD getAttributeDelta(const CPattern& p, CPatritiaTree::TAttribute a, DWORD maxDelta);
+	bool initializePreimage(const CPTPattern& parent, int genAttr, CPTPattern& res);
+	DWORD getAttributeDelta(const CPTPattern& p, CPatritiaTree::TAttribute a, DWORD maxDelta);
 };
 
 #endif // STABILITYLPCBYPATRICIATREE_H
