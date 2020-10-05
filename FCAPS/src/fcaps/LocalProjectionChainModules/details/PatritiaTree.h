@@ -9,6 +9,7 @@
 #include <vector>
 #include <deque>
 #include <set>
+#include <map>
 
 ////////////////////////////////////////////////////////////////////
 
@@ -60,14 +61,14 @@ public:
 		objects.push_back(obj);
 		return objects.size() - 1;
 	}
-	TObject GetObject(int index)
+	TObject GetObject(int index) const
 		{ assert( 0 <= index && index < objects.size()); return objects[index];}
 	// Add attributes in the closure
 	int AddAttribute(TAttribute a) {
 		closureAttrs.push_back(a);
 		return closureAttrs.size() - 1;
 	}
-	TAttribute GetClsAttribute(int index)
+	TAttribute GetClsAttribute(int index) const
 		{ assert( 0 <= index && index < closureAttrs.size()); return closureAttrs[index];}
 
 	// Comparator

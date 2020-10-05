@@ -13,7 +13,7 @@ struct CMemoryCounter {
 	void UnregisterAllocation(size_t n)
 	  { assert( memoryConsumption >= n); memoryConsumption -= n;}
 
-	size_t GetMemoryConsumption()
+	size_t GetMemoryConsumption() const
 	  {return memoryConsumption;}
 private:
 	size_t memoryConsumption;
@@ -38,15 +38,15 @@ struct CountingAllocator {
       typedef CountingAllocator<U> other;
    };
 
-   CountingAllocator( CMemoryCounter& cnt)
-	{ counter = cnt; };
-   CountingAllocator(CountingAllocator&&) = default;
+	CountingAllocator( CMemoryCounter& _cnt) :
+		cnt(_cnt) {}
+	CountingAllocator(CountingAllocator&&) = default;
    CountingAllocator(CountingAllocator const&) = default;
    CountingAllocator& operator=(CountingAllocator&&) = default;
    CountingAllocator& operator=(CountingAllocator const&) = default;
 
    template <typename U>
-   CountingAllocator(CountingAllocator<U> const&) {}
+   CountingAllocator(CountingAllocator<U> const& other): cnt(other.Counter()) {}
 
    pointer address(reference x) const { return &x; }
    const_pointer address(const_reference x) const { return &x; }
@@ -69,6 +69,8 @@ struct CountingAllocator {
 
    template <typename U>
    void destroy(U* p) { p->~U(); }
+
+	CMemoryCounter& Counter() const { return cnt;};
 
 private:
 	CMemoryCounter& cnt;
