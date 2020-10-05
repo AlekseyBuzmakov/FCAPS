@@ -84,25 +84,23 @@ private:
 	// The threshold for delta measure
 	double thld;
 
+	// Should all extension be found at once
+	bool areAllInOnce;
+
 	// Memory consumption
 	mutable size_t totalAllocatedPatterns;
 
 	void buildPatritiaTree();
 	void extractAttrsFromPatritiaTree();
 	void addAttributeNode(CPatritiaTree::TAttribute attr, const CPatritiaTreeNode& node);
+	void computeCommonAttributesinPT();
+	void computeNextAttributeIntersectionsinPT();
 
 	const CPattern& to_pattern(const IPatternDescriptor* d) const;
-	const CPattern* newPattern(
-		const CVectorBinarySetDescriptor* ext,
-		// CIntentsTree::TIntent intent,
-		CIgnoredAttrs& ignored,
-		int nextAttr, DWORD delta, int clossestAttr = 0);
-	const CVectorBinarySetDescriptor* getAttributeImg(int a);
-	const CPattern* initializeNewPattern(
-		const CPattern& parent,
-		int genAttr,
-		std::unique_ptr<const CVectorBinarySetDescriptor,CPatternDeleter>& ext);
-	DWORD getAttributeDelta(int a, const CVectorBinarySetDescriptor& ext);
+	CPattern* computePreimage(const CPattern& p, CPatritiaTree::TAttribute a);
+
+	bool initializePreimage(const CPattern& parent, int genAttr, CPattern& res);
+	DWORD getAttributeDelta(const CPattern& p, CPatritiaTree::TAttribute a, DWORD maxDelta);
 };
 
 #endif // STABILITYLPCBYPATRICIATREE_H

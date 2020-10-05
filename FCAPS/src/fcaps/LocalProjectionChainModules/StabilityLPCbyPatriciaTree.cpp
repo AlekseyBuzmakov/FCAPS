@@ -35,6 +35,10 @@ STR(
 				"ContextReader":{
 					"description": "A module for reading object intents from binary JSON context",
 					"type": "@BinContextReaderModules"
+				},
+				"AllAttributesInOnce": {
+					"description": "When called to compute next projection should it be generated only one 'next' pattern with one attribute, or all of them",
+					"type": "boolean"
 				}
 			}
 		}
@@ -54,14 +58,46 @@ const char* const CStabilityLPCbyPatriciaTree::Desc()
 
 class CPattern : public IExtent, public IPatternDescriptor, public ISwappable {
 public:
-	CPattern(CMemoryCounter& _cnt) :
+	typedef CExtentHolder list<const CPatritioaTreeNode*, CountingAllocator<const CPatritiaTreeNode*> >;
+	struct CIntentAttribute{
+		friend CPattern; // For accessing the counter
+
+		// The link to the previous attribute
+		CIntentAttribute* Prev;
+		// The attribute value
+		CPatritiaTree::TAttribute Attr;
+
+		CIntentAttribute(): Prev(0), Attr(-1), counter(1); {}
+		CIntentAttribute(CIntentAttribute* prev, CPatritiaTree::TAttribute a): Prev(prev), Attr(a), counter(1); {}
+
+	private:
+		int counter;
+	};
+
+public:
+	CPattern(CPatritiaTree& _pTree, CMemoryCounter& _cnt) :
+		pTree(_pTree),
 		extent( CountingAllocator<const CPatritiaTreeNode*>(_cnt) ),
 		extentSize(0),
 		extentHash(0),
 		kernelAttr(0),
 		clossestAttr( - 1),
-		delta(0)
+		delta(0),
+		intent(0)
 	{}
+	~CPattern()
+	{
+		while(intent != 0) {
+			assert(intent.counter > 0);
+			--intent.counter;
+			if(intent.counter > 0) {
+				break;
+			}
+			CIntentAttribute* prev = intent.Prev;
+			delete intent;
+			intent = prev;
+		}
+	}
 		
 	// Methods of IExtent
 	virtual DWORD Size() const
@@ -94,6 +130,8 @@ public:
 		extentSize += node.ObjEnd - node.ObjStart;
 		extentHash ^= node.ObjStart ^ (node.ObjEnd << 16)
 	}
+	CExtentHolder::const_iterator Begin() const { return extent.begin(); }
+	CExtentHolder::const_iterator End() const { return extent.end(); }
 
 	// Get/Set the kernel attribute
 	CPatritiaTree::TAttribute GetKernelAttribute() const
@@ -113,10 +151,22 @@ public:
 	void SetDelta(DWORD d) const
 		{assert(d <= delta); delta = d;}
 
+	// Checks if an attribute cannot extent the pattern
+	bool IsIgnored( CPatritiaTree::TAttribute a )
+		{ return false; }
+	// Adding new attribute to the intent
+	void AddNewAttributeToIntent(CPatritiaTree::TAttribute a)
+		{ assert(intent==0 || intent->Attr < a); ++intent.counter; intent = new CIntentAttribute(intent, a); }
+	const CIntentAttribute* GetLastIntentAttribute() const
+		{ return intent; }
+
 private:
+	CPatritiaTree& pTree;
+	
 	const DWORD extentSize;
 	const DWORD extentHash;
 
+	CExtentHolder extent;
 	// The minimal attribute number that can be added to the pattern
 	CPatritiaTree::TAttribute kernelAttr;
 	
@@ -126,14 +176,33 @@ private:
 	// Used as an optimization for earlier detection of new unstable patterns
 	mutable int clossestAttr;
 
+	// The reference to the last attribute in the intent
+	CIntentAttribute* intent;
+	// The number of self added attributes
+	int selfIntentAttributesCount;
+
 	void initPatternImage(CPatternImage& img) const {
 		img.PatternId = Hash();
-		img.ImageSize = Extent().Size();
+		img.ImageSize = Size();
 		img.Objects = 0;
 
 		unique_ptr<int[]> objects (new int[img.ImageSize]);
 		img.Objects = objects.get(); 
-		cmp.EnumValues(Extent(), objects.get(), img.ImageSize);
+		auto itr = extent.begin();
+		int lastObj = -1;
+		int currentImgPos = 0;
+		for( ; itr != extent.end(); ++itr) {
+			assert(lastObj < itr->ObjStart);
+			assert(itr->ObjStart < itr->ObjEnd);
+			for( lastObj = itr->ObjStart; lastObj < itr->ObjEnd; ++lastObj ) {
+				assert(currentImgPos < img.ImageSize);
+				CPatritiaTree::TObject obj = pTree.GetObject(lastObj);
+				img.Objects[currentImgPos] = obj;
+				++currentImgPos;
+			} 
+		}
+		assert(currentImgPos == img.ImageSize);
+
 		objects.release(); 
 	}
 };
@@ -142,18 +211,12 @@ private:
 
 CStabilityLPCbyPatriciaTree::CStabilityLPCbyPatriciaTree() :
 	thld(1),
-	extCmp(new CVectorBinarySetJoinComparator),
-	extDeleter(extCmp),
-	totalAllocatedPatterns(0),
-	totalAllocatedPatternSize(0)
+	areAllInOnce( false ),
+	totalAllocatedPatterns(0)
 {
 }
 CStabilityLPCbyPatriciaTree::~CStabilityLPCbyPatriciaTree()
 {
-	for(auto i = attrsHolder.begin(); i != attrsHolder.end(); ++i) {
-		extDeleter(*i);
-		*i = 0;
-	}
 }
 
 void CStabilityLPCbyPatriciaTree::LoadParams( const JSON& json )
@@ -188,6 +251,7 @@ void CStabilityLPCbyPatriciaTree::LoadParams( const JSON& json )
 
 	buildPatritiaTree();
 	extractAttrsFromPatritiaTree();
+	computeCommonAttributesinPT();
 
 	assert(pTree.GetNode(pTree.GetRoot()).ObjStart == 0);
 	assert(pTree.GetNode(pTree.GetRoot()).ObjEnd == attr->GetObjectNumber());
@@ -293,75 +357,60 @@ void CStabilityLPCbyPatriciaTree::ComputeZeroProjection( CPatternList& ptrns )
 
 ILocalProjectionChain::TPreimageResult CStabilityLPCbyPatriciaTree::Preimages( const IPatternDescriptor* d, CPatternList& preimages )
 {
-	// assert( attrs != 0);
+	assert( attrs != 0);
 
-	// const CPattern& p = to_pattern(d);
-    // assert(p.Delta() >= thld);
+	const CPattern& p = to_pattern(d);
+    assert(p.Delta() >= thld);
 
-	// int a = p.NextAttribute();
-	// CPatternImage img;
-	// while(attrs->HasAttribute(a)){
-	// 	if( p.Delta() < thld) {
-	// 		// Unstable concep cannot probuce stable concepts
-	// 		break;
-	// 	}
+	int a = p.GetKernelAttribute();
+	for(; a < attributes.size(); ++a){
+		if( p.Delta() < thld) {
+			// Unstable concept cannot probuce stable concepts
+			break;
+		}
 
-	// 	if(p.IsIgnored(a)){
-	// 		a = attrs->GetNextAttribute(a);
-	// 		continue;
-	// 	}
-	// 	// Getting next attribute
-	// 	const CVectorBinarySetDescriptor& nextImage = *getAttributeImg(a);
+		if(p.IsIgnored(a)){
+			continue;
+		}
+		// Computing the only possible preimage
+		unique_ptr<CPattern> res(computePreimage(p, a));
+		const DWORD extDiff = p.Size() - res->Size();
+		if(extDiff == 0 ) {
+			// Attribute is in the closure
+			p.AddNewAttributeToIntent(a);
+			continue;
+		}
 
-	// 	// Computing the only possible preimage
-	// 	unique_ptr<const CVectorBinarySetDescriptor, CPatternDeleter> res(
-	// 		extCmp->CalculateSimilarity( p.Extent(), nextImage ), extDeleter );
-	// 	const DWORD ptrnExtSize = p.Extent().Size();
-	// 	const DWORD resExtSize = res->Size();
-	// 	const DWORD extDiff = ptrnExtSize - resExtSize;
-	// 	if(extDiff == 0 ) {
-	// 		// Attribute is in the closure
-	// 		p.AddAttributeToIntent(a);
-	// 		a = attrs->GetNextAttribute(a);
-	// 		continue;
-	// 	}
+		const bool isPreimageStable = initializePreimage(p, a, *res);
 
-	// 	unique_ptr<const CPattern> newPtrn( initializeNewPattern( p, a, res ) );
+		// Updating the measure of the current pattern.
+		//    It is here, because initializeNewPattern relies on the p.GetClossestChild()
+		if( p.Delta() > extDiff ) {
+			p.SetDelta(extDiff);
+			p.SetClosestChild(a);
+		}
 
-	// 	// Updating the measure of the current pattern.
-	// 	//    It is here, because initializeNewPattern relies on the p.GetClossestChild()
-	// 	if( p.Delta() > extDiff ) {
-	// 		p.SetDelta(extDiff);
-	// 		p.SetClosestChild(a);
-	// 	}
-
-	// 	if( newPtrn == 0 ) {
-	// 		// Pattern 'res' is not stable
-	// 		// Any more specific attribute can be ignored
-	// 		a = attrs->GetNextNonChildAttribute(a);
-	// 		// TODO: normally all this attributes will be in the closure of any found children and thus there is no needs to intersect them  with this attribute
-	// 		// Should search funther for a better pattern
-	// 		continue;
-	// 	}
+		if( !isPreimageStable ) {
+			continue;
+		}
 		
-	// 	// A new stable pattern is generated
-	// 	//  We should add it to preimages.
-	// 	assert(newPtrn->Delta() >= thld);
-	// 	preimages.PushBack( newPtrn.release() );
+		// A new stable pattern is generated
+		//  We should add it to preimages.
+		assert(res->Delta() >= thld);
+		preimages.PushBack( res.release() );
 
-	// 	a = attrs->GetNextAttribute(a);
-	// 	if(!areAllInOnce) {
-	// 		break;
-	// 	}
-	// }
+		if(!areAllInOnce) {
+			break;
+		}
+	}
 
-	// p.SetNextAttribute(a);
-	// const bool isStable = p.Delta() >= thld;
-	// if(!attrs->HasAttribute(a)){
-	// 	return isStable ? PR_Finished : PR_Uninteresting;
-	// } else {
-	// 	return isStable ? PR_Expandable : PR_Uninteresting;
-	// }
+	p.SetNextAttribute(a);
+	const bool isStable = p.Delta() >= thld;
+	if(a >= attributes.size()){
+		return isStable ? PR_Finished : PR_Uninteresting;
+	} else {
+		return isStable ? PR_Expandable : PR_Uninteresting;
+	}
 
 	return PR_Uninteresting;
 }
@@ -379,29 +428,84 @@ int CStabilityLPCbyPatriciaTree::GetExtentSize( const IPatternDescriptor* d ) co
 }
 JSON CStabilityLPCbyPatriciaTree::SaveExtent( const IPatternDescriptor* d ) const
 {
-	return "";//extCmp->SavePattern( &to_pattern(d).Extent() );
+	const CPattern& p = to_pattern(d);
+	CPatternImage img;
+	p.GetExtent(img);
+
+	rapidjson::Document extentJson;
+	rapidjson::MemoryPoolAllocator<>& alloc = extentJson.GetAllocator();
+	extentJson.SetObject()
+		.AddMember( "Count", rapidjson::Value().SetUint(img.Size), alloc )
+		.AddMember( "Inds", rapidjson::Value.SetArray(), alloc );
+
+	rapidjson::Value& inds = extentJson["Inds"];
+	inds.Reserve( img.Size(), alloc );
+
+	for( int i = 0; i < img.Size; ++i) {
+		inds.PushBack( rapidjson::Value().SetUint(img.Objects[i]));
+	}
+
+	JSON result;
+	CreateStringFromJSON( extentJson, result );
+	return result;
 }
 JSON CStabilityLPCbyPatriciaTree::SaveIntent( const IPatternDescriptor* d ) const
 {
-	// const CPattern& p = to_pattern(d);
-	// CIntentsTree::TIntentItr itr = intentsTree.GetIterator(p.Intent());
-	// DWORD intentSize = 0;
-	// while(itr != -1) {
-	// 	++intentSize;
-	// 	intentsTree.GetNextAttribute(itr);
-	// }
-	// int* attributes = new int[intentSize];
-	// itr = intentsTree.GetIterator(p.Intent());
-	// int i = intentSize - 1;
-	// while(itr != -1) {
-	// 	assert(i >= 0);
-	// 	attributes[i] = intentsTree.GetNextAttribute(itr);
-	// 	--i;
-	// }
-	JSON rslt;// = this->attrs->DescribeAttributeSet(attributes,intentSize);
-	// delete[] attributes;
+	const CPattern& p = to_pattern(d);
 
-	return rslt;
+	vector<int> intent;
+	intent.resize(attributes.size(), 0);
+	auto itr = p.Begin();
+	int nodeCount = 0;
+	for(; itr != p.End(); ++itr, ++nodeCount) {
+		const CPatritiaTreeNode* node = *itr;
+		while( true ) {
+			assert( node != 0);
+			// Adding all attributes from the closure
+			for( int i = node->ClosureAttrStart; i < node->ClosureAttrEnd; ++i ) {
+				const int closureAttr = pTree.GetClsAttribute(i);
+				assert( 0 <= closureAttr && closureAttr < intent.size());
+				++intent[closureAttr];
+			}
+			// Adding the generator attribute
+			const int closureAttr = node->GenAttr;
+			assert( 0 <= closureAttr && closureAttr < intent.size());
+			++intent[closureAttr];
+			// Switching to parent node
+			const CPatritiaTree::TNodeIndex parentId = node->GetParent();
+			if( parentId == -1) {
+				break; // End of Patritia Tree
+			}
+			node = &pTree.GetNode(parentId);
+		}
+	}
+
+	rapidjson::Document intentJson;
+	rapidjson::MemoryPoolAllocator<>& alloc = intentJson.GetAllocator();
+	intentJson.SetObject()
+		.AddMember( "Names", rapidjson::Value.SetArray(), alloc );
+
+	rapidjson::Value& names = intentJson["Names"];
+	names.Reserve( intent.size(), alloc );
+
+	for( int i = 0; i < intent.size(); ++i) {
+		assert( intent[i] <= nodeCount);
+		if( intent[i] < nodeCount) {
+			// Not in all nodes, should be skipped
+			continue;
+		}
+		const CPatritiaTree::TAttribute a = i;
+		const JSON name = attrs->GetAttributeName(a);
+		names.PushBack( rapidjson::Value().SetString(name, alloc));
+	}
+
+	assert(nomes.Size() > 0);
+	intentJson
+		.AddMember( "Count", rapidjson::Value().SetUint(names.Size()), alloc );
+
+	JSON result;
+	CreateStringFromJSON( intentJson, result );
+	return result;
 }
 size_t CStabilityLPCbyPatriciaTree::GetTotalAllocatedPatterns() const
 {
@@ -613,7 +717,7 @@ void CStabilityLPCbyPatriciaTree::extractAttrsFromPatritiaTree()
 	}
 }
 // Adds new node in the description of the attribute
-void addAttributeNode(CPatritiaTree::TAttribute attr, const CPatritiaTreeNode& node)
+void CStabilityLPCbyPatriciaTree::addAttributeNode(CPatritiaTree::TAttribute attr, const CPatritiaTreeNode& node)
 {
 	if( attributes.size() <= attr ) {
 		attributes.resize(attr+1);
@@ -625,116 +729,163 @@ void addAttributeNode(CPatritiaTree::TAttribute attr, const CPatritiaTreeNode& n
 
 	attrList->push_back(&node);
 }
+// For every node in Patritia Tree computes the related attributes
+void CStabilityLPCbyPatriciaTree::computeCommonAttributesinPT()
+{
+	CDeepFirstPatritiaTreeIterator treeItr(pTree);
+	CPatritiaTreeNode::TAttributeSet attributes;
+	for(; !treeItr.IsEnd(); ++treeItr) {
+		switch(treeItr.Status) {
+		case CDeepFirstPatritiaTreeIterator::S_Return:
+			continue;
+		case CDeepFirstPatritiaTreeIterator::S_Forward: {
+			if(treeItr->GenAttr != -1) {
+				attributes.insert(treeItr->GenAttr);
+			}
+			for(int a = treeItr->ClosureAttrStart; a > treeItr->ClosureAttrEnd; ++a) {
+				attributes.insert(pTree.GetClsAttribute(a));
+			}
+			attributes.CommonAttributes = attributes;
+			break;
+		}
+		case CDeepFirstPatritiaTreeIterator::S_Exit: {
+			if(treeItr->GenAttr != -1) {
+				const size_t n = attributes.erase(treeItr->GenAttr);
+				assert(n == 1);
+			}
+			for(int a = treeItr->ClosureAttrStart; a > treeItr->ClosureAttrEnd; ++a) {
+				const size_t n = attributes.erase(pTree.GetClsAttribute(a));
+				assert(n == 1);
+			}
+			break;
+		}
+		default:
+			assert(false);
+		}
+	}
+}
 
+// Computhe the intersection of the PT node with an attribute
+void CStabilityLPCbyPatriciaTree::computeNextAttributeIntersectionsinPT()
+{
+	CDeepFirstPatritiaTreeIterator treeItr(pTree);
+	for(; !treeItr.IsEnd(); ++treeItr) {
+		if( treeItr.Status() != CDeepFirstPatritiaTreeIterator::S_Exit) {
+			// On exit all previous nodes are processed
+			continue;
+		}
 
+		for( int i = treeItr->ClosureAttrStart; i < treeItr->ClosureAttrEnd; ++i ) {
+			if( i <= treeItr->GenAttr) {
+				continue;
+			}
+			treeItr->NextAttributeIntersections.insert(CPatritiaTreeNode::TNextAttributeIntersections::value_type(pTree.GetClsAttribute(i), ch));
+		}
+		// Adding intersection information from children
+		auto chItr = treeItr->Children.begin();
+		for( ;chItr != treeItr->Children.end(); ++chItr) {
+			const CPatritiaTreeNode* ch = pTree.GetNode(*chItr);
+			// Intersection with the generator
+			treeItr->NextAttributeIntersections.insert(CPatritiaTreeNode::TNextAttributeIntersections::value_type(ch->GenAttr, ch));
+			// Intersections known in the child
+			treeItr->NextAttributeIntersections.insert(ch->NextAttributeIntersections.begin(), ch->NextAttributeIntersections.end());
+		}
+	}
+}
+
+// Converts the general pattern to specific pattern
 const CPattern& CStabilityLPCbyPatriciaTree::to_pattern(const IPatternDescriptor* d) const
 {
 	assert(d != 0);
 	return debug_cast<const CPattern&>(*d);
 }
 
-const CPattern* CStabilityLPCbyPatriciaTree::initializeNewPattern(
-	  const CPattern& parent,
-	  int genAttr,
-	  std::unique_ptr<const CVectorBinarySetDescriptor,CPatternDeleter>& ext)
+// Computes the preimage of p w.r.t. the attribute a
+CPattern* CStabilityLPCbyPatriciaTree::computePreimage(const CPattern& p, CPatritiaTree::TAttribute a)
 {
-	// assert( ext != 0 );
-
-	// // The intent of the new concept
-	// CIntentsTree::TIntent intent = intentsTree.Copy(parent.Intent());
-	// CIgnoredAttrs extIgnoredAttrs(parent.IgnoredAttrs());
-
-	// intent = intentsTree.AddAttribute(intent, genAttr);
-	// extIgnoredAttrs.Ignore(genAttr);
-	// // The ignored attributes for the new concept
-
-	// // First we should close the description of ext.
-	// bool canBeUnclosed=false;
-	// while(canBeUnclosed){
-	// 	canBeUnclosed=false;
-	// 	int a = attrs->GetNextAttribute(genAttr);
-	// 	for(; attrs->HasAttribute(a); a = attrs->GetNextAttribute(a)) {
-	// 		if(extIgnoredAttrs.IsIgnored(a)) {
-	// 			continue;
-	// 		}
-	// 		const CVectorBinarySetDescriptor& attr = *getAttributeImg(a);
-	// 		unique_ptr<const CVectorBinarySetDescriptor,CPatternDeleter> res(
-	// 				extCmp->CalculateSimilarity( *ext, attr ), extDeleter);
-	// 		const DWORD extDiff = ext->Size() - res->Size();
-	// 		// TODO
-	// 		// if( res->Size() < thld ) {
-	// 		// ??? could we ignore it somehow
-	// 		// }
-	// 		if( res->Size() == 0 ) {
-	// 			// can be ignored
-	// 			extIgnoredAttrs.Ignore(a);
-	// 		}
-	// 		if(extDiff > thld ) {
-	// 			// not in the closure wrt Delta
-	// 			continue;
-	// 		}
-	// 		canBeUnclosed = true;
-
-	// 		if( extDiff > 0 ) {
-	// 			ext.reset(res.release());
-	// 		}
-	// 		extIgnoredAttrs.Ignore(a);
-	// 		intent = intentsTree.AddAttribute(intent, a);
-	// 	}
-	// }
-
-
-	// // If delta is zero, then the attribute is in the intent.
-	// // However, according to canonical order it should not be there. Thus, such a pattern should also be ignored.
-	// assert(thld >= 1);
-	// DWORD delta = ext->Size();
-	// int minAttr = -1;
-	// if( parent.ClosestChild() >= 0 ) {
-	// 	assert(!parent.IsIgnored(parent.ClosestChild()));
-	// 	delta = getAttributeDelta(parent.ClosestChild(), *ext);
-	// 	minAttr = parent.ClosestChild();
-	// }
-
-	// // intentStorage.clear();
-	// // CIntentsTree::TIntentItr itr = intentsTree.GetIterator(parent.Intent());
-	// // while(itr != -1) {
-	// 	// intentStorage.push_back(intentsTree.GetNextAttribute(itr));
-	// // }
-	// // auto intentItr = intentStorage.rbegin();
-	// // auto intentEnd = intentStorage.rend();
-
-	// for(int a = 0; delta >= thld && a < genAttr && attrs->HasAttribute(a); a = attrs->GetNextNonChildAttribute(a)) {
-	// 	if(extIgnoredAttrs.IsIgnored(a)) {
-	// 		continue;
-	// 	}
-
-	// 	const DWORD aDelta = getAttributeDelta(a, *ext);
-	// 	if(aDelta < delta) {
-	// 		delta = aDelta;
-	// 		minAttr = a;
-	// 	}
-	// 	if( delta < thld ) {
-	// 		intentsTree.Delete(intent);
-	// 		return 0;
-	// 	}
-	// }
-	// if( delta < thld ) {
-	// 	intentsTree.Delete(intent);
-	// 	return 0;
-	// }
-	// return(newPattern(ext.release(), intent, extIgnoredAttrs,
-	// 			attrs->GetNextAttribute(genAttr), delta, minAttr));
-
-	return 0;
+	unique_ptr<CPattern> result( new CPattern(pTree, memoryCounter) );
+	auto itr = p.Begin();
+	for(; itr != p.End(); ++itr) {
+		auto range = p.NextAttributeIntersections.equal_range(a);
+		for( auto resNode = range.first; resNode != resNode.second; ++resNode) {
+			result.AddPTNode(*resNode);
+		}
+	} 
+	result->SetKernelAttribute(a+1);
+	result->AddNewAttributeToIntent(a);
+	return result.release();
 }
 
-DWORD CStabilityLPCbyPatriciaTree::getAttributeDelta(int a, const CVectorBinarySetDescriptor& ext)
-{
-	const CVectorBinarySetDescriptor& attr = *getAttributeImg(a);
+bool CStabilityLPCbyPatriciaTree::initializePreimage(const CPattern& parent, int genAttr, CPattern& res);
+(
+	// If delta is zero, then the attribute is in the intent.
+	// However, according to canonical order it should not be there. Thus, such a pattern should also be ignored.
+	assert(thld >= 1);
+	DWORD delta = min(parent.Delta(), res.Size());
+	int minAttr = -1;
+	if( parent.ClosestChild() >= 0 ) {
+		assert(!parent.IsIgnored(parent.ClosestChild()));
+		const DWORD clossestChildDelta = getAttributeDelta(res, parent.ClosestChild(), delta);
+		assert(clossestChildDelta <= delta);
+		delta = clossestChildDelta;
+		minAttr = parent.ClosestChild();
+	}
 
-	// Computing the only possible preimage
-	CSharedPtr<const CVectorBinarySetDescriptor> res(
-		extCmp->CalculateSimilarity( ext, attr ), extDeleter );
-	const DWORD extDiff = ext.Size() - res->Size();
-	return extDiff;
+	const CPattern::CIntentAttribute* lastIntentAttr = res.GetLastIntentAttribute();
+
+	for(int a = genAttr - 1; delta >= thld && a >=0; --a) {
+		if(a == parent.ClosestChild()) {
+			// Already verified
+			continue;
+		}
+		while(lastIntentAttr != 0 && lastIntentAttr.Attr > a) {
+			lastIntentAttr = lastIntentAttr.Prev;
+		}
+		if( lastIntentAttr.Attr == a ) {
+			// Already in the pattern
+			continue;
+		}
+		const DWORD aDelta = getAttributeDelta(res, a, delta);
+		if(aDelta < delta) {
+			delta = aDelta;
+			minAttr = a;
+		}
+		if( delta < thld ) {
+			// The pattern is unstable
+			return false;
+		}
+	}
+	if( delta < thld ) {
+		// The pattern is unstable
+		return false;
+	}
+	res.SetClosestAttribute(minAttr);
+	res.SetDelta(delta);
+	return true;
+}
+
+// Finds the delta-stability of a pattern p wrt the attribute a.
+//   If the delta-stability is larger than maxDelta, then maxDelta+1 is returned
+DWORD CStabilityLPCbyPatriciaTree::getAttributeDelta(const CPattern& p, CPatritiaTree::TAttribute a, DWORD maxDelta)
+{
+	DWORD currentDelta = 0;
+	auto itr = p.Begin();
+	for(; itr != p.End(); ++itr) {
+		if( currentDelta > maxDelta ) {
+			return maxDelta+1;
+		}
+		if( itr->GenAttr < a ) {
+			if( itr->CommonAttributes.find(a) == itr->CommonAttributes.end() ) {
+				// The node is removed after intersection
+				currentDelta += itr->ObjEnd - itr->ObjStart;
+			}
+		} else {
+			currentDelta += itr->ObjEnd - itr->ObjStart;
+			auto range = itr->NextAttributeIntersections.equal_range(a);
+			for( auto resNode = range.first; resNode != resNode.second; ++resNode) {
+				currentDelta -= resNode->ObjEnd - resNode->ObjStart;
+			}
+		}
+	} 
+	return currentDelta;
 }

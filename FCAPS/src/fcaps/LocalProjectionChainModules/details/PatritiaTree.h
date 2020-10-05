@@ -89,6 +89,8 @@ public:
 	typedef typename CPatritiaTree::TAttribute TAttribute;
 	typedef typename CPatritiaTree::CChildrenSet CChildrenSet;
 	typedef typename CPatritiaTree::TNodeIndex TNodeIndex;
+	typedef std::set<TAttribute> TAttributeSet;
+	typedef std::multimap<TAttribute, const CPatritiaTreeNode*> TNextAttributeIntersections;
 
 public:
 	CPatritiaTreeNode( TNodeIndex _parent, TAttribute a, CPatritiaTree& tree ) :
@@ -120,11 +122,16 @@ public:
 		ObjStart = -1;
 		ObjEnd = -1;
 		Children.clear();
+		CommonAttributes.clear();
 	}
 
 	// The set of children
 	CChildrenSet Children;
 
+	// The set of all common attributes to the node
+	TAttributeSet CommonAttributes;
+	// The references to the nodes that contains intersection of the current node with attributes larger than genAttr.
+	TNextAttributeIntersections NextAttributeIntersections;
 	// Generator Attribute the attributes that splits the object in the parrent vertex in two disjoint sets.
 	TAttribute GenAttr;
 
