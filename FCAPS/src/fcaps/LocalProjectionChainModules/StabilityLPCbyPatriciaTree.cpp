@@ -586,7 +586,8 @@ void CStabilityLPCbyPatriciaTree::buildPatritiaTree()
 		}
 	}
 
-	pTree.Print();
+	// // DEBUG: For printing the result
+	// pTree.Print();
 	
 	// The set of previously processed attibutes
 	std::deque<CPatritiaTree::TAttribute> childrenCAttrs;
@@ -606,50 +607,55 @@ void CStabilityLPCbyPatriciaTree::buildPatritiaTree()
 			continue;
 		}
 
-		// Now if there are objects associated with the node, then these objects do not have other attributes and thus there is no attributes in the closure.
-		if( nodeToObjectMap.find(*treeItr) != nodeToObjectMap.end() ) {
-			continue;
-		}
+		currentNodeAttrs.clear();
+
 		// Only the attributes after the last one can be in the closure,
 		// since the previous children are generated with the attribute which definetly upson in the last children
 		CPatritiaTree::TNodeIndex lastNodeId = *ch;
 		auto& lastNode = pTree.GetNode(lastNodeId);
-		currentNodeAttrs.clear();
-		// Adding the generated attribute for the last children.
-		// It is the only possible generated attribute among the children that can be common to all of children
-		currentNodeAttrs.push_back(lastNode.GenAttr);
-		// Adding all attributes for the last node as candidates.
-		for(int i = lastNode.ClosureAttrStart; i < lastNode.ClosureAttrEnd; ++i) {
-			assert(currentNodeAttrs.empty() || 0 <= i && childrenCAttrs.size() && currentNodeAttrs.back() < childrenCAttrs[i]);
-			currentNodeAttrs.push_back(childrenCAttrs[i]);
-		}
-		// A flag indicating if all attributes from the last node are presented in prevous children
-		bool areAllLastChildAttributesCommon = true;
-		// Now we itearate over the previous children and compute the common attributes
-		++ch; // Now it is the last but one child
-		for(; ch != children.rend(); ++ch) {
-			auto attrItr = currentNodeAttrs.begin();
-			const CPatritiaTree::TNodeIndex chId = *ch;
-			const CPatritiaTree::CNode& chNode = pTree.GetNode(chId);
-			int i = chNode.ClosureAttrStart;
-			for(; attrItr != currentNodeAttrs.end(); ) {
-				auto a = attrItr;
-				++attrItr;
 
-				// Skiping all attributes that are missed in the current child
-				while( i < chNode.ClosureAttrEnd && childrenCAttrs[i] < *a) {
-					++i;
+		// A flag indicating if all attributes from the last node are presented in the previous children
+		bool areAllLastChildAttributesCommon = false;
+			
+		// Now if there are objects associated with the node, then these objects do not have other attributes and thus there is no attributes in the closure.
+		if( nodeToObjectMap.find(*treeItr) == nodeToObjectMap.end() ) {
+			// Adding the generated attribute for the last children.
+			// It is the only possible generated attribute among the children that can be common to all of children
+			currentNodeAttrs.push_back(lastNode.GenAttr);
+			// Adding all attributes for the last node as candidates.
+			for(int i = lastNode.ClosureAttrStart; i < lastNode.ClosureAttrEnd; ++i) {
+				assert(currentNodeAttrs.empty() || 0 <= i && childrenCAttrs.size() && currentNodeAttrs.back() < childrenCAttrs[i]);
+				currentNodeAttrs.push_back(childrenCAttrs[i]);
+			}
+			// A flag indicating if all attributes from the last node are presented in the previous children
+			areAllLastChildAttributesCommon = true;
+			// Now we itearate over the previous children and compute the common attributes
+			++ch; // Now it is the last but one child
+
+			for(; ch != children.rend(); ++ch) {
+				auto attrItr = currentNodeAttrs.begin();
+				const CPatritiaTree::TNodeIndex chId = *ch;
+				const CPatritiaTree::CNode& chNode = pTree.GetNode(chId);
+				int i = chNode.ClosureAttrStart;
+				for(; attrItr != currentNodeAttrs.end(); ) {
+					auto a = attrItr;
+					++attrItr;
+
+					// Skiping all attributes that are missed in the current child
+					while( i < chNode.ClosureAttrEnd && childrenCAttrs[i] < *a) {
+						++i;
+					}
+
+					if( i >= chNode.ClosureAttrEnd || childrenCAttrs[i] != *a ) {
+						// The attribute a is missed from the current child
+						currentNodeAttrs.erase(a);
+						areAllLastChildAttributesCommon = false;
+						continue;
+					}
+
+					assert(childrenCAttrs[i] == *a);
+					// The attribute can  be potentailly common just continue
 				}
-
-				if( i >= chNode.ClosureAttrEnd || childrenCAttrs[i] != *a ) {
-					// The attribute a is missed from the current child
-					currentNodeAttrs.erase(a);
-					areAllLastChildAttributesCommon = false;
-					continue;
-				}
-
-				assert(childrenCAttrs[i] == *a);
-				// The attribute can  be potentailly common just continue
 			}
 		}
 
@@ -666,6 +672,26 @@ void CStabilityLPCbyPatriciaTree::buildPatritiaTree()
 
 		ch = children.rbegin();
 		assert( ch != children.rend());
+		if( !currentNodeAttrs.empty() && currentNodeAttrs.front() == lastNode.GenAttr && !areAllLastChildAttributesCommon ) {
+			auto curNodeAttrsItr = currentNodeAttrs.begin();
+			++curNodeAttrsItr;
+			// lastNode.GenAttr is common so should be changed
+			for( int clsAttrInd = lastNode.ClosureAttrStart; clsAttrInd  < lastNode.ClosureAttrEnd; ++clsAttrInd ) {
+				const CPatritiaTree::TAttribute a = childrenCAttrs.at(clsAttrInd);
+
+				assert(curNodeAttrsItr != currentNodeAttrs.end());
+				assert( a >= *curNodeAttrsItr);
+
+				if( a != *curNodeAttrsItr ) {
+					// The attribute can be used the generator for the node
+					lastNode.GenAttr = a;
+					lastNode.ClosureAttrStart = clsAttrInd + 1;
+					break;
+				}
+				++curNodeAttrsItr;
+			}
+			assert(curNodeAttrsItr != currentNodeAttrs.end());
+		}
 		if(areAllLastChildAttributesCommon) {
 			++ch; // The last node will be removed later
 		}
@@ -676,17 +702,31 @@ void CStabilityLPCbyPatriciaTree::buildPatritiaTree()
 			CPatritiaTree::CNode& chNode = pTree.GetNode(chId);
 			int clsAttrInds = chNode.ClosureAttrStart;
 			const int clsAttrEnd = chNode.ClosureAttrEnd;
-			if( clsAttrInds >= clsAttrEnd ) {
-				continue;
-			}
-			chNode.ClosureAttrStart = pTree.AddAttribute(childrenCAttrs.at(clsAttrInds));
-			chNode.ClosureAttrEnd = chNode.ClosureAttrStart;
-			++clsAttrInds;
+			auto curNodeAttrsItr = currentNodeAttrs.begin();
+			bool isStartSet = false;
 			for(; clsAttrInds < clsAttrEnd; ++clsAttrInds) {
-				chNode.ClosureAttrEnd = pTree.AddAttribute(childrenCAttrs.at(clsAttrInds));
+				const CPatritiaTree::TAttribute a  = childrenCAttrs.at(clsAttrInds);
+				while( curNodeAttrsItr != currentNodeAttrs.end() && *curNodeAttrsItr < a ) {
+					++curNodeAttrsItr;
+				}
+				if( curNodeAttrsItr != currentNodeAttrs.end() && *curNodeAttrsItr == a ) {
+					// Attribute is passed to the parent node
+					continue;
+				}
+				const int newAttrInd = pTree.AddAttribute( a );
+				if( !isStartSet ) {
+					chNode.ClosureAttrStart = newAttrInd;
+					isStartSet = true;
+				}
+
+				chNode.ClosureAttrEnd = newAttrInd + 1;
 			}
-			++chNode.ClosureAttrEnd;
-			assert(chNode.ClosureAttrStart < chNode.ClosureAttrEnd);
+			if(!isStartSet) {
+				chNode.ClosureAttrStart = 0;
+				chNode.ClosureAttrEnd = 0;
+			}
+
+			assert(chNode.ClosureAttrStart <= chNode.ClosureAttrEnd);
 		}
 
 		if( areAllLastChildAttributesCommon ) {
@@ -700,6 +740,29 @@ void CStabilityLPCbyPatriciaTree::buildPatritiaTree()
 		}
 	}
 
+	// Copying the attributes of the root closure to the tree
+	CPatritiaTree::CNode& root = pTree.GetNode(pTree.GetRoot());
+	int clsAttrInds = root.ClosureAttrStart;
+	const int clsAttrEnd = root.ClosureAttrEnd;
+	bool isStartSet = false;
+	for(; clsAttrInds < clsAttrEnd; ++clsAttrInds) {
+		const CPatritiaTree::TAttribute a  = childrenCAttrs.at(clsAttrInds);
+		const int newAttrInd = pTree.AddAttribute( a );
+		if( !isStartSet ) {
+			root.ClosureAttrStart = newAttrInd;
+			isStartSet = true;
+		}
+
+		root.ClosureAttrEnd = newAttrInd + 1;
+	}
+	if(!isStartSet) {
+		root.ClosureAttrStart = 0;
+		root.ClosureAttrEnd = 0;
+	}
+
+	assert(root.ClosureAttrStart <= root.ClosureAttrEnd);
+
+	// // DEBUG: For printing the result
 	pTree.Print();
 }
 
@@ -784,9 +847,6 @@ void CStabilityLPCbyPatriciaTree::computeNextAttributeIntersectionsinPT()
 
 		for( int i = treeItr->ClosureAttrStart; i < treeItr->ClosureAttrEnd; ++i ) {
 			const CPatritiaTree::TAttribute a = pTree.GetClsAttribute(i);
-			if( a <= treeItr->GenAttr) {
-				continue;
-			}
 			treeItr->NextAttributeIntersections.insert(CPatritiaTreeNode::TNextAttributeIntersections::value_type(a, &pTree.GetNode(*treeItr)));
 		}
 		// Adding intersection information from children
@@ -799,10 +859,11 @@ void CStabilityLPCbyPatriciaTree::computeNextAttributeIntersectionsinPT()
 			treeItr->NextAttributeIntersections.insert(ch->NextAttributeIntersections.begin(), ch->NextAttributeIntersections.end());
 		}
 	}
-	auto tmp = pTree.GetNode(pTree.GetRoot()).NextAttributeIntersections;
-	for(auto itr = tmp.begin(); itr != tmp.end(); ++itr){
-		cout << itr->first << " " << itr->second->GenAttr << endl;
-	}
+	// // DEBUG: For printing the result
+	// auto tmp = pTree.GetNode(pTree.GetRoot()).NextAttributeIntersections;
+	// for(auto itr = tmp.begin(); itr != tmp.end(); ++itr){
+	// 	cout << itr->first << " " << itr->second->GenAttr << endl;
+	// }
 }
 
 // Converts the general pattern to specific pattern

@@ -66,6 +66,7 @@ void CPatritiaTree::Print()
 				   // isIndented = true;
 			   }
 		  	   std::cout << "->" << std::setw(4) << treeItr->GenAttr << " (";
+			   assert(0 <= treeItr->ClosureAttrStart && treeItr->ClosureAttrEnd <= closureAttrs.size());
 			   for( int i = treeItr->ClosureAttrStart; i < treeItr->ClosureAttrEnd; ++i) {
 			   		if( i != treeItr->ClosureAttrStart) {
 						std::cout << ",";
