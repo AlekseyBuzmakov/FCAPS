@@ -95,6 +95,7 @@ private:
 	void addAttributeNode(CPatritiaTree::TAttribute attr, const CPatritiaTreeNode& node);
 	void computeCommonAttributesinPT();
 	void computeNextAttributeIntersectionsinPT();
+	bool checkPTValidity();
 
 	const CPTPattern& to_pattern(const IPatternDescriptor* d) const;
 	CPTPattern* computePreimage(const CPTPattern& p, CPatritiaTree::TAttribute a);

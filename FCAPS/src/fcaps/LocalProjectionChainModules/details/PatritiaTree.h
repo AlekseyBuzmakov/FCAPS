@@ -55,6 +55,9 @@ public:
 
 	TNodeIndex AddNode( TNodeIndex parent, TAttribute genAttr );
 	TNodeIndex GetAttributeNode(TNodeIndex id, TAttribute a);
+	TNodeIndex GetAttributeNode(const CNode& node, TAttribute a);
+	TNodeIndex GetOrCreateAttributeNode(TNodeIndex id, TAttribute a)
+		{ const TNodeIndex res = GetAttributeNode(id, a); return res == -1 ? AddNode(id,a) : res; }
 
 	// Adds objects to tree
 	int AddObject(TObject obj) {
@@ -127,6 +130,7 @@ public:
 	}
 
 	// The set of children
+	// Children.find should not be used! Use CPatritiaTree::GetAttributeNode instead
 	CChildrenSet Children;
 
 	// The set of all common attributes to the node

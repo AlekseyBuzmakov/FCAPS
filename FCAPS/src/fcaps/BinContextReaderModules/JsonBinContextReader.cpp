@@ -98,9 +98,7 @@ public:
 	// Reading the objects one by one (the second pass)
 	void StartReadingObjects() {
 		mode = M_Read;
-		assert(attrsAddedObjects.size() == 0);
 		assert(attributes.size() != 0);
-		attrsAddedObjects.resize(attributes.size(), 0);
 		attrBuffer.reserve(totalObjectNumber);
 
 		clear();
@@ -332,8 +330,6 @@ private:
 	bool hasAttrNames;
 	// The place where the attributes should be read
 	CJsonBinContextReader::TAttributes& attributes;
-	// The number of added objects for every attribute
-	vector<unsigned> attrsAddedObjects;
 	int totalObjectNumber;
 	// Buffer for the attributes
 	vector<int> attrBuffer;
@@ -427,9 +423,10 @@ int CJsonBinContextReader::GetNextObjectIntentSize()
 }
 void CJsonBinContextReader::GetNextObject(CObjectIntent& intent)
 {
-	if( intent.Size < nextObjectAttrCount) {
+	if( intent.Size < nextObjectAttrCount ) {
 		throw new CTextException("CJsonBinContextReader::GetNextObject", "Insuffisient intent memory");
 	}
+	intent.Size = nextObjectAttrCount;
 	assert(sizeof(int) == sizeof(IBinContextReader::TAttributeID));
 	for(int i = 0; i < nextObjectAttrCount; ++i) {
 		const TAttributeID curAttr = nextObjectData[i];

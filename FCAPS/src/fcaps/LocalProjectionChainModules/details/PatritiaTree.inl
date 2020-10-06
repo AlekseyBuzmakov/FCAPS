@@ -22,11 +22,8 @@ CPatritiaTree::TNodeIndex CPatritiaTree::AddNode( TNodeIndex parent, TAttribute 
 	}
 	return nodes.size() - 1;
 }
-CPatritiaTree::TNodeIndex CPatritiaTree::GetAttributeNode(TNodeIndex id, TAttribute a)
+CPatritiaTree::TNodeIndex CPatritiaTree::GetAttributeNode(const CNode& nd, TAttribute a)
 {
-	assert(0 <= id && id < nodes.size());
-	CNode& nd = nodes[id];
-
 	genAttributeToSearch = a;
 	auto res = nd.Children.find(-1); // A special flag indicating that genAttributeToSearch should be used instead
 	genAttributeToSearch = -1;
@@ -34,8 +31,15 @@ CPatritiaTree::TNodeIndex CPatritiaTree::GetAttributeNode(TNodeIndex id, TAttrib
 	if(res != nd.Children.end()) {
 		return *res;
 	} else {
-		return AddNode(id, a);
+		return -1;
 	}
+}
+CPatritiaTree::TNodeIndex CPatritiaTree::GetAttributeNode(TNodeIndex id, TAttribute a)
+{
+	assert(0 <= id && id < nodes.size());
+	CNode& nd = nodes[id];
+
+	return GetAttributeNode(nd, a);
 }
 bool CPatritiaTree::operator()( const TNodeIndex& lhs, const TNodeIndex& rhs ) const
 {
