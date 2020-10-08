@@ -54,6 +54,8 @@ public:
 		{ return nodes.size(); }
 
 	TNodeIndex AddNode( TNodeIndex parent, TAttribute genAttr );
+	void MoveChild( TNodeIndex child, TNodeIndex newParent);
+
 	TNodeIndex GetAttributeNode(TNodeIndex id, TAttribute a);
 	TNodeIndex GetAttributeNode(const CNode& node, TAttribute a);
 	TNodeIndex GetOrCreateAttributeNode(TNodeIndex id, TAttribute a)
@@ -89,6 +91,7 @@ private:
 };
 
 class CPatritiaTreeNode {
+	friend CPatritiaTree;
 public:
 	typedef typename CPatritiaTree::TAttribute TAttribute;
 	typedef typename CPatritiaTree::CChildrenSet CChildrenSet;

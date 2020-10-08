@@ -362,6 +362,7 @@ void CStabilityLPCbyPatriciaTree::ComputeZeroProjection( CPatternList& ptrns )
 	ptrnHolder->AddPTNode(pTree.GetNode(pTree.GetRoot()));
 	ptrnHolder->SetDelta(ptrnHolder->Size());
 	ptrns.PushBack( ptrnHolder.release() );
+	++totalAllocatedPatterns;
 }
 
 ILocalProjectionChain::TPreimageResult CStabilityLPCbyPatriciaTree::Preimages( const IPatternDescriptor* d, CPatternList& preimages )
@@ -384,6 +385,7 @@ ILocalProjectionChain::TPreimageResult CStabilityLPCbyPatriciaTree::Preimages( c
 		// Computing the only possible preimage
 		unique_ptr<CPTPattern> res(computePreimage(p, a));
 		const DWORD extDiff = p.Size() - res->Size();
+		assert( extDiff == getAttributeDelta(p, a, -1));
 		if(extDiff == 0 ) {
 			// Attribute is in the closure
 			p.AddNewAttributeToIntent(a);
@@ -407,6 +409,7 @@ ILocalProjectionChain::TPreimageResult CStabilityLPCbyPatriciaTree::Preimages( c
 		//  We should add it to preimages.
 		assert(res->Delta() >= thld);
 		preimages.PushBack( res.release() );
+		++totalAllocatedPatterns;
 
 		if(!areAllInOnce) {
 			++a;
@@ -475,12 +478,14 @@ JSON CStabilityLPCbyPatriciaTree::SaveIntent( const IPatternDescriptor* d ) cons
 			for( int i = node->ClosureAttrStart; i < node->ClosureAttrEnd; ++i ) {
 				const int closureAttr = pTree.GetClsAttribute(i);
 				assert( 0 <= closureAttr && closureAttr < intent.size());
+				assert( intent[closureAttr] <= nodeCount);
 				++intent[closureAttr];
 			}
 			// Adding the generator attribute
 			const int closureAttr = node->GenAttr;
 			if( closureAttr != -1 ) {
 				assert( 0 <= closureAttr && closureAttr < intent.size());
+				assert( intent[closureAttr] <= nodeCount);
 				++intent[closureAttr];
 			}
 			// Switching to parent node
@@ -738,8 +743,9 @@ for(; !treeItr.IsEnd(); ++treeItr) {
 		// Then the last child should be merged with the current node
 		auto tmpItr = treeItr->Children.end();
 		--tmpItr;
-		treeItr->Children.insert(lastNode.Children.begin(),lastNode.Children.end());
-
+		for(auto chItr = lastNode.Children.begin(); chItr != lastNode.Children.end(); ++chItr) {
+			pTree.MoveChild(*chItr, *treeItr);
+		}
 		lastNode.Clear();
 		treeItr->Children.erase(tmpItr);
 	}
@@ -817,7 +823,7 @@ void CStabilityLPCbyPatriciaTree::computeCommonAttributesinPT()
 			if(treeItr->GenAttr != -1) {
 				attributes.insert(treeItr->GenAttr);
 			}
-			for(int a = treeItr->ClosureAttrStart; a > treeItr->ClosureAttrEnd; ++a) {
+			for(int a = treeItr->ClosureAttrStart; a < treeItr->ClosureAttrEnd; ++a) {
 				attributes.insert(pTree.GetClsAttribute(a));
 			}
 			treeItr->CommonAttributes = attributes;
@@ -828,7 +834,7 @@ void CStabilityLPCbyPatriciaTree::computeCommonAttributesinPT()
 				const size_t n = attributes.erase(treeItr->GenAttr);
 				assert(n == 1);
 			}
-			for(int a = treeItr->ClosureAttrStart; a > treeItr->ClosureAttrEnd; ++a) {
+			for(int a = treeItr->ClosureAttrStart; a < treeItr->ClosureAttrEnd; ++a) {
 				const size_t n = attributes.erase(pTree.GetClsAttribute(a));
 				assert(n == 1);
 			}
@@ -890,6 +896,7 @@ bool CStabilityLPCbyPatriciaTree::checkPTValidity()
 				assert( intent.find(a) == intent.end() );
 				intent.insert(a);
 			}
+		assert(treeItr->ObjStart <= treeItr->ObjEnd);
 			for(int i = treeItr->ObjStart; i < treeItr->ObjEnd; ++i) {
 				const CPatritiaTree::TObject o = pTree.GetObject(i);
 				assert( 0 <= o );
@@ -990,9 +997,14 @@ const CPTPattern& CStabilityLPCbyPatriciaTree::to_pattern(const IPatternDescript
 // Computes the preimage of p w.r.t. the attribute a
 CPTPattern* CStabilityLPCbyPatriciaTree::computePreimage(const CPTPattern& p, CPatritiaTree::TAttribute a)
 {
+	assert(p.GetKernelAttribute() <= a);
 	unique_ptr<CPTPattern> result( new CPTPattern(pTree, memoryCounter) );
 	auto itr = p.Begin();
 	for(; itr != p.End(); ++itr) {
+		if( (*itr)->CommonAttributes.find(a) != (*itr)->CommonAttributes.end() ){
+			result->AddPTNode(**itr);
+			continue;
+		}
 		auto range = (*itr)->NextAttributeIntersections.equal_range(a);
 		for( auto resNode = range.first; resNode != range.second; ++resNode) {
 			result->AddPTNode(*resNode->second);
@@ -1013,6 +1025,7 @@ bool CStabilityLPCbyPatriciaTree::initializePreimage(const CPTPattern& parent, i
 	if( parent.GetClosestAttribute() >= 0 ) {
 		assert(!parent.IsIgnored(parent.GetClosestAttribute()));
 		const DWORD clossestChildDelta = getAttributeDelta(res, parent.GetClosestAttribute(), delta);
+		assert(checkAttributeDeltaProblem(parent, res, parent.GetClosestAttribute()));
 		assert(clossestChildDelta <= delta);
 		delta = clossestChildDelta;
 		minAttr = parent.GetClosestAttribute();
@@ -1033,6 +1046,7 @@ bool CStabilityLPCbyPatriciaTree::initializePreimage(const CPTPattern& parent, i
 			continue;
 		}
 		const DWORD aDelta = getAttributeDelta(res, a, delta);
+		assert(checkAttributeDeltaProblem(parent, res, a));
 		if(aDelta < delta) {
 			delta = aDelta;
 			minAttr = a;
@@ -1061,11 +1075,15 @@ DWORD CStabilityLPCbyPatriciaTree::getAttributeDelta(const CPTPattern& p, CPatri
 		if( currentDelta > maxDelta ) {
 			return maxDelta+1;
 		}
-		if( (*itr)->GenAttr < a ) {
-			if( (*itr)->CommonAttributes.find(a) == (*itr)->CommonAttributes.end() ) {
-				// The node is removed after intersection
-				currentDelta += (*itr)->ObjEnd - (*itr)->ObjStart;
-			}
+		if( (*itr)->GenAttr == a) {
+			continue;
+		}
+		if( (*itr)->CommonAttributes.find(a) != (*itr)->CommonAttributes.end() ) {
+			continue;
+		}
+		if( a < (*itr)->GenAttr ) {
+			// The node is removed after intersection
+			currentDelta += (*itr)->ObjEnd - (*itr)->ObjStart;
 		} else {
 			currentDelta += (*itr)->ObjEnd - (*itr)->ObjStart;
 			auto range = (*itr)->NextAttributeIntersections.equal_range(a);
@@ -1075,4 +1093,117 @@ DWORD CStabilityLPCbyPatriciaTree::getAttributeDelta(const CPTPattern& p, CPatri
 		}
 	} 
 	return currentDelta;
+}
+
+// The function verifyies that parent p, a child ch, and the results of intersecting p and ch with the attribute a are correctly placed
+// In particular it is verified that p >= ch, p >= pRes = p \cup a, ch >= chRes, pRes >= chRes
+// It also verify if an object o is in ch and in pRes than it is necessarily in chRes
+bool CStabilityLPCbyPatriciaTree::checkAttributeDeltaProblem(const CPTPattern& p, const CPTPattern& ch, CPatritiaTree::TAttribute a)
+{
+	auto pItr = p.Begin();
+	auto chItr = ch.Begin();
+	for(; chItr != ch.End(); ++chItr) {
+		assert(pItr != p.End()); // Otherwise it is not a child
+
+		const int chObjStart = (*chItr)->ObjStart;
+		const int chObjEnd = (*chItr)->ObjEnd;
+
+		while(pItr != p.End() && (*pItr)->ObjEnd <= chObjStart) {
+			// The objects are only in the parent.
+			// Just skip them
+			++pItr;
+		}
+		assert(pItr != p.End()); // Otherwise it is not a child
+
+		const int pObjStart = (*pItr)->ObjStart;
+		const int pObjEnd = (*pItr)->ObjEnd;
+
+		assert( pObjStart <= chObjStart ); // Otherwise it is not a child
+		assert( pObjEnd >= chObjEnd ); // The object sets cannot partially overlap
+
+
+		if( (*pItr)->GenAttr == a
+		    || (*pItr)->CommonAttributes.find(a) != (*pItr)->CommonAttributes.end() )
+		{
+			// The parent node is preserved then the child node should also be preserved
+			assert((*chItr)->CommonAttributes.find(a) != (*chItr)->CommonAttributes.end());
+			continue;
+		}
+
+		if( a < (*pItr)->GenAttr ) {
+			// The parent is removed, the child should also be removed
+			// Otherwise something from the child is preserved an it is a contradiction
+			assert((*chItr)->GenAttr != a);
+			assert((*chItr)->CommonAttributes.find(a) == (*chItr)->CommonAttributes.end());
+			auto range = (*chItr)->NextAttributeIntersections.equal_range(a);
+			assert(range.first == range.second);
+			continue;
+		}
+
+		auto chRange = (*chItr)->NextAttributeIntersections.equal_range(a);
+		auto chResItr = chRange.first;
+
+		int chResObjStart = chObjStart;
+		int chResObjEnd = chObjEnd;
+
+		auto pRange = (*pItr)->NextAttributeIntersections.equal_range(a);
+		auto pResItr = pRange.first;
+
+		if((*chItr)->GenAttr != a && ((*chItr)->CommonAttributes.find(a) == (*chItr)->CommonAttributes.end())) {
+			if(chResItr == chRange.second) {
+				// A child is removed with 'a', the result should have no intersections with the child
+				for(; pResItr != pRange.second; ++pResItr) {
+					const int pResObjStart = pResItr->second->ObjStart;
+					const int pResObjEnd = pResItr->second->ObjEnd;
+					assert( pResObjStart < pResObjEnd );
+					assert(pResObjStart >= chObjEnd || chObjStart >= pResObjEnd);
+				}
+				continue;
+			}
+			chResObjStart = chResItr->second->ObjStart;
+			chResObjEnd = chResItr->second->ObjEnd;
+			assert(chObjStart <= chResObjStart && chResObjEnd <= chObjEnd);
+			++chResItr;
+		}
+
+		int verifiedLimit = -1;
+
+		assert(pRange.first != pRange.second);
+		int pResObjStart = pResItr->second->ObjStart;
+		int pResObjEnd = pResItr->second->ObjEnd;
+
+		while( pResItr != pRange.second ) {
+			if( pResObjEnd <= chResObjStart ) {
+				assert(verifiedLimit == -1 || pResObjEnd <= verifiedLimit);
+				++pResItr;
+				pResObjStart = pResItr->second->ObjStart;
+				pResObjEnd = pResItr->second->ObjEnd;
+				assert(pObjStart <= pResObjStart && pResObjEnd <= pObjEnd);
+				if( verifiedLimit == -1 && pResObjEnd > chObjStart ) {
+					verifiedLimit = max(pResObjStart, chObjStart);
+				}
+				assert(verifiedLimit == -1 || pResObjEnd <= verifiedLimit || pResObjStart <= verifiedLimit);
+				continue;
+			}
+
+			assert(pResObjStart <= chResObjStart && chResObjEnd <= pResObjEnd);
+
+			assert( verifiedLimit == -1 || verifiedLimit == chResObjStart );
+
+			verifiedLimit = chResObjEnd;
+			if( pResObjEnd == verifiedLimit ) {
+				verifiedLimit = -1;
+			}
+
+			if( chResItr == chRange.second) {
+				break;
+			}
+			chResObjStart = chResItr->second->ObjStart;
+			chResObjEnd = chResItr->second->ObjEnd;
+			assert(chObjStart <= chResObjStart && chResObjEnd <= chObjEnd);
+			++chResItr;
+		}
+		assert(verifiedLimit == -1 || verifiedLimit >= chObjEnd);
+	} 
+	return true;
 }

@@ -22,6 +22,17 @@ CPatritiaTree::TNodeIndex CPatritiaTree::AddNode( TNodeIndex parent, TAttribute 
 	}
 	return nodes.size() - 1;
 }
+void CPatritiaTree::MoveChild( TNodeIndex child, TNodeIndex newParent)
+{
+	assert( 0 <= child && child < nodes.size());
+	assert( 0 <= newParent && newParent < nodes.size());
+	CNode& p = nodes[newParent];
+	CNode& ch = nodes[child];
+
+	assert(p.Children.find(child) == p.Children.end()); 
+	p.Children.insert(child);
+	ch.parent = newParent;
+}
 CPatritiaTree::TNodeIndex CPatritiaTree::GetAttributeNode(const CNode& nd, TAttribute a)
 {
 	genAttributeToSearch = a;

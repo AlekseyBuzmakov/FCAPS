@@ -102,6 +102,7 @@ private:
 
 	bool initializePreimage(const CPTPattern& parent, int genAttr, CPTPattern& res);
 	DWORD getAttributeDelta(const CPTPattern& p, CPatritiaTree::TAttribute a, DWORD maxDelta);
+	bool checkAttributeDeltaProblem(const CPTPattern& p, const CPTPattern& ch, CPatritiaTree::TAttribute a);
 };
 
 #endif // STABILITYLPCBYPATRICIATREE_H
