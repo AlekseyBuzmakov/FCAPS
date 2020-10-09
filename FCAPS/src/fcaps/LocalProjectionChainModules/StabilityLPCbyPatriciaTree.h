@@ -96,12 +96,13 @@ private:
 	void buildPatritiaTree();
 	// void extractAttrsFromPatritiaTree();
 	// void addAttributeNode(CPatritiaTree::TAttribute attr, const CPatritiaTreeNode& node);
-	void computeCommonAttributesinPT();
 
 	void buildPatritiaTree2();
 	void insertObjectToPTNode(CPatritiaTree::TNodeIndex nodeId, std::set<int>& intent,
 	                          std::multimap<CPatritiaTree::TNodeIndex, CPatritiaTree::TObject>& nodeToObjectMap, CPatritiaTree::TObject objectId);
 	
+	void addObjectsToPTNodes(std::multimap<CPatritiaTree::TNodeIndex, CPatritiaTree::TObject>& nodeToObjectMap);
+	void computeCommonAttributesinPT();
 	void computeNextAttributeIntersectionsinPT();
 	bool checkPTValidity();
 
