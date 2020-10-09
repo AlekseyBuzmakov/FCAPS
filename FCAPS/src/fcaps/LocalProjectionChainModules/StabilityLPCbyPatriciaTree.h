@@ -79,8 +79,11 @@ private:
 	CSharedPtr<IBinContextReader> attrs;
 	// The patricia tree of the context
 	CPatritiaTree pTree;
+	// The maximal attribute number found in the tree
+	int maxAttribute;
+
 	// The correspondance between the attributes and the nodes of pTree
-	std::deque< std::list<const CPatritiaTreeNode*> > attributes;
+	// std::deque< std::list<const CPatritiaTreeNode*> > attributes;
 	// The threshold for delta measure
 	double thld;
 
@@ -91,9 +94,14 @@ private:
 	mutable size_t totalAllocatedPatterns;
 
 	void buildPatritiaTree();
-	void extractAttrsFromPatritiaTree();
-	void addAttributeNode(CPatritiaTree::TAttribute attr, const CPatritiaTreeNode& node);
+	// void extractAttrsFromPatritiaTree();
+	// void addAttributeNode(CPatritiaTree::TAttribute attr, const CPatritiaTreeNode& node);
 	void computeCommonAttributesinPT();
+
+	void buildPatritiaTree2();
+	void insertObjectToPTNode(CPatritiaTree::TNodeIndex nodeId, std::set<int>& intent,
+	                          std::multimap<CPatritiaTree::TNodeIndex, CPatritiaTree::TObject>& nodeToObjectMap, CPatritiaTree::TObject objectId);
+	
 	void computeNextAttributeIntersectionsinPT();
 	bool checkPTValidity();
 
