@@ -81,12 +81,14 @@ void CPatritiaTree::Print()
 				   // isIndented = true;
 			   }
 		  	   std::cout << "->" << std::setw(4) << treeItr->GenAttr << " (";
-			   assert(0 <= treeItr->ClosureAttrStart && treeItr->ClosureAttrEnd <= closureAttrs.size());
-			   for( int i = treeItr->ClosureAttrStart; i < treeItr->ClosureAttrEnd; ++i) {
-			   		if( i != treeItr->ClosureAttrStart) {
+			   auto attr = treeItr->CommonAttributes.upper_bound(treeItr->GenAttr);
+			   bool isFirst = true;
+			   for(; attr != treeItr->CommonAttributes.end(); ++attr) {
+			   		 if(!isFirst) {
 						std::cout << ",";
-					}
-					std::cout << closureAttrs[i];
+					 } 
+					 std::cout << *attr;
+					 isFirst = false;
 			   }
 				std::cout << ") Ext(" << treeItr->ObjEnd - treeItr->ObjStart << ")";
 			   ++depth;

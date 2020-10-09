@@ -14,6 +14,7 @@
 
 #include <set>
 #include <map>
+#include <deque>
 #include <algorithm>
 #include <stdint.h>
 
@@ -140,18 +141,27 @@ public:
 	void SetKernelAttribute( CPatritiaTree::TAttribute a ) const
 	{
 		// Now we should skip all attributes that are in the closure and all atributes that colapse the pattern to zero
-		const int attrNum = pTree.GetNode(pTree.GetRoot()).NextAttributeIntersections.rend()->first + 1;
-		CPatritiaTree::TAttribute minAllInClosureAttr = attrNum;
+		const CPatritiaTreeNode& root = pTree.GetNode(pTree.GetRoot());
+		int attrNum = root.NextAttributeIntersections.rend()->first + 1;
+		if(!root.CommonAttributes.empty()) {
+			attrNum = max(attrNum, *root.CommonAttributes.rend());
+		}
 		CPatritiaTree::TAttribute minAllRemovedAttr = attrNum;
 		for( auto itr = extent.begin(); itr != extent.end(); ++itr ) {
-			minAllRemovedAttr = min( minAllRemovedAttr,*(*itr)->CommonAttributes.upper_bound(a-1) - 1);
-			minAllRemovedAttr = min( minAllRemovedAttr,(*itr)->NextAttributeIntersections.upper_bound(a-1)->first - 1);
-			if(minAllRemovedAttr <= a) {
-				assert(minAllRemovedAttr == a);
+			auto firstCommonAttr = (*itr)->CommonAttributes.upper_bound(a-1);
+			if( firstCommonAttr != (*itr)->CommonAttributes.end()) {
+				minAllRemovedAttr = min( minAllRemovedAttr, *firstCommonAttr - 1);
+			}
+			auto firstIntersection = (*itr)->NextAttributeIntersections.upper_bound(a-1);
+			if( firstIntersection != (*itr)->NextAttributeIntersections.end() ) {
+				minAllRemovedAttr = min( minAllRemovedAttr, firstIntersection->first - 1);
+			}
+			if(minAllRemovedAttr < a) {
+				assert(minAllRemovedAttr == a - 1);
 				break;
 			}
 		}
-		kernelAttr = max(a, minAllRemovedAttr);
+		kernelAttr = max(a, minAllRemovedAttr + 1);
 	}
 
 	// Get/Set the closest child attribute
@@ -815,10 +825,12 @@ void CStabilityLPCbyPatriciaTree::buildPatritiaTree2()
 
 		intentSet.clear();
 		intentSet.insert(buffer.begin(), buffer.end());
+		maxAttribute = max( maxAttribute, buffer.back());
 
 		insertObjectToPTNode(pTree.GetRoot(), intentSet, nodeToObjectMap, objectId);
 	}
 
+	addObjectsToPTNodes(nodeToObjectMap);
 	computeCommonAttributesinPT();	
 	computeNextAttributeIntersectionsinPT();
 }
@@ -828,6 +840,14 @@ void CStabilityLPCbyPatriciaTree::insertObjectToPTNode(CPatritiaTree::TNodeIndex
 	std::multimap<CPatritiaTree::TNodeIndex, CPatritiaTree::TObject>& nodeToObjectMap, CPatritiaTree::TObject objectId)
 {
 	CPatritiaTreeNode& node = pTree.GetNode(nodeId);
+
+	if(node.Children.empty() && nodeToObjectMap.find(nodeId) == nodeToObjectMap.end()) {
+		// No objects are associated with the node or its children,
+		//   Should just add the node
+		node.CommonAttributes = intent;
+		nodeToObjectMap.insert(pair<CPatritiaTree::TNodeIndex, CPatritiaTree::TObject>(nodeId, objectId));
+		return;
+	}
 
 	set<int> commonAttrs;
 
@@ -870,11 +890,14 @@ void CStabilityLPCbyPatriciaTree::insertObjectToPTNode(CPatritiaTree::TNodeIndex
 			++attr; // The first one is already a generator
 			newNode.CommonAttributes.insert(attr, nextAttrs.end());
 
+			deque< pair<CPatritiaTree::TNodeIndex, CPatritiaTree::TObject> > toMoveObjs;
+			toMoveObjs.insert(toMoveObjs.end(), range.first, range.second);
+			nodeToObjectMap.erase(range.first, range.second);
+			
 			//moving objects
-			for(auto obj = range.first; obj != range.second; ++obj) {
+			for(auto obj = toMoveObjs.begin(); obj != toMoveObjs.end(); ++obj) {
 				nodeToObjectMap.insert(pair<CPatritiaTree::TNodeIndex, CPatritiaTree::TObject>(newNodeId, obj->second));
 			}
-			nodeToObjectMap.erase(range.first, range.second);
 		}
 	}
 
@@ -929,7 +952,7 @@ void CStabilityLPCbyPatriciaTree::computeCommonAttributesinPT()
 	for(; !treeItr.IsEnd(); ++treeItr) {
 		switch(treeItr.Status()) {
 		case CDeepFirstPatritiaTreeIterator::S_Return:
-			treeItr->CommonAttributes = attributes;
+			attributes = treeItr->CommonAttributes;
 			continue;
 		case CDeepFirstPatritiaTreeIterator::S_Forward: {
 			if(treeItr->GenAttr != -1) {
@@ -963,13 +986,11 @@ void CStabilityLPCbyPatriciaTree::computeNextAttributeIntersectionsinPT()
 		for( ;chItr != treeItr->Children.end(); ++chItr) {
 			const CPatritiaTreeNode* ch = &pTree.GetNode(*chItr);
 
-			// Intersection with the generator
-			treeItr->NextAttributeIntersections.insert(CPatritiaTreeNode::TNextAttributeIntersections::value_type(ch->GenAttr, ch));
 			// Intersections known in the child
 			treeItr->NextAttributeIntersections.insert(ch->NextAttributeIntersections.begin(), ch->NextAttributeIntersections.end());
 
 			// Intersections with the attributes in the closure of the child
-			for( auto attr = ch->CommonAttributes.lower_bound(treeItr->GenAttr); attr != ch->CommonAttributes.end(); ++attr) {
+			for( auto attr = ch->CommonAttributes.upper_bound(treeItr->GenAttr); attr != ch->CommonAttributes.end(); ++attr) {
 				treeItr->NextAttributeIntersections.insert(CPatritiaTreeNode::TNextAttributeIntersections::value_type(*attr, ch));
 			}
 		}
@@ -993,12 +1014,14 @@ bool CStabilityLPCbyPatriciaTree::checkPTValidity()
 			break;
 		case CDeepFirstPatritiaTreeIterator::S_Forward: {
 			const CPatritiaTree::TNodeIndex pId = treeItr->GetParent();
-			const CPatritiaTreeNode& parent = pTree.GetNode(pId);
-			const set<CPatritiaTree::TAttribute>& intent = parent.CommonAttributes;
+			if( pId >= 0 ) {
+				const CPatritiaTreeNode& parent = pTree.GetNode(pId);
+				const set<CPatritiaTree::TAttribute>& intent = parent.CommonAttributes;
 
-			assert( intent.find(treeItr->GenAttr) == intent.end() );
-			assert( includes(treeItr->CommonAttributes.begin(), treeItr->CommonAttributes.end(),
-			                 intent.begin(), intent.end()));
+				assert( intent.find(treeItr->GenAttr) == intent.end() );
+				assert( includes(treeItr->CommonAttributes.begin(), treeItr->CommonAttributes.end(),
+								 intent.begin(), intent.end()));
+			}
 
 			assert(treeItr->ObjStart <= treeItr->ObjEnd);
 			for(int i = treeItr->ObjStart; i < treeItr->ObjEnd; ++i) {
