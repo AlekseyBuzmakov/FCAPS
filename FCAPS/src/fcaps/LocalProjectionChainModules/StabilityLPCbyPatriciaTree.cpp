@@ -1064,34 +1064,17 @@ bool CStabilityLPCbyPatriciaTree::checkPTValidity()
 		int processedAttrs = 0;
 		for(int i = 0; i < buffer.size(); ++i) {
 			assert( node != 0);
-			// Marking closure attrs
-			auto attr = node->CommonAttributes.lower_bound(node->GenAttr + 1);
-			for(; attr != node->CommonAttributes.end(); ++attr) {
-				const CPatritiaTree::TAttribute a = *attr;
-				auto res = std::find(buffer.begin(), buffer.end(), a);
-				assert( res != buffer.end());
-				*res = -1;
-				++processedAttrs;
+			if( node->CommonAttributes.find(buffer[i]) != node->CommonAttributes.end()) {
+				continue;
 			}
-			// Moving to the next node in the tree
-			while(i < buffer.size() && buffer[i] == -1) {
-				++i;
-			}
-			if( i >= buffer.size()) {
-				break;
-			}
-			assert(buffer[i] != -1);
+			
 			const CPatritiaTree::TNodeIndex next = pTree.GetAttributeNode(*node, buffer[i]);
 			// The next attribute should be in the tree
 			assert( next != -1 );
-
-			++processedAttrs;
-			buffer[i] = -1;
 			node = &pTree.GetNode(next);
 		}
 
 		// All atributes are somewhere found
-		assert(processedAttrs == buffer.size());
 		assert(node != 0);
 		int i = node->ObjStart;
 		for(; i < node->ObjEnd; ++i) {
