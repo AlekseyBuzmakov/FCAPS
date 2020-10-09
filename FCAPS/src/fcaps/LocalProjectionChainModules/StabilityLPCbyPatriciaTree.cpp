@@ -1059,7 +1059,6 @@ bool CStabilityLPCbyPatriciaTree::checkPTValidity()
 		attrs->GetNextObject(objectIntent);
 		assert(objectIntent.Size == buffer.size());
 		sort(buffer.begin(), buffer.end());
-		maxAttribute = max( maxAttribute, buffer.back());
 
 		const CPatritiaTreeNode* node = &pTree.GetNode(pTree.GetRoot());
 		int processedAttrs = 0;
