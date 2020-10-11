@@ -58,8 +58,8 @@ public:
 
 	TNodeIndex GetAttributeNode(TNodeIndex id, TAttribute a);
 	TNodeIndex GetAttributeNode(const CNode& node, TAttribute a);
-	TNodeIndex GetOrCreateAttributeNode(TNodeIndex id, TAttribute a)
-		{ const TNodeIndex res = GetAttributeNode(id, a); return res == -1 ? AddNode(id,a) : res; }
+	TNodeIndex GetOrCreateAttributeNode(TNodeIndex id, TAttribute a);
+	void ChangeGenAttr(TNodeIndex id, TAttribute a);
 
 	// Adds objects to tree
 	int AddObject(TObject obj) {

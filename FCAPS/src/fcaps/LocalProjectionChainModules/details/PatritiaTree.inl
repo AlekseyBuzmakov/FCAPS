@@ -15,6 +15,8 @@ CPatritiaTree::CPatritiaTree() : genAttributeToSearch(-1)
 CPatritiaTree::TNodeIndex CPatritiaTree::AddNode( TNodeIndex parent, TAttribute genAttr )
 {
 	assert( parent == -1 || 0 <= parent && parent < nodes.size() );
+	
+	assert( parent == -1 || GetAttributeNode(parent, genAttr) == -1);
 	nodes.push_back( CNode( parent, genAttr, *this ) );
 	if( parent >= 0 ) {
 		auto res = nodes[parent].Children.insert( nodes.size() - 1 );
@@ -28,6 +30,13 @@ void CPatritiaTree::MoveChild( TNodeIndex child, TNodeIndex newParent)
 	assert( 0 <= newParent && newParent < nodes.size());
 	CNode& p = nodes[newParent];
 	CNode& ch = nodes[child];
+	assert( ch.GetParent() == -1 || 0 <= ch.GetParent() && ch.GetParent() < nodes.size());
+	if( ch.GetParent() >= 0 ) {
+		CNode& oldParent = nodes[ch.GetParent()];
+		auto itr = oldParent.Children.find(child);
+		assert( itr != oldParent.Children.end());
+		oldParent.Children.erase(itr);
+	}
 
 	assert(p.Children.find(child) == p.Children.end()); 
 	p.Children.insert(child);
@@ -52,6 +61,26 @@ CPatritiaTree::TNodeIndex CPatritiaTree::GetAttributeNode(TNodeIndex id, TAttrib
 
 	return GetAttributeNode(nd, a);
 }
+
+CPatritiaTree::TNodeIndex CPatritiaTree::GetOrCreateAttributeNode(TNodeIndex id, TAttribute a)
+{
+	const TNodeIndex res = GetAttributeNode(id, a);
+	return res == -1 ? AddNode(id,a) : res;
+}
+
+void CPatritiaTree::ChangeGenAttr(TNodeIndex id, TAttribute a)
+{
+	assert(0 <= id && id < nodes.size());
+	CNode& node = nodes[id];
+	assert(0 <= node.parent && node.parent < nodes.size());
+	CNode& p = nodes[node.parent];
+	p.Children.erase(id);
+	assert(GetAttributeNode(node.parent, a) == -1);
+	node.GenAttr = a;
+	p.Children.insert(id);
+	assert(GetAttributeNode(node.parent, a) != -1);
+}
+
 bool CPatritiaTree::operator()( const TNodeIndex& lhs, const TNodeIndex& rhs ) const
 {
 	assert( lhs == -1 || 0 <= lhs && lhs < nodes.size());
