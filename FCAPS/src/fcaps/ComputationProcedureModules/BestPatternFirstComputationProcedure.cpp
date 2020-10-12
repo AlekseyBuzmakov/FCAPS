@@ -82,6 +82,55 @@ STR(
 ////////////////////////////////////////////////////////////////////
 const CModuleRegistrar<CBestPatternFirstComputationProcedure> CBestPatternFirstComputationProcedure::registrar;
 
+///////////////////////////////////////////////////////////////////
+// template methods
+
+// Adding a pattern to the queue
+template <typename QueueType>
+void CBestPatternFirstComputationProcedure::addPatternToQueue(const CPattern& p,QueueType& queue)
+{
+	checkForBestConcept(p);
+
+	if( p.Potential <= max(
+			// We are not interested at all in smaller quality
+			bestMap.GetMinAcceptableQuality(),
+			// For the given interest (or better) the already found pattern is of better quality
+			bestMap.GetQuality(lpChain->GetPatternInterest(p.Pattern.get()))) )
+	{
+		return;
+	}
+
+	if( lpChain->IsExpandable(p.Pattern.get()) ) {
+		queue.insert(p);
+	}
+	
+}
+
+// Add new patterns to the queue and to the best found pattern. Removes unecessary patterns
+template <typename QueueType>
+void CBestPatternFirstComputationProcedure::addNewPatterns( const ILocalProjectionChain::CPatternList& newPatterns, QueueType& queue )
+{
+	assert(oest != 0);
+	assert(lpChain != 0);
+	
+	auto itr = newPatterns.Begin();
+	if( itr == newPatterns.End()) {
+		return;
+	}
+
+	for( ;itr != newPatterns.End(); ) {
+		auto currItr = itr;
+		++itr;
+
+		CPattern p;
+		convertPattern(*currItr,p);
+
+		addPatternToQueue(p,queue);
+	}
+}
+
+///////////////////////////////////////////////////////////////////
+
 const char* const CBestPatternFirstComputationProcedure::Desc()
 {
 	return description;
@@ -369,52 +418,11 @@ void CBestPatternFirstComputationProcedure::convertPattern(const IPatternDescrip
 	assert( p.Potential >= p.Quality );
 }
 
-// Adding a pattern to the queue
-void CBestPatternFirstComputationProcedure::addPatternToQueue(const CPattern& p,TQueue& queue)
-{
-	checkForBestConcept(p);
-
-	if( p.Potential <= max(
-			// We are not interested at all in smaller quality
-			bestMap.GetMinAcceptableQuality(),
-			// For the given interest (or better) the already found pattern is of better quality
-			bestMap.GetQuality(lpChain->GetPatternInterest(p.Pattern.get()))) )
-	{
-		return;
-	}
-
-	if( lpChain->IsExpandable(p.Pattern.get()) ) {
-		queue.insert(p);
-	}
-	
-}
-
-// Add new patterns to the queue and to the best found pattern. Removes unecessary patterns
-void CBestPatternFirstComputationProcedure::addNewPatterns( const ILocalProjectionChain::CPatternList& newPatterns, TQueue& queue )
-{
-	assert(oest != 0);
-	assert(lpChain != 0);
-	
-	auto itr = newPatterns.Begin();
-	if( itr == newPatterns.End()) {
-		return;
-	}
-
-	for( ;itr != newPatterns.End(); ) {
-		auto currItr = itr;
-		++itr;
-
-		CPattern p;
-		convertPattern(*currItr,p);
-
-		addPatternToQueue(p,queue);
-	}
-}
-
 // Starts a beams search for the most interesting pattern at p
 void CBestPatternFirstComputationProcedure::startBeamSearch(const CPattern& p)
 {
-	TQueue bsQueues[2] = {TQueue(potentialCmp), TQueue(potentialCmp)};
+	typedef std::multiset<CPattern,CPatternQualityComparator> TQQueue;
+	TQQueue bsQueues[2] = {TQQueue(), TQQueue()};
 	addPatternToQueue(p, bsQueues[0]);
 	int q = 0; // index of the currently expanded queue
 	ILocalProjectionChain::CPatternList newPatterns;

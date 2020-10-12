@@ -1269,6 +1269,8 @@ DWORD CStabilityLPCbyPatriciaTree::getAttributeDelta(const CPTPattern& p, CPatri
 // It also verify if an object o is in ch and in pRes than it is necessarily in chRes
 bool CStabilityLPCbyPatriciaTree::checkAttributeDeltaProblem(const CPTPattern& p, const CPTPattern& ch, CPatritiaTree::TAttribute a)
 {
+	return true;
+
 	auto pItr = p.Begin();
 	auto chItr = ch.Begin();
 	for(; chItr != ch.End(); ++chItr) {

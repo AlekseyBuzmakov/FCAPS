@@ -85,6 +85,16 @@ private:
 	private:
 		const CSharedPtr<ILocalProjectionChain>& lpChain;
 	};
+	class CPatternQualityComparator {
+	public:
+		CPatternQualityComparator()
+			{}
+
+		// Compare potential of patterns
+		bool operator()(const CPattern& a, const CPattern& b)
+			{ return a.Quality > b.Quality;};
+	};
+
 
 	// The queue class
 	typedef std::set<CPattern,CPatternPotentialComparator> TQueue;
@@ -130,8 +140,10 @@ private:
 	DWORD numInMemoryPatterns;
 
 	void convertPattern(const IPatternDescriptor* d, CPattern& p) const;
-	void addPatternToQueue(const CPattern& p,TQueue& queue);
-	void addNewPatterns( const ILocalProjectionChain::CPatternList& newPatterns, TQueue& queue );
+	template <typename QueueType>
+	void addPatternToQueue(const CPattern& p,QueueType& queue);
+	template <typename QueueType>
+	void addNewPatterns( const ILocalProjectionChain::CPatternList& newPatterns, QueueType& queue );
 	void startBeamSearch(const CPattern& p);
 	void checkForBestConcept(const CPattern& p);
 	void adjustThreshold();
