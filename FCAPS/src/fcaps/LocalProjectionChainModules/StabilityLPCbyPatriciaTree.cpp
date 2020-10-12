@@ -831,11 +831,6 @@ void CStabilityLPCbyPatriciaTree::buildPatritiaTree2()
 		intentSet.insert(buffer.begin(), buffer.end());
 		maxAttribute = max( maxAttribute, buffer.back());
 
-		if(objectId == 10 || objectId == 25) {
-			int a = 0;
-			++a;
-		}
-
 		insertObjectToPTNode(pTree.GetRoot(), intentSet, nodeToObjectMap, objectId);
 	}
 
