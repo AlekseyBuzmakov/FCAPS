@@ -72,7 +72,7 @@ struct CAttrIntersectionIntent {
 		Attr(a), ExtentSize(size), IsInKernel(isK) {}
 
 	// Comparison operator for multimap
-	bool operator < (const CAttrIntersectionIntent& other)
+	bool operator < (const CAttrIntersectionIntent& other) const
 		{ return IsInKernel > other.IsInKernel || IsInKernel == other.IsInKernel && ExtentSize > other.ExtentSize; }
 };
 ////////////////////////////////////////////////////////////////////
@@ -291,10 +291,10 @@ private:
 	// computes the extent size after intersection with any attribute
 	void computeAttrIntersection(vector<int>& attributeExtents)
 	{
-		attributeExtents.clean();
+		attributeExtents.clear();
 		attributeExtents.resize(pTree.GetAttrNumber(), 0);
 		for( auto ptNode = extent.begin(); ptNode != extent.end(); ++ptNode) {
-			CDeepFirstPatritiaTreeIterator treeItr(pTree, *extent);
+			CDeepFirstPatritiaTreeIterator treeItr(pTree, const_cast<CPatritiaTreeNode&>(**ptNode) ); // CONST CAST is bad here should be another iterator for const trees
 			// Processing the starting node
 			for(auto a = treeItr->CommonAttributes.begin(); a != treeItr->CommonAttributes.end(); ++a) {
 				attributeExtents[*a] += treeItr->ObjEnd - treeItr->ObjStart;
@@ -303,7 +303,7 @@ private:
 
 			// Processing all other nodes
 			for(; !treeItr.IsEnd(); ++treeItr) {
-				if( treeItr.Status() != S_Forward ) {
+				if( treeItr.Status() != CDeepFirstPatritiaTreeIterator::S_Forward ) {
 					// Process only forward pass
 					continue;
 				}
