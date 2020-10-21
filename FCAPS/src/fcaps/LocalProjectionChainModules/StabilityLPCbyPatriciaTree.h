@@ -99,10 +99,10 @@ private:
 
 	void buildPatritiaTree2();
 	void insertObjectToPTNode(CPatritiaTree::TNodeIndex nodeId, std::set<int>& intent,
-	                          std::multimap<CPatritiaTree::TNodeIndex, CPatritiaTree::TObject>& nodeToObjectMap, CPatritiaTree::TObject objectId);
+	                          std::multimap<const CPatritiaTreeNode*, CPatritiaTree::TObject>& nodeToObjectMap, CPatritiaTree::TObject objectId);
 	bool checkNodeValidity(const CPatritiaTreeNode& node);
 	
-	void addObjectsToPTNodes(std::multimap<CPatritiaTree::TNodeIndex, CPatritiaTree::TObject>& nodeToObjectMap);
+	void addObjectsToPTNodes(std::multimap<const CPatritiaTreeNode*, CPatritiaTree::TObject>& nodeToObjectMap);
 	void computeCommonAttributesinPT();
 	void computeNextAttributeIntersectionsinPT();
 	bool checkPTValidity();

@@ -12,6 +12,11 @@ CPatritiaTree::CPatritiaTree() : genAttributeToSearch(-1)
 	AddNode(-1, -1);
 }
 
+CPatritiaTree::TNodeIndex CPatritiaTree::GetNodeIndex( const CNode& nd) const
+{
+	return nd.GetParent() == -1 ? GetRoot() : GetAttributeNode(nd.GetParent(), nd.GenAttr);
+}
+
 CPatritiaTree::TNodeIndex CPatritiaTree::AddNode( TNodeIndex parent, TAttribute genAttr )
 {
 	assert( parent == -1 || 0 <= parent && parent < nodes.size() );
@@ -42,7 +47,7 @@ void CPatritiaTree::MoveChild( TNodeIndex child, TNodeIndex newParent)
 	p.Children.insert(child);
 	ch.parent = newParent;
 }
-CPatritiaTree::TNodeIndex CPatritiaTree::GetAttributeNode(const CNode& nd, TAttribute a)
+CPatritiaTree::TNodeIndex CPatritiaTree::GetAttributeNode(const CNode& nd, TAttribute a) const
 {
 	genAttributeToSearch = a;
 	auto res = nd.Children.find(-1); // A special flag indicating that genAttributeToSearch should be used instead
@@ -54,10 +59,10 @@ CPatritiaTree::TNodeIndex CPatritiaTree::GetAttributeNode(const CNode& nd, TAttr
 		return -1;
 	}
 }
-CPatritiaTree::TNodeIndex CPatritiaTree::GetAttributeNode(TNodeIndex id, TAttribute a)
+CPatritiaTree::TNodeIndex CPatritiaTree::GetAttributeNode(TNodeIndex id, TAttribute a) const
 {
 	assert(0 <= id && id < nodes.size());
-	CNode& nd = nodes[id];
+	const CNode& nd = nodes[id];
 
 	return GetAttributeNode(nd, a);
 }
@@ -92,6 +97,17 @@ bool CPatritiaTree::operator()( const TNodeIndex& lhs, const TNodeIndex& rhs ) c
 
 	return l < r;
 }
+
+int CPatritiaTree::GetAttrNumber() const
+{
+	const CNode& root = nodes[GetRoot()];
+	int attrNum = root.NextAttributeIntersections.rend()->first + 1;
+	if( !root.CommonAttributes.empty() ) {
+		attrNum = std::max(attrNum, *root.CommonAttributes.rend() + 1);
+	}
+	return attrNum;
+}
+
 void CPatritiaTree::Print()
 {
 	CDeepFirstPatritiaTreeIterator treeItr(*this);

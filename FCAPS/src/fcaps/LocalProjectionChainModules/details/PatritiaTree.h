@@ -48,6 +48,7 @@ public:
 		{ return nodes[node]; }
 	const CNode& GetNode( TNodeIndex node ) const
 		{ return nodes[node]; }
+	TNodeIndex GetNodeIndex( const CNode& nd) const;
 	void Clear()
 		{ nodes.clear(); AddNode(-1,-1); }
 	size_t GetSize() const
@@ -56,8 +57,8 @@ public:
 	TNodeIndex AddNode( TNodeIndex parent, TAttribute genAttr );
 	void MoveChild( TNodeIndex child, TNodeIndex newParent);
 
-	TNodeIndex GetAttributeNode(TNodeIndex id, TAttribute a);
-	TNodeIndex GetAttributeNode(const CNode& node, TAttribute a);
+	TNodeIndex GetAttributeNode(TNodeIndex id, TAttribute a) const;
+	TNodeIndex GetAttributeNode(const CNode& node, TAttribute a) const;
 	TNodeIndex GetOrCreateAttributeNode(TNodeIndex id, TAttribute a);
 	void ChangeGenAttr(TNodeIndex id, TAttribute a);
 
@@ -75,6 +76,10 @@ public:
 	}
 	TAttribute GetClsAttribute(int index) const
 		{ assert( 0 <= index && index < closureAttrs.size()); return closureAttrs[index];}
+	// Get object number and attribute number
+	int GetObjNumber() const
+		{ return objects.size(); }
+	int GetAttrNumber() const;
 
 	// Comparator
 	bool operator()( const TNodeIndex& lhs, const TNodeIndex& rhs ) const;
@@ -87,7 +92,7 @@ private:
 	std::vector<TAttribute> closureAttrs;
 	std::vector<TObject> objects;
 
-	TAttribute genAttributeToSearch;
+	mutable TAttribute genAttributeToSearch;
 };
 
 class CPatritiaTreeNode {
@@ -178,21 +183,24 @@ public:
 	CDeepFirstPatritiaTreeIterator() :
 		tree( 0 ), node( 0 ), status( S_Forward ), isEnd( true) {}
 	CDeepFirstPatritiaTreeIterator( CTree& _tree ) :
-		tree( &_tree ), node( _tree.GetRoot() ), status( S_Forward ), isEnd( false ) {}
+		tree( &_tree ), node( &_tree.GetNode(_tree.GetRoot()) ), status( S_Forward ), isEnd( false ) {}
+	CDeepFirstPatritiaTreeIterator( CTree& _tree, TNodeIndex i ) :
+		tree( &_tree ), node( &_tree.GetNode(i) ), status( S_Forward ), isEnd( false ) {}
+
 
 	void Reset( CTree& _tree ) {
 		tree = &_tree;
-		node = tree->GetRoot();
-		child = tree->GetNode(node).Children.end();
+		node =&tree->GetNode(tree->GetRoot());
+		child = node->Children.end();
 		status = S_Forward;
 		isEnd = false;
 		stack.Clear();
 	}
 
-	TNodeIndex operator*()
-		{ return node; }
+	CNode& operator*()
+		{ return *node; }
 	CNode* operator->()
-		{ return &tree->GetNode(node); }
+	{ return node; }
 
 	_Self& operator++()
 		{ next(); return *this; }
@@ -212,17 +220,17 @@ public:
 
 private:
 	struct CState {
-		TNodeIndex Node;
+		CNode* Node;
 		CNode::CChildrenSet::const_iterator Child;
 
 		CState() :
-			Node(-1) {}
-		CState( TNodeIndex v, CNode::CChildrenSet::const_iterator c ) :
+			Node(0) {}
+		CState( CNode* v, CNode::CChildrenSet::const_iterator c ) :
 			Node(v), Child(c) {}
 	};
 private:
 	CTree* tree;
-	TNodeIndex node;
+	CNode* node;
 	CNode::CChildrenSet::const_iterator child;
 	TStatus status;
 	bool isEnd;
@@ -239,9 +247,10 @@ inline void CDeepFirstPatritiaTreeIterator::next()
 	}
 
 	assert(tree != 0);
+	assert(node != 0);
 	switch(status) {
 	case S_Exit: {
-		assert(child == tree->GetNode(node).Children.end());
+		assert(child == node->Children.end());
 
 		if( stack.IsEmpty() ) {
 			isEnd = true;
@@ -256,10 +265,10 @@ inline void CDeepFirstPatritiaTreeIterator::next()
 		return;
 	}
 	case S_Forward:
-		child = tree->GetNode(node).Children.begin();
+		child = node->Children.begin();
 		break;
 	case S_Return:
-		assert(child != tree->GetNode(node).Children.end());
+		assert(child != node->Children.end());
 		++child;
 		break;
 	default:
@@ -267,14 +276,14 @@ inline void CDeepFirstPatritiaTreeIterator::next()
 		return;
 	}
 
-	if( child == tree->GetNode(node).Children.end()) {
+	if( child == node->Children.end()) {
 		status = S_Exit;
 		return;
 	}
 
 	stack.PushBack( CState( node, child ) );
-	node = *child;
-	child = tree->GetNode(node).Children.end();
+	node = &tree->GetNode(*child);
+	child = node->Children.end();
 	status = S_Forward;
 }
 
