@@ -157,6 +157,28 @@ public:
 	// Get/Set the kernel attribute
 	CPatritiaTree::TAttribute GetKernelAttribute() const
 		{ return kernelAttr; }
+	bool HasKernelAttribute() const
+		{ return !attrIntersection.begin()->IsInKernel; }
+	void MoveAttributeToKernel(CPatritiaTree::TAttribute a) const
+	{
+		assert(!attrIntersection.empty());
+		auto itr = attrIntersection.begin();
+		assert(a == itr->Attr);
+		if(a != itr->Attr) {
+			for(; itr != attrIntersection.end(); ++itr) {
+				if( itr->Attr == a) {
+					break;
+				}
+			}
+			assert(itr != attrIntersection.end());
+		}
+		CAttrIntersectionIntent newAttr = *itr;
+		assert(!newAttr.IsInKernel);
+		newAttr.IsInKernel = true;
+
+		attrIntersection.erase(itr);
+		attrIntersection.insert(newAttr);
+	}
 	void SetKernelAttribute( CPatritiaTree::TAttribute a ) const
 	{
 		// Now we should skip all attributes that are in the closure and all atributes that colapse the pattern to zero
@@ -291,6 +313,8 @@ private:
 	// computes the extent size after intersection with any attribute
 	void computeAttrIntersection(vector<int>& attributeExtents)
 	{
+		delta = extentSize;
+
 		attributeExtents.clear();
 		attributeExtents.resize(pTree.GetAttrNumber(), 0);
 		for( auto ptNode = extent.begin(); ptNode != extent.end(); ++ptNode) {
@@ -329,6 +353,9 @@ private:
 			return !isInKernel;
 		}
 
+		if( isInKernel ) {
+			delta = min(delta, this->extentSize - extentSize);
+		}
 		attrIntersection.insert(CAttrIntersectionIntent(a, extentSize, isInKernel));
 		return true;
 	}
@@ -482,6 +509,8 @@ void CStabilityLPCbyPatriciaTree::ComputeZeroProjection( CPatternList& ptrns )
 	unique_ptr<CPTPattern> ptrnHolder( new CPTPattern(pTree, memoryCounter));
 	ptrnHolder->AddPTNode(pTree.GetNode(pTree.GetRoot()));
 	ptrnHolder->SetDelta(ptrnHolder->Size());
+	const bool res = ptrnHolder->ComputeAttributeIntersections();
+	assert(res);
 	ptrns.PushBack( ptrnHolder.release() );
 	++totalAllocatedPatterns;
 }
@@ -494,7 +523,7 @@ ILocalProjectionChain::TPreimageResult CStabilityLPCbyPatriciaTree::Preimages( c
     assert(p.Delta() >= thld);
 
 	int a = p.GetKernelAttribute();
-	for(; a <= maxAttribute; ++a){
+	for(; p.HasKernelAttribute(); a = p.GetKernelAttribute()){
 		if( p.Delta() < thld) {
 			// Unstable concept cannot probuce stable concepts
 			break;
@@ -538,9 +567,9 @@ ILocalProjectionChain::TPreimageResult CStabilityLPCbyPatriciaTree::Preimages( c
 		}
 	}
 
-	p.SetKernelAttribute(a);
+	// p.SetKernelAttribute(a);
 	const bool isStable = p.Delta() >= thld;
-	if(a > maxAttribute){
+	if(!p.HasKernelAttribute()){
 		return isStable ? PR_Finished : PR_Uninteresting;
 	} else {
 		return isStable ? PR_Expandable : PR_Uninteresting;
@@ -1285,6 +1314,13 @@ CPTPattern* CStabilityLPCbyPatriciaTree::computePreimage(const CPTPattern& p, CP
 
 bool CStabilityLPCbyPatriciaTree::initializePreimage(const CPTPattern& parent, int genAttr, CPTPattern& res)
 {
+	if(!res.ComputeAttributeIntersections(parent)) {
+		// Not a canonical order
+		return false;
+	}
+	assert( res.Delta() <= parent.Delta());
+	return res.Delta() >= thld;
+
 	// If delta is zero, then the attribute is in the intent.
 	// However, according to canonical order it should not be there. Thus, such a pattern should also be ignored.
 	assert(thld >= 1);
