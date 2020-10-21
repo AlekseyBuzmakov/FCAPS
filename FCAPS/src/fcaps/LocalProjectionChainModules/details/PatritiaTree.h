@@ -186,6 +186,8 @@ public:
 		tree( &_tree ), node( &_tree.GetNode(_tree.GetRoot()) ), status( S_Forward ), isEnd( false ) {}
 	CDeepFirstPatritiaTreeIterator( CTree& _tree, TNodeIndex i ) :
 		tree( &_tree ), node( &_tree.GetNode(i) ), status( S_Forward ), isEnd( false ) {}
+	CDeepFirstPatritiaTreeIterator( CTree& _tree, CNode& nd ) :
+		tree( &_tree ), node( &nd ), status( S_Forward ), isEnd( false ) {}
 
 
 	void Reset( CTree& _tree ) {

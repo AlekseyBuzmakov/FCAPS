@@ -215,14 +215,33 @@ public:
 		{ return intent; }
 
 	// Computes the intersection of the pattern given in extent with every attribute
-	void ComputeAttributeIntersections()
+	//  The parent pattern can be passed as a parameter
+	//  For the Root node
+	bool ComputeAttributeIntersections()
 	{
-		// for( auto ptNode = extent.begin(); ptNode != extent.end(); ++ptNode) {
-		// 	CDeepFirstPatritiaTreeIterator treeItr()
-			
-		// }
+		vector<int> attributeExtents;
+		computeAttrIntersection(attributeExtents);
+		for(int i = 0; i < attributeExtents.size(); ++i) {
+			if( !registerAttrExtentSize(i, attributeExtents[i], false) ) {
+				assert(false);
+				return false;
+			}
+		}
+		return true;
 	}
-
+	//  For the specified node
+	bool ComputeAttributeIntersections( const CPTPattern& other )
+	{
+		vector<int> attributeExtents;
+		computeAttrIntersection(attributeExtents);
+		for(auto itr = other.attrIntersection.begin(); itr != other.attrIntersection.end(); ++itr) {
+			assert(attributeExtents[itr->Attr] < itr->ExtentSize);
+			if( !registerAttrExtentSize(itr->Attr, attributeExtents[itr->Attr], itr->IsInKernel ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
 private:
 	CPatritiaTree& pTree;
 	
@@ -243,7 +262,7 @@ private:
 	mutable CIntentAttribute* intent;
 
 	// The intersection of the pattern with its attributes
-	multiset<CAttrIntersectionIntent> attrIntersection;
+	mutable multiset<CAttrIntersectionIntent> attrIntersection;
 
 	void initPatternImage(CPatternImage& img) const {
 		img.PatternId = Hash();
@@ -269,6 +288,51 @@ private:
 
 		objects.release(); 
 	}
+	// computes the extent size after intersection with any attribute
+	void computeAttrIntersection(vector<int>& attributeExtents)
+	{
+		attributeExtents.clean();
+		attributeExtents.resize(pTree.GetAttrNumber(), 0);
+		for( auto ptNode = extent.begin(); ptNode != extent.end(); ++ptNode) {
+			CDeepFirstPatritiaTreeIterator treeItr(pTree, *extent);
+			// Processing the starting node
+			for(auto a = treeItr->CommonAttributes.begin(); a != treeItr->CommonAttributes.end(); ++a) {
+				attributeExtents[*a] += treeItr->ObjEnd - treeItr->ObjStart;
+			}
+			++treeItr;
+
+			// Processing all other nodes
+			for(; !treeItr.IsEnd(); ++treeItr) {
+				if( treeItr.Status() != S_Forward ) {
+					// Process only forward pass
+					continue;
+				}
+
+				const int objectCount = treeItr->ObjEnd - treeItr->ObjStart;
+				assert(objectCount > 0);
+				attributeExtents[treeItr->GenAttr] += objectCount;
+				for(int i = treeItr->ClosureAttrStart; i < treeItr->ClosureAttrEnd; ++i) {
+					attributeExtents[pTree.GetClsAttribute(i)] += objectCount;
+				}
+			}
+			
+		}
+	}
+	// Add attributes to attrIntersection
+	bool registerAttrExtentSize(CPatritiaTree::TAttribute a, DWORD extentSize, bool isInKernel )
+	{
+		assert(extentSize <= this->extentSize );
+		if( extentSize == this->extentSize) {
+			// The attribute is in the closure, so should not add this to possible extensions
+
+			// kernel attributes are not allowed to be in the closure
+			return !isInKernel;
+		}
+
+		attrIntersection.insert(CAttrIntersectionIntent(a, extentSize, isInKernel));
+		return true;
+	}
+
 };
 
 ////////////////////////////////////////////////////////////////////
