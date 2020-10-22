@@ -25,27 +25,27 @@ using namespace std;
 #define STR(...) #__VA_ARGS__
 
 const char description[] =
-STR(
-	{
-	"Name":"Stability Local Projection Chain by means of Patricia Tree",
-	"Description":"Local Projection Chain that is based on Close-by-One (also known as LCM) canonical order and Patricia Tree and incorporates computation of DELTA-stability.",
-	"Params": {
-			"$schema": "http://json-schema.org/draft-04/schema#",
-			"title": "Params of Stability Patricia Tree LPC",
-			"type": "object",
-			"properties": {
-				"ContextReader":{
-					"description": "A module for reading object intents from binary JSON context",
-					"type": "@BinContextReaderModules"
-				},
-				"AllAttributesInOnce": {
-					"description": "When called to compute next projection should it be generated only one 'next' pattern with one attribute, or all of them",
-					"type": "boolean"
-				}
-			}
+	STR(
+		{
+		 "Name":"Stability Local Projection Chain by means of Patricia Tree",
+		 "Description":"Local Projection Chain that is based on Close-by-One (also known as LCM) canonical order and Patricia Tree and incorporates computation of DELTA-stability.",
+		 "Params": {
+					"$schema": "http://json-schema.org/draft-04/schema#",
+					"title": "Params of Stability Patricia Tree LPC",
+					"type": "object",
+					"properties": {
+								   "ContextReader":{
+													"description": "A module for reading object intents from binary JSON context",
+													"type": "@BinContextReaderModules"
+								   },
+								   "AllAttributesInOnce": {
+														   "description": "When called to compute next projection should it be generated only one 'next' pattern with one attribute, or all of them",
+														   "type": "boolean"
+								   }
+					}
+		 }
 		}
-	}
-);
+		);
 
 
 ////////////////////////////////////////////////////////////////////
@@ -73,7 +73,7 @@ struct CAttrIntersectionIntent {
 
 	// Comparison operator for multimap
 	bool operator < (const CAttrIntersectionIntent& other) const
-		{ return IsInKernel > other.IsInKernel || IsInKernel == other.IsInKernel && ExtentSize > other.ExtentSize; }
+	{ return IsInKernel > other.IsInKernel || IsInKernel == other.IsInKernel && ExtentSize > other.ExtentSize; }
 };
 ////////////////////////////////////////////////////////////////////
 
@@ -119,24 +119,24 @@ public:
 			intent = prev;
 		}
 	}
-		
+
 	// Methods of IExtent
 	virtual DWORD Size() const
-		{ return extentSize;}
-    virtual void GetExtent( CPatternImage& extent ) const
-		{initPatternImage(extent);}
+	{ return extentSize;}
+	virtual void GetExtent( CPatternImage& extent ) const
+	{initPatternImage(extent);}
 	virtual void ClearMemory( CPatternImage& e) const
-		{ delete[] e.Objects;}
+	{ delete[] e.Objects;}
 
 	// Methos of IPatternDescriptor
 	virtual bool IsMostGeneral() const
-		{ return extent.empty() || extent.front()->GetParent() == -1; }
+	{ return extent.empty() || extent.front()->GetParent() == -1; }
 	virtual size_t Hash() const
-		{ return extentHash; }
+	{ return extentHash; }
 
 	// Methods of ISwappable
 	virtual bool IsSwapped() const
-		{ return false;}
+	{ return false;}
 	virtual void Swap() const
 	{
 		// Nothing for the moment
@@ -156,9 +156,9 @@ public:
 
 	// Get/Set the kernel attribute
 	CPatritiaTree::TAttribute GetKernelAttribute() const
-		{ return kernelAttr; }
+	{ return attrIntersection.begin()->Attr; }
 	bool HasKernelAttribute() const
-		{ return !attrIntersection.begin()->IsInKernel; }
+	{ return !attrIntersection.begin()->IsInKernel; }
 	void MoveAttributeToKernel(CPatritiaTree::TAttribute a) const
 	{
 		assert(!attrIntersection.empty());
@@ -207,19 +207,19 @@ public:
 
 	// Get/Set the closest child attribute
 	CPatritiaTree::TAttribute GetClosestAttribute() const
-		{ return clossestAttr; }
+	{ return clossestAttr; }
 	void SetClosestAttribute( CPatritiaTree::TAttribute a ) const
-		{ clossestAttr = a; }
+	{ clossestAttr = a; }
 
 	// Get/Set the delta value of the pattern
 	DWORD Delta() const
-		{return delta;}
+	{return delta;}
 	void SetDelta(DWORD d) const
-		{assert(d <= delta); delta = d;}
+	{assert(d <= delta); delta = d;}
 
 	// Checks if an attribute cannot extent the pattern
 	bool IsIgnored( CPatritiaTree::TAttribute a ) const
-		{ return false; }
+	{ return false; }
 	// Copies intent from another node
 	void CopyIntent( const CPTPattern& other ) const {
 		intent = other.intent;
@@ -230,11 +230,11 @@ public:
 	// Adding new attribute to the intent
 	void AddNewAttributeToIntent(CPatritiaTree::TAttribute a) const
 	{
-		assert(intent==0 || intent->Attr < a);
+		// assert(intent==0 || intent->Attr < a); 
 		intent = new CIntentAttribute(intent, a);
 	}
 	const CIntentAttribute* GetLastIntentAttribute() const
-		{ return intent; }
+	{ return intent; }
 
 	// Computes the intersection of the pattern given in extent with every attribute
 	//  The parent pattern can be passed as a parameter
@@ -257,7 +257,7 @@ public:
 		vector<int> attributeExtents;
 		computeAttrIntersection(attributeExtents);
 		for(auto itr = other.attrIntersection.begin(); itr != other.attrIntersection.end(); ++itr) {
-			assert(attributeExtents[itr->Attr] < itr->ExtentSize);
+			assert(attributeExtents[itr->Attr] <= itr->ExtentSize);
 			if( !registerAttrExtentSize(itr->Attr, attributeExtents[itr->Attr], itr->IsInKernel ) ) {
 				return false;
 			}
@@ -266,14 +266,14 @@ public:
 	}
 private:
 	CPatritiaTree& pTree;
-	
+
 	DWORD extentSize;
 	DWORD extentHash;
 
 	CExtentHolder extent;
 	// The minimal attribute number that can be added to the pattern
 	mutable CPatritiaTree::TAttribute kernelAttr;
-	
+
 	// The delta measure of the pattern w.r.t. the projection not including the @var nextAttribute attribute
 	mutable DWORD delta;
 	// The attribute of a clossest child. In intersection of the pattern and the attribute the result is the clossest child
@@ -322,6 +322,7 @@ private:
 			// Processing the starting node
 			for(auto a = treeItr->CommonAttributes.begin(); a != treeItr->CommonAttributes.end(); ++a) {
 				attributeExtents[*a] += treeItr->ObjEnd - treeItr->ObjStart;
+				assert(attributeExtents[*a] <= this->extentSize);
 			}
 			++treeItr;
 
@@ -335,11 +336,13 @@ private:
 				const int objectCount = treeItr->ObjEnd - treeItr->ObjStart;
 				assert(objectCount > 0);
 				attributeExtents[treeItr->GenAttr] += objectCount;
+				assert(attributeExtents[treeItr->GenAttr] <= this->extentSize);
 				for(int i = treeItr->ClosureAttrStart; i < treeItr->ClosureAttrEnd; ++i) {
 					attributeExtents[pTree.GetClsAttribute(i)] += objectCount;
+					assert(attributeExtents[pTree.GetClsAttribute(i)] <= this->extentSize);
 				}
 			}
-			
+
 		}
 	}
 	// Add attributes to attrIntersection
@@ -351,6 +354,9 @@ private:
 
 			// kernel attributes are not allowed to be in the closure
 			return !isInKernel;
+		}
+		if(extentSize == 0) {
+			return true;
 		}
 
 		if( isInKernel ) {
@@ -463,7 +469,7 @@ JSON CStabilityLPCbyPatriciaTree::SaveParams() const
 
 	JSON peParams;
 	rapidjson::Document peParamsDoc;
-    assert( m!=0);
+	assert( m!=0);
 	if( m != 0 ) {
 		peParams = m->SaveParams();
 		CJsonError error;
@@ -520,7 +526,7 @@ ILocalProjectionChain::TPreimageResult CStabilityLPCbyPatriciaTree::Preimages( c
 	assert( attrs != 0);
 
 	const CPTPattern& p = to_pattern(d);
-    assert(p.Delta() >= thld);
+	assert(p.Delta() >= thld);
 
 	int a = p.GetKernelAttribute();
 	for(; p.HasKernelAttribute(); a = p.GetKernelAttribute()){
@@ -554,7 +560,7 @@ ILocalProjectionChain::TPreimageResult CStabilityLPCbyPatriciaTree::Preimages( c
 		if( !isPreimageStable ) {
 			continue;
 		}
-		
+
 		// A new stable pattern is generated
 		//  We should add it to preimages.
 		assert(res->Delta() >= thld);
@@ -630,7 +636,7 @@ JSON CStabilityLPCbyPatriciaTree::SaveIntent( const IPatternDescriptor* d ) cons
 
 		set<int> res;
 		set_intersection(node->CommonAttributes.begin(), node->CommonAttributes.end(),
-		                 intent.begin(), intent.end(), inserter(res, res.end()));
+						 intent.begin(), intent.end(), inserter(res, res.end()));
 
 		intent.swap(res);
 	}
@@ -706,7 +712,7 @@ void CStabilityLPCbyPatriciaTree::buildPatritiaTree()
 	addObjectsToPTNodes(nodeToObjectMap);
 
 	// // DEBUG: For printing the result
-		// pTree.Print();
+	// pTree.Print();
 
 	// The set of previously processed attibutes
 	std::deque<CPatritiaTree::TAttribute> childrenCAttrs;
@@ -965,7 +971,7 @@ void CStabilityLPCbyPatriciaTree::buildPatritiaTree2()
 
 // Inserts an intent to the node, the information in the intent can be updated for further processing
 void CStabilityLPCbyPatriciaTree::insertObjectToPTNode(CPatritiaTree::TNodeIndex nodeId, set<int>& intent,
-	std::multimap<const CPatritiaTreeNode*, CPatritiaTree::TObject>& nodeToObjectMap, CPatritiaTree::TObject objectId)
+													   std::multimap<const CPatritiaTreeNode*, CPatritiaTree::TObject>& nodeToObjectMap, CPatritiaTree::TObject objectId)
 {
 	CPatritiaTreeNode& node = pTree.GetNode(nodeId);
 	assert(checkNodeValidity(node));
@@ -981,8 +987,8 @@ void CStabilityLPCbyPatriciaTree::insertObjectToPTNode(CPatritiaTree::TNodeIndex
 	set<int> commonAttrs;
 
 	set_intersection(node.CommonAttributes.begin(), node.CommonAttributes.end(),
-	                 intent.begin(), intent.end(),
-	                 std::inserter(commonAttrs, commonAttrs.end()));
+					 intent.begin(), intent.end(),
+					 std::inserter(commonAttrs, commonAttrs.end()));
 
 	set<int> nextAttrs;
 	set_difference(node.CommonAttributes.begin(), node.CommonAttributes.end(),
@@ -1139,10 +1145,11 @@ void CStabilityLPCbyPatriciaTree::computeCommonAttributesinPT()
 			treeItr->ClosureAttrEnd = -1;
 			// Saving the closure
 			for( auto a = treeItr->CommonAttributes.begin(); a != treeItr->CommonAttributes.end(); ++a) {
+				const int attrIndex = pTree.AddAttribute(*a);
 				if( treeItr->ClosureAttrStart == -1) {
-					treeItr->ClosureAttrStart = pTree.AddAttribute(*a);
+					treeItr->ClosureAttrStart = attrIndex;
 				}
-				treeItr->ClosureAttrEnd = pTree.AddAttribute(*a) + 1;
+				treeItr->ClosureAttrEnd = attrIndex + 1;
 			}
 			if(treeItr->GenAttr != -1) {
 				attributes.insert(treeItr->GenAttr);
@@ -1212,8 +1219,30 @@ bool CStabilityLPCbyPatriciaTree::checkPTValidity()
 				const set<CPatritiaTree::TAttribute>& intent = parent.CommonAttributes;
 
 				assert( intent.find(treeItr->GenAttr) == intent.end() );
+				assert(treeItr->CommonAttributes.find(treeItr->GenAttr) != treeItr->CommonAttributes.end());
+				CPatritiaTree::TAttribute prevAttr = -1;
+				for( int i = treeItr->ClosureAttrStart; i < treeItr->ClosureAttrEnd; ++i) {
+					const CPatritiaTree::TAttribute a = pTree.GetClsAttribute(i);
+					assert( prevAttr < a);
+					prevAttr = a;
+					assert(intent.find(a) == intent.end());
+					assert(a > treeItr->GenAttr);
+					assert(treeItr->CommonAttributes.find(a) != treeItr->CommonAttributes.end());
+				}
+
 				assert( includes(treeItr->CommonAttributes.begin(), treeItr->CommonAttributes.end(),
 								 intent.begin(), intent.end()));
+				assert( parent.ObjStart <= treeItr->ObjStart && treeItr->ObjEnd <=parent.ObjEnd);
+			}
+			auto ch = treeItr->Children.begin();
+			auto prevCh = ch;
+			if( ch != treeItr->Children.end()) {
+				++ch;
+			}
+			for(; ch != treeItr->Children.end(); prevCh = ch, ++ch) {
+				const CPatritiaTreeNode& prev = pTree.GetNode(*prevCh);
+				const CPatritiaTreeNode& cur = pTree.GetNode(*ch);
+				assert(prev.ObjEnd == cur.ObjStart);
 			}
 
 			assert(treeItr->ObjStart <= treeItr->ObjEnd);
@@ -1429,12 +1458,12 @@ bool CStabilityLPCbyPatriciaTree::checkAttributeDeltaProblem(const CPTPattern& p
 
 
 		if( (*pItr)->GenAttr == a
-		    || (*pItr)->CommonAttributes.find(a) != (*pItr)->CommonAttributes.end() )
-		{
-			// The parent node is preserved then the child node should also be preserved
-			assert((*chItr)->CommonAttributes.find(a) != (*chItr)->CommonAttributes.end());
-			continue;
-		}
+			|| (*pItr)->CommonAttributes.find(a) != (*pItr)->CommonAttributes.end() )
+			{
+				// The parent node is preserved then the child node should also be preserved
+				assert((*chItr)->CommonAttributes.find(a) != (*chItr)->CommonAttributes.end());
+				continue;
+			}
 
 		if( a < (*pItr)->GenAttr ) {
 			// The parent is removed, the child should also be removed
