@@ -557,6 +557,8 @@ ILocalProjectionChain::TPreimageResult CStabilityLPCbyPatriciaTree::Preimages( c
 			p.SetClosestAttribute(a);
 		}
 
+		p.MoveAttributeToKernel(a);
+
 		if( !isPreimageStable ) {
 			continue;
 		}
