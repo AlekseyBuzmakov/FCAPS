@@ -73,7 +73,11 @@ struct CAttrIntersectionIntent {
 
 	// Comparison operator for multimap
 	bool operator < (const CAttrIntersectionIntent& other) const
-	{ return IsInKernel > other.IsInKernel || IsInKernel == other.IsInKernel && ExtentSize > other.ExtentSize; }
+	{
+		return IsInKernel < other.IsInKernel
+		                    || IsInKernel == other.IsInKernel
+		                    && ( IsInKernel && ExtentSize < other.ExtentSize || !IsInKernel && ExtentSize > other.ExtentSize);
+	}
 };
 ////////////////////////////////////////////////////////////////////
 
@@ -529,7 +533,8 @@ ILocalProjectionChain::TPreimageResult CStabilityLPCbyPatriciaTree::Preimages( c
 	assert(p.Delta() >= thld);
 
 	int a = p.GetKernelAttribute();
-	for(; p.HasKernelAttribute(); a = p.GetKernelAttribute()){
+	for(; p.HasKernelAttribute(); p.MoveAttributeToKernel(a)){
+		a = p.GetKernelAttribute();
 		if( p.Delta() < thld) {
 			// Unstable concept cannot probuce stable concepts
 			break;
@@ -557,8 +562,6 @@ ILocalProjectionChain::TPreimageResult CStabilityLPCbyPatriciaTree::Preimages( c
 			p.SetClosestAttribute(a);
 		}
 
-		p.MoveAttributeToKernel(a);
-
 		if( !isPreimageStable ) {
 			continue;
 		}
@@ -570,7 +573,7 @@ ILocalProjectionChain::TPreimageResult CStabilityLPCbyPatriciaTree::Preimages( c
 		++totalAllocatedPatterns;
 
 		if(!areAllInOnce) {
-			++a;
+			p.MoveAttributeToKernel(a);
 			break;
 		}
 	}
