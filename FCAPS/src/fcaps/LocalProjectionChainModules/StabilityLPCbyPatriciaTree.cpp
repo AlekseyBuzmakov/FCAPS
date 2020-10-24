@@ -594,7 +594,7 @@ bool CStabilityLPCbyPatriciaTree::IsExpandable( const IPatternDescriptor* d ) co
 
 	const CPTPattern& p = to_pattern(d);
 	assert(p.Delta() >= thld);
-	return p.GetKernelAttribute() <= maxAttribute;
+	return p.HasKernelAttribute();
 }
 int CStabilityLPCbyPatriciaTree::GetExtentSize( const IPatternDescriptor* d ) const
 {
@@ -1327,7 +1327,7 @@ const CPTPattern& CStabilityLPCbyPatriciaTree::to_pattern(const IPatternDescript
 // Computes the preimage of p w.r.t. the attribute a
 CPTPattern* CStabilityLPCbyPatriciaTree::computePreimage(const CPTPattern& p, CPatritiaTree::TAttribute a)
 {
-	assert(p.GetKernelAttribute() <= a);
+	// assert(p.GetKernelAttribute() <= a);
 	unique_ptr<CPTPattern> result( new CPTPattern(pTree, memoryCounter) );
 	auto itr = p.Begin();
 	for(; itr != p.End(); ++itr) {

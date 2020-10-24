@@ -30,7 +30,7 @@ STR(
 					"type": "file-path"
 				},
 					"Order":{
-					"description": "The sorting order of attributes in the context: desc(ending), (asc)ending, rand(om), (n)one.",
+					"description": "The sorting order of attributes in the context: desc(ending), asc(ending), rand(om), n(one).",
 					"type": "string"
 				}
 			}
