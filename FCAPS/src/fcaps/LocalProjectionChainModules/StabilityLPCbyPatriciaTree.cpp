@@ -108,7 +108,9 @@ public:
 		kernelAttr(0),
 		clossestAttr( - 1),
 		delta(-1),
-		intent(0)
+		intent(0),
+		attrsToIntersect(CountingAllocator<CPatritiaTree::TAttribute>(_cnt)),
+		firstInKernelAttr(-1)
 	{}
 	~CPTPattern()
 	{
@@ -160,28 +162,28 @@ public:
 
 	// Get/Set the kernel attribute
 	CPatritiaTree::TAttribute GetKernelAttribute() const
-	{ return attrIntersection.begin()->Attr; }
+	{ return attrsToIntersect.front(); }
 	bool HasKernelAttribute() const
-	{ return !attrIntersection.begin()->IsInKernel; }
+	{ return firstInKernelAttr > 0 && !attrsToIntersect.empty(); }
 	void MoveAttributeToKernel(CPatritiaTree::TAttribute a) const
 	{
-		assert(!attrIntersection.empty());
-		auto itr = attrIntersection.begin();
-		assert(a == itr->Attr);
-		if(a != itr->Attr) {
-			for(; itr != attrIntersection.end(); ++itr) {
-				if( itr->Attr == a) {
+		assert(!attrsToIntersect.empty());
+		assert( 0 < firstInKernelAttr && firstInKernelAttr <= attrsToIntersect.size());
+		auto itr = attrsToIntersect.begin();
+		assert(a == *itr);
+		if(a != *itr) {
+			for(; itr != attrsToIntersect.end(); ++itr) {
+				if( *itr == a) {
 					break;
 				}
 			}
-			assert(itr != attrIntersection.end());
+			assert(itr != attrsToIntersect.end());
+			attrsToIntersect.erase(itr);
+		} else { 
+			attrsToIntersect.pop_front();
 		}
-		CAttrIntersectionIntent newAttr = *itr;
-		assert(!newAttr.IsInKernel);
-		newAttr.IsInKernel = true;
-
-		attrIntersection.erase(itr);
-		attrIntersection.insert(newAttr);
+		attrsToIntersect.push_back(a);
+		--firstInKernelAttr;
 	}
 	void SetKernelAttribute( CPatritiaTree::TAttribute a ) const
 	{
@@ -247,12 +249,14 @@ public:
 	{
 		vector<int> attributeExtents;
 		computeAttrIntersection(attributeExtents);
+		deque<CAttrIntersectionIntent> attrIntersection;
 		for(int i = 0; i < attributeExtents.size(); ++i) {
-			if( !registerAttrExtentSize(i, attributeExtents[i], false) ) {
+			if( !registerAttrExtentSize(i, attributeExtents[i], false, attrIntersection) ) {
 				assert(false);
 				return false;
 			}
 		}
+		fillAttrsInIntersection(attrIntersection);
 		return true;
 	}
 	//  For the specified node
@@ -260,12 +264,15 @@ public:
 	{
 		vector<int> attributeExtents;
 		computeAttrIntersection(attributeExtents);
-		for(auto itr = other.attrIntersection.begin(); itr != other.attrIntersection.end(); ++itr) {
-			assert(attributeExtents[itr->Attr] <= itr->ExtentSize);
-			if( !registerAttrExtentSize(itr->Attr, attributeExtents[itr->Attr], itr->IsInKernel ) ) {
+		deque<CAttrIntersectionIntent> attrIntersection;
+		for(int i = 0; i < other.attrsToIntersect.size(); ++i) {
+			const CPatritiaTree::TAttribute a = other.attrsToIntersect[i];
+			assert( a < attributeExtents.size());
+			if( !registerAttrExtentSize(a, attributeExtents[a], i >= other.firstInKernelAttr , attrIntersection) ) {
 				return false;
 			}
 		}
+		fillAttrsInIntersection(attrIntersection);
 		return true;
 	}
 private:
@@ -288,7 +295,8 @@ private:
 	mutable CIntentAttribute* intent;
 
 	// The intersection of the pattern with its attributes
-	mutable multiset<CAttrIntersectionIntent> attrIntersection;
+	mutable deque< CPatritiaTree::TAttribute, CountingAllocator<const CPatritiaTreeNode*> > attrsToIntersect;
+	mutable int firstInKernelAttr;
 
 	void initPatternImage(CPatternImage& img) const {
 		img.PatternId = Hash();
@@ -350,7 +358,7 @@ private:
 		}
 	}
 	// Add attributes to attrIntersection
-	bool registerAttrExtentSize(CPatritiaTree::TAttribute a, DWORD extentSize, bool isInKernel )
+	bool registerAttrExtentSize(CPatritiaTree::TAttribute a, DWORD extentSize, bool isInKernel, deque<CAttrIntersectionIntent>& attrIntersection )
 	{
 		assert(extentSize <= this->extentSize );
 		if( extentSize == this->extentSize) {
@@ -366,10 +374,24 @@ private:
 		if( isInKernel ) {
 			delta = min(delta, this->extentSize - extentSize);
 		}
-		attrIntersection.insert(CAttrIntersectionIntent(a, extentSize, isInKernel));
+		attrIntersection.push_back(CAttrIntersectionIntent(a, extentSize, isInKernel));
 		return true;
 	}
-
+	void fillAttrsInIntersection( deque<CAttrIntersectionIntent>& attrIntersection )
+	{
+		sort(attrIntersection.begin(), attrIntersection.end());
+		firstInKernelAttr = -1;
+		attrsToIntersect.clear();
+		for(auto itr = attrIntersection.begin(); itr != attrIntersection.end(); ++itr) {
+			attrsToIntersect.push_back( itr->Attr );
+			if( firstInKernelAttr == -1 && itr->IsInKernel ) {
+				firstInKernelAttr = attrsToIntersect.size() - 1;
+			}
+		}
+		if( firstInKernelAttr == -1 ) {
+			firstInKernelAttr = attrsToIntersect.size();
+		}
+	}
 };
 
 ////////////////////////////////////////////////////////////////////
