@@ -37,7 +37,7 @@ private:
 class CBlockBitSetJoinComparator : public  IPatternManager {
 public:
 	CBlockBitSetJoinComparator() :
-		maxAttrNum(0) {}
+		blockNum(0), blockSize(3), isAllocated(false) {}
 	~CBlockBitSetJoinComparator();
 
 	// Methods of IPatternManager.
@@ -58,16 +58,20 @@ public:
 
 	// Methods of Class
 	// Get/Set maximal number of attributes.
-	DWORD GetMaxAttrNumber() const
-		{ return maxAttrNum; }
-	//  Can be called only once before any other commands processing.
+	DWORD GetMaxAttrNumber() const;
+	//  Sets the blockNum in such a way to cover at least num attributes
 	void SetMaxAttrNumber( DWORD num );
 
 	// Get/Set the number of CBlockAllocator::TElementType elements in one block
 	DWORD GetBlockSize() const
-		{return 2 << blockSize;}
+		{return 1 << blockSize;}
 	//   The block size is adjust in such a way to be a larger power of 2
 	void SetBlockSize( DWORD s );
+
+	// Get/Set the number of blocks
+	DWORD GetBlockNumber() const
+		{ return blockNum; }
+	void SetBlockNumber(DWORD n);
 
 	// Reserve memory.
 	void Reserve( size_t patternNumber );
@@ -78,6 +82,13 @@ public:
 
 	// Add new values to the descriptors.
 	void AddValue( DWORD value, CBlockBitSetDescriptor& descr );
+	// Enumerate values
+	//   Returns the first atttribute
+	int Begin( const CBlockBitSetDescriptor& d ) const
+		{ return Next(d ,-1); }
+	//   Returns the next attribute after prev or -1 if nothing is found
+	int Next(const CBlockBitSetDescriptor& d, int prev) const;
+	
 
 	// Memory consumption
 	size_t GetMemoryConsumption() const
@@ -93,13 +104,17 @@ private:
 	// It generates the blocks
 	CBlockAllocator blockAllocator;
 
-	// The maximal number of the attributes that can be stored in the class
-	DWORD maxAttrNum;
 	// The used block size
 	DWORD blockSize;
-	
+	// The number of blocks in the pattern
+	DWORD blockNum;
+
+	// The function verifies that memory is allocated.
+	//  After allocation it is not possible to change settings of allocation, e.g., maxAttrNum or blockSize
+	bool isAllocated();
 	CBlockBitSetDescriptor* newPattern( bool clear );
 	void freePattern( const CBlockBitSetDescriptor& descr );
+
 };
 
 #endif // CBLOCKBITSETDESCRIPTOR_H

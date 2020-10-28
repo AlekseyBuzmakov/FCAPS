@@ -12,9 +12,6 @@
 class CBlockAllocator {
 	typedef uintptr_t TElementType;
 public:
-	CBlockAllocator() :
-		blockSize(4), nextFreeBlock(0), allocatedBlocks(0) {}
-
 	// Get the size of the basic block
 	static size_t GetElementSize()
 		{return sizeof(TElementType);}
@@ -35,8 +32,8 @@ public:
 		{ return GetAvailableBlockCount() * blockSize * sizeof(TElementType); }
 
 	// New and free operations on top of the block alocator
-	TElementType* New()
-		{ return newBlock(false); }
+	TElementType* New( bool clear)
+		{ return newBlock(clear); }
 	void Free( TElementType* ptr )
 		{freeBlock(ptr);}
 
