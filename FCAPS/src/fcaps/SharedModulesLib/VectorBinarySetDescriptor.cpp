@@ -29,7 +29,7 @@ CVectorBinarySetJoinComparator::CVectorBinarySetJoinComparator() :
 	nextFreeBlock( 0 ),
 	allocatedPatterns( 0 ),
 	shouldWriteNames(false),
-	swapFile("VectorBinarySetDesriptar.SWAP"),
+	swapFile("VectorBinarySetDescriptor.SWAP"),
 	freeIndxSwapPosition(-1)
 #ifdef _DEBUG
 	, fingerprint( rand() )
