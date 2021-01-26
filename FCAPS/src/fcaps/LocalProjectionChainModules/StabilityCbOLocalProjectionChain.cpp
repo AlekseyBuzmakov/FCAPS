@@ -237,7 +237,9 @@ public:
 	int NextMostCloseAttribute() const
 		{ return nextMostCloseAttr; }
 	void ResetNextMostCloseAttribute() const
-		{ nextMostCloseAttr = -1; }
+		{ nextMostCloseAttr = -222; }
+	bool IsNextMostCloseAttributeReset() const
+		{ return nextMostCloseAttr == -222; }
 	DWORD Delta() const
 		{return delta;}
 	void SetDelta(DWORD d) const
@@ -526,6 +528,12 @@ ILocalProjectionChain::TPreimageResult CStabilityCbOLocalProjectionChain::Preima
 	if(!attrs->HasAttribute(a)){
 		return isStable ? PR_Finished : PR_Uninteresting;
 	} else {
+		if( !isStable ) {
+			return PR_Uninteresting;
+		} else {
+			
+			
+		}
 		return isStable ? PR_Expandable : PR_Uninteresting;
 	}
 }
@@ -536,6 +544,11 @@ bool CStabilityCbOLocalProjectionChain::IsExpandable( const IPatternDescriptor* 
 	const CPattern& p = to_pattern(d);
     assert(p.Delta() >= thld);
     return attrs->HasAttribute(p.NextAttribute());
+}
+bool CStabilityCbOLocalProjectionChain::IsFinalInterestKnown( const IPatternDescriptor* d ) const
+{
+	const CPattern& p = to_pattern(d);
+	return p.IsNextMostCloseAttributeReset();
 }
 int CStabilityCbOLocalProjectionChain::GetExtentSize( const IPatternDescriptor* d ) const
 {
@@ -660,6 +673,7 @@ const CPattern* CStabilityCbOLocalProjectionChain::initializeNewPattern(
 			// TODO
 			// if( res->Size() < thld ) {
 			// ??? could we ignore it somehow
+			//   please note it should be available as a child for any descedent of the concept
 			// }
 			if( res->Size() == 0 ) {
 				// can be ignored
@@ -752,9 +766,9 @@ int CStabilityCbOLocalProjectionChain::getNextKernelAttribute( const CPattern& p
 {
 	const int attr = p.NextMostCloseAttribute();
 	if( attr >= 0) {
-		return attrs->GetNextAttribute(p.NextAttribute());
-	} else {
 		return p.NextAttribute();
+	} else {
+		return attrs->GetNextAttribute(p.NextAttribute());
 	}
 }
 

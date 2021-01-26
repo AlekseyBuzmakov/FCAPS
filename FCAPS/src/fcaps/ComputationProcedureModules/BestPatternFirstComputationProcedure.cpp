@@ -502,7 +502,7 @@ void CBestPatternFirstComputationProcedure::checkForBestConcept(const CPattern& 
 {
 	assert(lpChain != 0);
 
-	if( lpChain->IsExpandable(p.Pattern.get()) ) {
+	if( !lpChain->IsFinalInterestKnown(p.Pattern.get()) ) {
 		return; // Cannot yet take its quality
 	}
 	
@@ -528,7 +528,7 @@ void CBestPatternFirstComputationProcedure::adjustThreshold()
 	// }
 
 	// Nothing is wory about...
-	if( (!shouldAdjustThld || queue.size() < mpn * 2) && lpChain->GetTotalConsumedMemory() < maxRAMConsumption  ) {
+	if( (!shouldAdjustThld || queue.size() <= mpn*2) && lpChain->GetTotalConsumedMemory() < maxRAMConsumption  ) {
 		return;
 	}
 
@@ -565,11 +565,11 @@ void CBestPatternFirstComputationProcedure::adjustThreshold()
 	}
 
 	// Yes, now there is nothing to worry about
-	if( !shouldAdjustThld || (queue.size() < mpn * 2 && lpChain->GetTotalConsumedMemory() < maxRAMConsumption )) {
+	if( !shouldAdjustThld || (queue.size() <= mpn*2 && lpChain->GetTotalConsumedMemory() < maxRAMConsumption )) {
 		return;
 	}
 
-	const DWORD firstPatternToRemove = min<DWORD>(mpn + 1, boost::math::round<DWORD>(queue.size() * 1.0 * maxRAMConsumption / lpChain->GetTotalConsumedMemory()) );
+	const DWORD firstPatternToRemove = min<DWORD>(mpn, boost::math::round<DWORD>(queue.size() * 1.0 * maxRAMConsumption / lpChain->GetTotalConsumedMemory()) );
 	// Should remove patterns such that there are at most @var mpn patterns.
 	vector<double> interests;
 	interests.reserve(queue.size());
@@ -586,13 +586,15 @@ void CBestPatternFirstComputationProcedure::adjustThreshold()
 		auto currItr = itr;
 		++itr;
 
-		if(lpChain->GetPatternInterest(currItr->Pattern.get()) >= thld) {
+		if(lpChain->GetPatternInterest(currItr->Pattern.get()) > thld) {
 			continue;
 		}
 		queue.erase(currItr);
 	}
 	lpChain->UpdateInterestThreshold( thld );
 	bestMap.SetMinKey(thld);
+
+	callback->ReportNextStage("New Thld: " + StdExt::to_string(thld) + ". Prev Q Size: " + StdExt::to_string(interests.size()) + ". New Q Size: " + StdExt::to_string(queue.size()) );
 }
 
 ///////////////////////////////////////////////////////////////////

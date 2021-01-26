@@ -107,6 +107,8 @@ public:
 	virtual TPreimageResult Preimages( const IPatternDescriptor* d, CPatternList& preimages );
 
 	virtual bool IsExpandable( const IPatternDescriptor* d ) const;
+	virtual bool IsFinalInterestKnown( const IPatternDescriptor* d ) const;
+
 	virtual int GetExtentSize( const IPatternDescriptor* d ) const;
 	virtual JSON SaveExtent( const IPatternDescriptor* d ) const;
 	virtual JSON SaveIntent( const IPatternDescriptor* d ) const;

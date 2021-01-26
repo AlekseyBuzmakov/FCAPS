@@ -61,6 +61,8 @@ interface ILocalProjectionChain : public virtual IObject {
 	virtual TPreimageResult Preimages( const IPatternDescriptor* d, CPatternList& preimages ) = 0;
 	// Check if the pattern is expandable, i.e., there are some other projections in the chain for this pattern
 	virtual bool IsExpandable( const IPatternDescriptor* d ) const = 0;
+	// Check if the quality of the pattern in final projection is known
+	virtual bool IsFinalInterestKnown( const IPatternDescriptor* d ) const = 0;
 
 	// Some attributes of patterns
 	virtual int GetExtentSize( const IPatternDescriptor* d ) const = 0;

@@ -105,7 +105,7 @@ JSON CBinaryClassificationOEst::GetJsonQuality(const IExtent* ext) const
 	const double probability = wPlus/wAll;
 	const double e1 = curWAll * probability;  
 	const double e0 = curWAll - e1;
-	const double T = (e1-o1)*(e1-o1)/e1 + (e0-o0)*(e0-o0)/e0;
+	const double T = e1*e0 == 0 ? 0 : (e1-o1)*(e1-o1)/e1 + (e0-o0)*(e0-o0)/e0;
 	boost::math::chi_squared chi2(1);
 	const double pValue = 1-boost::math::cdf(chi2,T);
 
