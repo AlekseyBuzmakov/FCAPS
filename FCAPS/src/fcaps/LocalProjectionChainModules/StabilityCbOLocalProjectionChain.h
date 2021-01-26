@@ -129,6 +129,16 @@ public:
 	static const char* const Desc();
 
 private:
+	enum TChildAnalysisMode {
+		CAM_None = 0, // No analysis of attributes larger than projection
+		CAM_Cls, // Computing only closure of the intent 
+		CAM_Unstable, // Computing closure and adding unstable attributes to the intent
+		CAM_MinDeltaFirst, // Finding also attribute that generate the closed child
+
+		CAM_EnumCount
+	};
+
+private:
 	static const CModuleRegistrar<CStabilityCbOLocalProjectionChain> registrar;
 	// Object that enumerates attribute extents
 	CSharedPtr<IContextAttributes> attrs;
@@ -145,6 +155,7 @@ private:
 	std::vector<int> intentStorage;
 	// A flag indicating if all attributes for a concept should be processed in once
 	bool areAllInOnce;
+	TChildAnalysisMode childAnalysisMode;
 
 	// Memory consumption
 	mutable size_t totalAllocatedPatterns;
@@ -155,12 +166,16 @@ private:
 		const CVectorBinarySetDescriptor* ext,
 		CIntentsTree::TIntent intent,
 		CIgnoredAttrs& ignored,
-		int nextAttr, DWORD delta, int clossestAttr = 0);
+		int nextAttr, DWORD delta, int clossestAttr = 0,
+		int nextMostClosedAttr = -1);
 	const CVectorBinarySetDescriptor* getAttributeImg(int a);
 	const CPattern* initializeNewPattern(
 		const CPattern& parent,
-		int genAttr,
+		int genAttr, int kernelAttr,
 		std::unique_ptr<const CVectorBinarySetDescriptor,CPatternDeleter>& ext);
+	int getNextAttribute( const CPattern& p) const;
+	int switchToNextProjection( const CPattern& p) const;
+	int getNextKernelAttribute( const CPattern& p) const;
 	DWORD getAttributeDelta(int a, const CVectorBinarySetDescriptor& ext);
 };
 

@@ -43,6 +43,10 @@ STR(
 				"AllAttributesInOnce": {
 					"description": "When called to compute next projection should it be generated only one 'next' pattern with one attribute, or all of them",
 					"type": "boolean"
+				},
+				"ChildrenAnalysis":{
+					"description": "Specifies if for new concepts the analysis of all its child concepts should be performed. 'None' -- do not check attributes after projection, 'Cls' -- only addition of attributes to the closure, 'Unstable' -- closure of attribute set as well as addition of attributes that make the current concept unstable, 'MinDeltaFirst' -- the most closed child w.r.t. extent is the next in projection",
+					"type": "string"
 				}
 			}
 		}
@@ -162,13 +166,15 @@ class CPattern : public IExtent, public IPatternDescriptor, public ISwappable {
 public:
 	// Pattern controls memor for the extent
 	CPattern( CVectorBinarySetJoinComparator& _cmp, 
-			const CVectorBinarySetDescriptor* e, 
-			CPatternDeleter dlt,
-	          CIntentsTree& iTree, CIntentsTree::TIntent i,
-		  CIgnoredAttrs& ignored,
-	          int nextAttr, DWORD d, int closestAttribute ) :
+			  const CVectorBinarySetDescriptor* e, 
+			  CPatternDeleter dlt,
+			  CIntentsTree& iTree, CIntentsTree::TIntent i,
+			  CIgnoredAttrs& ignored,
+			  int nextAttr, DWORD d, int closestAttribute,
+			  int _nextMostCloseAttr) :
 		cmp(_cmp), extent(e, dlt), swappedExtent(-1), extentSize(e->Size()), extentHash(e->Hash()),
-		intentsTree(iTree), intent(i), nextAttribute(nextAttr), delta(d), closestChildAttribute(closestAttribute)
+		intentsTree(iTree), intent(i), nextAttribute(nextAttr), delta(d), closestChildAttribute(closestAttribute),
+		nextMostCloseAttr(_nextMostCloseAttr)
 	{
 		assert( extent != 0 );
 		ignoredAttrs.Swap(ignored);
@@ -228,6 +234,10 @@ public:
 		{return nextAttribute;}
 	void SetNextAttribute(int a) const
 		{nextAttribute = a;}
+	int NextMostCloseAttribute() const
+		{ return nextMostCloseAttr; }
+	void ResetNextMostCloseAttribute() const
+		{ nextMostCloseAttr = -1; }
 	DWORD Delta() const
 		{return delta;}
 	void SetDelta(DWORD d) const
@@ -261,6 +271,8 @@ private:
 	// The attribute of a clossest child. In intersection of the pattern and the attribute the result is the clossest child
 	// Used as an optimization for earlier detection of new unstable patterns
 	mutable int closestChildAttribute;
+	// The number of the attribute that would generate the most closed child. It allows to get the Delta of the pattern as soon as possible
+	mutable int nextMostCloseAttr;
 
 	void initPatternImage(CPatternImage& img) const {
 		img.PatternId = Hash();
@@ -291,7 +303,8 @@ CStabilityCbOLocalProjectionChain::CStabilityCbOLocalProjectionChain() :
 	extDeleter(extCmp),
 	areAllInOnce(false),
 	totalAllocatedPatterns(0),
-	totalAllocatedPatternSize(0)
+	totalAllocatedPatternSize(0),
+	childAnalysisMode(CAM_None)
 {
 }
 CStabilityCbOLocalProjectionChain::~CStabilityCbOLocalProjectionChain()
@@ -338,6 +351,20 @@ void CStabilityCbOLocalProjectionChain::LoadParams( const JSON& json )
 	if(p.HasMember("AllAttributesInOnce") && p["AllAttributesInOnce"].IsBool()) {
 		areAllInOnce = p["AllAttributesInOnce"].GetBool();
 	}
+	if(p.HasMember("ChildrenAnalysis") && p["ChildrenAnalysis"].IsString()) {
+		const string chldAnalysis = params["Params"]["ChildrenAnalysis"].GetString();
+		if( chldAnalysis == "None") {
+			childAnalysisMode = CAM_None;
+		} else if( chldAnalysis == "Cls" ) {
+			childAnalysisMode = CAM_Cls;
+		} else if( chldAnalysis == "Unstable" ) {
+			childAnalysisMode = CAM_Unstable;
+		} else if( chldAnalysis == "MinDeltaFirst" ) {
+			childAnalysisMode = CAM_MinDeltaFirst;
+		} else {
+			CAM_None;
+		}
+	}
 }
 
 JSON CStabilityCbOLocalProjectionChain::SaveParams() const
@@ -349,6 +376,23 @@ JSON CStabilityCbOLocalProjectionChain::SaveParams() const
 		.AddMember( "Name", rapidjson::StringRef(Name()), alloc )
 		.AddMember( "Params", rapidjson::Value().SetObject()
 		            .AddMember("AllAttributesInOnce",rapidjson::Value(areAllInOnce),alloc), alloc );
+
+	switch(childAnalysisMode) {
+	case CAM_None:
+		params["Params"].AddMember("ChildAnalysis", "None", alloc );
+		break;
+	case CAM_Cls:
+		params["Params"].AddMember("ChildAnalysis", "Cls", alloc );
+		break;
+	case CAM_Unstable:
+		params["Params"].AddMember("ChildAnalysis", "Unstable", alloc );
+		break;
+	case CAM_MinDeltaFirst:
+		params["Params"].AddMember("ChildAnalysis", "MinDeltaFirst", alloc );
+		break;
+	default:
+		assert(false);
+	}
 
 	IModule* m = dynamic_cast<IModule*>(attrs.get());
 
@@ -416,16 +460,17 @@ ILocalProjectionChain::TPreimageResult CStabilityCbOLocalProjectionChain::Preima
 	const CPattern& p = to_pattern(d);
     assert(p.Delta() >= thld);
 
-	int a = p.NextAttribute();
+    int a = getNextAttribute(p);
 	CPatternImage img;
 	while(attrs->HasAttribute(a)){
 		if( p.Delta() < thld) {
-			// Unstable concep cannot probuce stable concepts
+			// Unstable concept cannot probuce stable concepts
 			break;
 		}
 
 		if(p.IsIgnored(a)){
-			a = attrs->GetNextAttribute(a);
+			// a = attrs->GetNextAttribute(a);
+			a = switchToNextProjection(p);
 			continue;
 		}
 		// Getting next attribute
@@ -440,11 +485,12 @@ ILocalProjectionChain::TPreimageResult CStabilityCbOLocalProjectionChain::Preima
 		if(extDiff == 0 ) {
 			// Attribute is in the closure
 			p.AddAttributeToIntent(a);
-			a = attrs->GetNextAttribute(a);
+			// a = attrs->GetNextAttribute(a);
+			a = switchToNextProjection(p);
 			continue;
 		}
 
-		unique_ptr<const CPattern> newPtrn( initializeNewPattern( p, a, res ) );
+		unique_ptr<const CPattern> newPtrn( initializeNewPattern( p, a, getNextKernelAttribute(p), res ) );
 
 		// Updating the measure of the current pattern.
 		//    It is here, because initializeNewPattern relies on the p.GetClossestChild()
@@ -456,7 +502,8 @@ ILocalProjectionChain::TPreimageResult CStabilityCbOLocalProjectionChain::Preima
 		if( newPtrn == 0 ) {
 			// Pattern 'res' is not stable
 			// Any more specific attribute can be ignored
-			a = attrs->GetNextNonChildAttribute(a);
+			// a = attrs->GetNextNonChildAttribute(a);
+			a = switchToNextProjection(p);
 			// TODO: normally all this attributes will be in the closure of any found children and thus there is no needs to intersect them  with this attribute
 			// Should search funther for a better pattern
 			continue;
@@ -467,13 +514,14 @@ ILocalProjectionChain::TPreimageResult CStabilityCbOLocalProjectionChain::Preima
 		assert(newPtrn->Delta() >= thld);
 		preimages.PushBack( newPtrn.release() );
 
-		a = attrs->GetNextAttribute(a);
+		// a = attrs->GetNextAttribute(a);
+		a = switchToNextProjection(p);
 		if(!areAllInOnce) {
 			break;
 		}
 	}
 
-	p.SetNextAttribute(a);
+	// p.SetNextAttribute(a);
 	const bool isStable = p.Delta() >= thld;
 	if(!attrs->HasAttribute(a)){
 		return isStable ? PR_Finished : PR_Uninteresting;
@@ -538,12 +586,15 @@ const CPattern* CStabilityCbOLocalProjectionChain::newPattern(
 	const CVectorBinarySetDescriptor* ext,
 	CIntentsTree::TIntent intent,
 	CIgnoredAttrs& ignored,
-	int nextAttr, DWORD delta, int clossestAttr)
+	int nextAttr, DWORD delta, int clossestAttr,
+    int nextMostClosedAttr)
 {
-	const CPattern* p = new CPattern(*extCmp, ext, extDeleter,
-	                    intentsTree, intent,
-			    ignored,
-	                    nextAttr,delta,clossestAttr);
+	const CPattern* p = new CPattern(
+					*extCmp, ext, extDeleter,
+					intentsTree, intent,
+					ignored,
+					nextAttr,delta,clossestAttr,
+	                nextMostClosedAttr);
 
 	++totalAllocatedPatterns;
 	totalAllocatedPatternSize += p->GetPatternMemorySize();
@@ -573,7 +624,8 @@ const CVectorBinarySetDescriptor* CStabilityCbOLocalProjectionChain::getAttribut
 }
 const CPattern* CStabilityCbOLocalProjectionChain::initializeNewPattern(
 	  const CPattern& parent,
-	  int genAttr,
+	  int genAttr, // The attributes that has generated the new pattern
+	  int kernelAttr, // The kernel attribute (i.e. the attribute that should be added next) in terms of CbO for the child. In most of the cases it is genAttr + 1
 	  std::unique_ptr<const CVectorBinarySetDescriptor,CPatternDeleter>& ext)
 {
 	assert( ext != 0 );
@@ -587,15 +639,21 @@ const CPattern* CStabilityCbOLocalProjectionChain::initializeNewPattern(
 	// The ignored attributes for the new concept
 
 	// First we should close the description of ext.
-	bool canBeUnclosed=false;
+	bool canBeUnclosed=childAnalysisMode != CAM_None;
+	int nextMinAttr = -1;
+	DWORD minAttrDelta = -1;
 	while(canBeUnclosed){
+
 		canBeUnclosed=false;
-		int a = attrs->GetNextAttribute(genAttr);
+		nextMinAttr = -1;
+		minAttrDelta = -1;
+
+		int a = kernelAttr;
 		for(; attrs->HasAttribute(a); a = attrs->GetNextAttribute(a)) {
 			if(extIgnoredAttrs.IsIgnored(a)) {
 				continue;
 			}
-			const CVectorBinarySetDescriptor& attr = *getAttributeImg(a);
+			const CVectorBinarySetDescriptor& attr = *getAttributeImg(a); // This is a long operation, probably should be cashed
 			unique_ptr<const CVectorBinarySetDescriptor,CPatternDeleter> res(
 					extCmp->CalculateSimilarity( *ext, attr ), extDeleter);
 			const DWORD extDiff = ext->Size() - res->Size();
@@ -607,20 +665,26 @@ const CPattern* CStabilityCbOLocalProjectionChain::initializeNewPattern(
 				// can be ignored
 				extIgnoredAttrs.Ignore(a);
 			}
+
+			if( childAnalysisMode == CAM_MinDeltaFirst && (nextMinAttr == -1 || minAttrDelta > extDiff) ) {
+				nextMinAttr = a;
+				minAttrDelta = extDiff;
+			}
+
 			if(extDiff > thld ) {
 				// not in the closure wrt Delta
 				continue;
 			}
-			canBeUnclosed = true;
 
-			if( extDiff > 0 ) {
+
+			if( (childAnalysisMode == CAM_Unstable || childAnalysisMode == CAM_MinDeltaFirst ) && extDiff > 0 ) {
+				canBeUnclosed = true;
 				ext.reset(res.release());
 			}
 			extIgnoredAttrs.Ignore(a);
 			intent = intentsTree.AddAttribute(intent, a);
 		}
 	}
-
 
 	// If delta is zero, then the attribute is in the intent.
 	// However, according to canonical order it should not be there. Thus, such a pattern should also be ignored.
@@ -641,7 +705,7 @@ const CPattern* CStabilityCbOLocalProjectionChain::initializeNewPattern(
 	// auto intentItr = intentStorage.rbegin();
 	// auto intentEnd = intentStorage.rend();
 
-	for(int a = 0; delta >= thld && a < genAttr && attrs->HasAttribute(a); a = attrs->GetNextNonChildAttribute(a)) {
+	for(int a = 0; delta >= thld && a < kernelAttr && attrs->HasAttribute(a); a = attrs->GetNextNonChildAttribute(a)) {
 		if(extIgnoredAttrs.IsIgnored(a)) {
 			continue;
 		}
@@ -661,7 +725,37 @@ const CPattern* CStabilityCbOLocalProjectionChain::initializeNewPattern(
 		return 0;
 	}
 	return(newPattern(ext.release(), intent, extIgnoredAttrs,
-				attrs->GetNextAttribute(genAttr), delta, minAttr));
+		kernelAttr, delta, minAttr, nextMinAttr));
+}
+
+int CStabilityCbOLocalProjectionChain::getNextAttribute( const CPattern& p) const
+{
+	const int attr = p.NextMostCloseAttribute();
+	if( attr >= 0 ) {
+		return attr;
+	} else {
+		return p.NextAttribute();
+	}
+}
+int CStabilityCbOLocalProjectionChain::switchToNextProjection( const CPattern& p) const
+{
+	const int attr = p.NextMostCloseAttribute();
+	if( attr >= 0 ) {
+		p.ResetNextMostCloseAttribute();
+		return p.NextAttribute();
+	} else {
+		p.SetNextAttribute( attrs->GetNextAttribute(p.NextAttribute()));
+		return p.NextAttribute();
+	}
+}
+int CStabilityCbOLocalProjectionChain::getNextKernelAttribute( const CPattern& p) const
+{
+	const int attr = p.NextMostCloseAttribute();
+	if( attr >= 0) {
+		return attrs->GetNextAttribute(p.NextAttribute());
+	} else {
+		return p.NextAttribute();
+	}
 }
 
 DWORD CStabilityCbOLocalProjectionChain::getAttributeDelta(int a, const CVectorBinarySetDescriptor& ext)
