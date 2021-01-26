@@ -22,6 +22,50 @@ size_t CBlockAllocator::GetAvailableBlockCount() const
 	return totalBlockCount / blockSize;
 }
 
+bool CBlockAllocator::CheckMemory( const TElementType* ptr, bool startOfBlock ) const
+{
+	CStdIterator<CMemory::CConstIterator, false> itr( memory );
+	for( ; !itr.IsEnd(); ++itr ) {
+		if( &(*itr).front() <= ptr && ptr < (&(*itr).back()+ 1) ) {
+			if( !startOfBlock ) {
+				return true;
+			} else {
+				const bool rslt = ptr +blockSize <= (&(*itr).back() + 1)
+					&& ( (reinterpret_cast<uintptr_t>(ptr)
+						-reinterpret_cast<uintptr_t>(&(*itr).front())) % (blockSize*sizeof(uintptr_t)) ) == 0;
+				// For breakpoitns on false.
+				if( rslt ) {
+					return true;
+				} else {
+					return false;
+				}
+
+			}
+		}
+	}
+	return false;
+}
+
+bool CBlockAllocator::CheckSameBlock( const TElementType* p1, const TElementType* p2 ) const
+{
+	CStdIterator<CMemory::CConstIterator, false> itr( memory );
+	for( ; !itr.IsEnd(); ++itr ) {
+		if( !(&(*itr).front() <= p1 && p1 < (&(*itr).back() + 1)) ) {
+			continue;
+		}
+		const bool result = ( &(*itr).front() <= p2 && p2 < (&(*itr).back() + 1) )
+			&& (reinterpret_cast<uintptr_t>(p1) - reinterpret_cast<uintptr_t>(&(*itr).front())) / (blockSize*sizeof(uintptr_t))
+				== (reinterpret_cast<uintptr_t>(p2) - reinterpret_cast<uintptr_t>(&(*itr).front())) / (blockSize*sizeof(uintptr_t));
+		if( result ) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	return false;
+
+}
+
 // Allocates new memory
 inline void CBlockAllocator::allocate()
 {

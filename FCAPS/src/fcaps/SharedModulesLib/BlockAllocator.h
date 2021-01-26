@@ -37,6 +37,12 @@ public:
 	void Free( TElementType* ptr )
 		{freeBlock(ptr);}
 
+
+	// Checks if memory is within the allocator
+	bool CheckMemory( const TElementType* ptr, bool startOfBlock ) const;
+	// Checks if poth pointers belong to memory of the same descriptior
+	bool CheckSameBlock( const TElementType* p1, const TElementType* p2 ) const;
+
 private:
 	// Memory allocator related types.
 	typedef std::vector<TElementType> CMemoryBlock;

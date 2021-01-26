@@ -24,8 +24,10 @@ private:
 	size_t hash;
 	size_t size;
 
-	CBlockAllocator::TElementType* description;
+	// The number of blocks filled with zeros
+	size_t nonEmptyBlocksNum;
 
+	// After the structure a memory for attributes is follow
 	CBlockBitSetDescriptor()
 		{}
 	~CBlockBitSetDescriptor()
@@ -37,7 +39,7 @@ private:
 class CBlockBitSetJoinComparator : public  IPatternManager {
 public:
 	CBlockBitSetJoinComparator() :
-		blockNum(0), blockSize(3), isAllocated(false) {}
+		blockNum(0), blockSize(3) {}
 	~CBlockBitSetJoinComparator();
 
 	// Methods of IPatternManager.
@@ -76,6 +78,12 @@ public:
 	// Reserve memory.
 	void Reserve( size_t patternNumber );
 
+	TCompareResult Compare(
+		const CBlockBitSetDescriptor& first, const CBlockBitSetDescriptor& second,
+		DWORD interestingResults, DWORD possibleResults );
+	const CBlockBitSetDescriptor* CalculateSimilarity(
+		const CBlockBitSetDescriptor& first, const CBlockBitSetDescriptor& second );
+
 	// Allocate new pattern
 	CBlockBitSetDescriptor* NewPattern()
 		{ return newPattern( true ); }
@@ -97,10 +105,11 @@ public:
 		{ return patternAllocator.GetTotalMemoryConsumption() + patternRefsAllocator.GetTotalMemoryConsumption() + blockAllocator.GetTotalMemoryConsumption(); }
 
 private:
+	// Size of the descriptor in CBlockAllocator::TElementType
+	static const int descriptorSize;
+
 	// Here the patterns itself are stored
 	CBlockAllocator patternAllocator;
-	// Here the array of reference is stored. It is used to store the references to the blocks
-	CBlockAllocator patternRefsAllocator;
 	// It generates the blocks
 	CBlockAllocator blockAllocator;
 
@@ -109,12 +118,17 @@ private:
 	// The number of blocks in the pattern
 	DWORD blockNum;
 
-	// The function verifies that memory is allocated.
-	//  After allocation it is not possible to change settings of allocation, e.g., maxAttrNum or blockSize
-	bool isAllocated();
+	const CBlockBitSetDescriptor& getBlockBitSet(const IPatternDescriptor* d);
+	CBlockAllocator::TElementType* getAttrBlocks( CBlockBitSetDescriptor& descr );
+	CBlockAllocator::TElementType& getAttrBlock( CBlockAllocator::TElementType* ptr, size_t blockNum );
+
 	CBlockBitSetDescriptor* newPattern( bool clear );
 	void freePattern( const CBlockBitSetDescriptor& descr );
-
+	TCompareResult compare(
+		const CBlockBitSetDescriptor& first, const CBlockBitSetDescriptor& second,
+		DWORD interestingResults, DWORD possibleResults );
+	const CBlockBitSetDescriptor* calculateSimilarity(
+		const CBlockBitSetDescriptor& first, const CBlockBitSetDescriptor& second );
 };
 
 #endif // CBLOCKBITSETDESCRIPTOR_H
