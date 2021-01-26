@@ -80,6 +80,7 @@ solution "Sofia-PS"
 			"Tools/inc/", 
 		}
 		files{ "FCAPS/src/fcaps/SharedModulesLib/**.h", "FCAPS/src/fcaps/SharedModulesLib/**.cpp" }
+		removefiles{"FCAPS/src/fcaps/SharedModulesLib/BlockBitSetDescriptor.cpp"}
 
 		libdirs {
 			"boost/stage/lib/",
