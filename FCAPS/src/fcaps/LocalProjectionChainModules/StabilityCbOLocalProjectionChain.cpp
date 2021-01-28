@@ -548,7 +548,7 @@ bool CStabilityCbOLocalProjectionChain::IsExpandable( const IPatternDescriptor* 
 bool CStabilityCbOLocalProjectionChain::IsFinalInterestKnown( const IPatternDescriptor* d ) const
 {
 	const CPattern& p = to_pattern(d);
-	return p.IsNextMostCloseAttributeReset();
+	return p.IsNextMostCloseAttributeReset() || attrs->HasAttribute(getNextAttribute(p));
 }
 int CStabilityCbOLocalProjectionChain::GetExtentSize( const IPatternDescriptor* d ) const
 {
