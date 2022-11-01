@@ -600,7 +600,7 @@ void CBestPatternFirstComputationProcedure::adjustThreshold()
 ///////////////////////////////////////////////////////////////////
 
 // compares patterns first patterns with larger potential are first (true), second patterns are given in topolgical order
-bool CBestPatternFirstComputationProcedure::CPatternPotentialComparator::operator()(const CPattern& a, const CPattern& b)
+bool CBestPatternFirstComputationProcedure::CPatternPotentialComparator::operator()(const CPattern& a, const CPattern& b) const
 {
 	assert(lpChain != 0);
 
