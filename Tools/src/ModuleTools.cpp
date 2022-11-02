@@ -8,6 +8,7 @@
 #include <fcaps/Module.h>
 
 //#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 using namespace std;
 using namespace boost;
