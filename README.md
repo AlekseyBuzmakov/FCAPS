@@ -112,5 +112,8 @@ This version of the software separates modules dynamic libraries from the execut
 
 ## How to use
 
+When running the executable you probably have to explicitly add the folder with all libraries of boost, e.g.,
+* LD_LIBRARY_PATH=PATH_TO_FCAPS/boost/stage/lib/ PATH_TO_FCAPS/build/final_x64/Sofia -I 
+
 The examples of usage can be found [here](https://github.com/AlekseyBuzmakov/FCAPS/tree/master/FCAPS/EXAMPLES#examples-of-the-application-usage). The main executable has two principal parameters: __-data__ is a json file with the context to process; and __-CP__ is a json file with the description of a context processor module that is going to process the context. In particular AddIntent module or Sofia module are examples of such context processors. Ideally, the schemas of json files for any type of json descriptions used by the program should be found [here](https://github.com/AlekseyBuzmakov/FCAPS/tree/master/FCAPS/schemas), but the world is not ideal... not yet.
 

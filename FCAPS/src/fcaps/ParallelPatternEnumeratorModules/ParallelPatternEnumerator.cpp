@@ -220,6 +220,7 @@ bool CParallelPatternEnumerator::registerPattern( const CPatternImage& ptrn )
 	}
 
 	pi.ImageSize = ptrn.ImageSize;
+	COUT << "\t ptrn SIZE: " << ptrn.ImageSize << "\n";
 	pi.Objects = new int[pi.ImageSize];
 	memcpy(const_cast<int*>(pi.Objects), ptrn.Objects, pi.ImageSize * sizeof( pi.Objects[0] ));
 
