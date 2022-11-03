@@ -1,0 +1,47 @@
+{
+	"Type": "ComputationProcedureModules",
+	"Name": "ContextBasedComputationProcedureModule",
+	"Params": {
+		"ContextFilePath": "context.json",
+		"ContextProcessor": {
+			"Type": "ContextProcessorModules",
+			"Name": "SofiaContextProcessorModule",
+			"Params": {
+				"DefualtThld": 5,
+				"MaxPatternNumber": 10000,
+				"FindPartialOrder": true,
+				"AdjustThreshold": true,
+				"OutputParams": {
+					"OutExtent": true,
+					"OutIntent": true
+				},
+				"ProjectionChain": {
+					"Type": "ProjectionChainModules",
+					"Name": "StabClsPatternProjectionChainModule",
+					"Params": {
+						"Enumerator":{
+							"Type": "PatternEnumeratorModules",
+							"Name": "ParallelPatternEnumeratorModule",
+							"Params":{
+								"PatternEnumeratorByCallback":{
+									"Type": "PatternEnumeratorByCallbackModules",
+									"Name": "GastonGraphPatternEnumeratorModule",
+									"Params":{
+										"InputPath":"../../../../LibGastonForSofia/sample-data/Chemical_340",
+										"RemoveInput": false,
+										"PatternPath":"PATTERNS.OUT",
+										"MinSupport":20,
+										"MaxGraphSize": -1,
+										"GastonMode":"Full|Trees|Pathes"
+									}
+								}
+							}	
+						},
+						"ImageReserve": 1000,
+						"ObjectCount": 339
+					}
+                }
+            }
+        }
+    }
+}
