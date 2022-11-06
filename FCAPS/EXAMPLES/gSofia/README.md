@@ -7,7 +7,7 @@ In order to run this example you need:
   * SOME FOLDER
     * FCAPS
     * LibGastonForSofia
-1. to compile this project stating from FCAPS/premake5-graphs.lua
+2. to compile this project stating from FCAPS/premake5-graphs.lua
 
 ## The content of the example
 
