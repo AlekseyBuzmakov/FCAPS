@@ -283,9 +283,11 @@ void CGastonGraphPatternEnumerator::writePattern( const LibGastonGraph* graph )
 		patternStream << "v " << i << " " << graph->Vertices[i] /*<< " # " << vertexLabelMap.GetLabel(graph->Vertices[i])*/ << "\n";
 	}
 	for (DWORD i = 0; i < graph->EdgeCount; i++) {
-		patternStream << "e " //<< i
+		patternStream << "e" //<< i
 		              << " " << graph->Edges[i].From << " " << graph->Edges[i].To
-		              << " " << edgeLabelMap.GetLabel(graph->Edges[i].Label) << "\n";
+		              << " " << graph->Edges[i].Label 
+		              << " # " << edgeLabelMap.GetLabel(graph->Edges[i].Label) 
+			      << "\n";
 	}
 	patternStream << "x";
 	for( DWORD i = 0; i < graph->Support; ++i ) {
