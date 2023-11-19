@@ -1,12 +1,8 @@
-# FCAPS
+# FCAPS Compilation with Premake (OLD)
 
-## License and copyright
-
-Initial software, Aleksey Buzmakov, Copyright (c) INRIA and University of Lorraine, 2011-2015, Copyright NRU Higher School of Economics, 2016, GPL v2 license, v0.9
+Please, remember that the project is moved to cmake and cmake is the preferable way for compilaiton
 
 ## Compilation
-
-The project is moved to **CMAKE**. The description for the old compilation can be found [here]().
 
 Bellow there are some commands that should be copied in the console (__terminal__ in Linux/MacOs or __cmd__ in Windows). By "$" a prompt is denoted, which means that this sign should NOT be typed to the console. Some problems are discussed at the end of the section.
 
