@@ -6,32 +6,43 @@ Initial software, Aleksey Buzmakov, Copyright (c) INRIA and University of Lorrai
 
 ## Compilation
 
-The project is moved to **CMAKE**. The description for the old compilation can be found [here]().
+The project is moved to **CMAKE**. The description for the old compilation can be found [here](https://raw.githubusercontent.com/AlekseyBuzmakov/FCAPS/master/COMPILE_WITH_PREMAKE.md).
 
 Bellow there are some commands that should be copied in the console (__terminal__ in Linux/MacOs or __cmd__ in Windows). By "$" a prompt is denoted, which means that this sign should NOT be typed to the console. Some problems are discussed at the end of the section.
 
 You will need
 * git (on Windows it should be accesible from __cmd__, i.e., you should be able to run "$git status" from __cmd__)
 * [boost](http://www.boost.org/)
-* [premake5](https://premake.github.io/download.html)
 
-Boost libraries should be in the _root_ of the git folder under the name __boost__. 
-You can put a symbolic (or a hard) link.
+Normally, the CMAKE should take the library from the system, so you can just install it in a regular way.
+Then, building the project will be as simple as:
 
-> $ ln -s "path/to/boost" boost \# Linux or MacOS
+> cd $FCAPS\_PROJECT\_DIR
 
-> $ mklink /D boost "path/to/boost" \# Windows
+> mkdir -p build && cd build
 
-Now inside __root__ (FCAPS, the cloned folder of this project), you should see the following structure.
+> cmake ..
 
-* boost
-* FCAPS
-* Sofia-PS
-* Tools
-* {files}
+> make
 
-Boost library can be install in the system and then the corresponding folder should be linked to boost subfloder, or can be downloaded from the site. In this case some boost libraries (regex, thread, system, filesystem) should be compiled:
-* Go to boost folder and run 
+However, it is possible, that in such a way the boost library will be build with different toolchain and then the linakeg would not be possible. So you can get some errors like:
+
+> undefined reference to `boost::filesystem::detail::directory_iterator_construct(boost::filesystem::directory_iterator&, boost::filesystem::path const&, boost::system::error_code*)'
+
+Then the only option known to me is to build boost by you self and install it to the system.
+
+### Boost library
+
+Goto the [boost webpage](http://www.boost.org/), download and extract the boost library.
+The version 1.65.1 is garanteed to work. It is known that for windows some linkage problems can appear for versions 1.70+ but you can try. Let the library is extracted to $BOOST\_SRC folder.
+
+Go to this folder, build and install the library. For reducing the compilation time only few libraries can be actually compiled:
+* regex
+* thread
+* system
+* filesystem
+
+> cd $BOOST\_SRC
 
 > $ ./bootstrap.
 
@@ -42,42 +53,24 @@ Or in Windows,
 * Then build the necessary libraries.
 
 For Linux/MacOs:
-> $ ./b2 --with-system --with-filesystem --with-thread --with-math debug stage
+> $ ./b2 --with-system --with-filesystem --with-thread --with-math debug stage install
 
-> $ ./b2 --with-system --with-filesystem --with-thread --with-math release stage
+> $ ./b2 --with-system --with-filesystem --with-thread --with-math release stage install
 
 For Windows:
-> $ b2.exe --with-system --with-filesystem --with-thread --with-math debug stage
+> $ b2.exe --with-system --with-filesystem --with-thread --with-math debug stage install
 
-> $ b2.exe --with-system --with-filesystem --with-thread --with-math release stage
+> $ b2.exe --with-system --with-filesystem --with-thread --with-math release stage install
 
-The next step is to convert the project to your most loved IDE. For that run
+Then return to the FCAPS project folder and run the following:
 
-> $ premake5 {configuration}
+> cd $FCAPS\_PROJECT\_DIR
 
-The most widely used configurations are 
+> mkdir -p build && cd build
 
-> $ premake5 vs2005|vs2008|...|vs2017 \# for diferent version of visual studio   *sln** file
+> cmake -DBOOST_ROOT=$BOOST_SRC -DBoost_NO_SYSTEM_PATHS=TRUE -DBoost_NO_BOOST_CMAKE=TRUE ..
 
-> $ premake5 gmake \# for GNU make file
-
-> $ premake5 codeblocks \# for cbp file of code::blocks IDE
-
-> $ premake5 clean \# for removing the created files
-
-Basically this script fetches [rapidjson](https://github.com/miloyip/rapidjson.git) and apply the file rapidjson.patch.
-Then it converts the description from the file __premake5.lua__ to the format of your IDE in love. The file is placed in the __build__ subdirectory.
-Then, I guess, you know what to do with the resulting files.
-
-After running the scirpt you should see the following structure of folders in the __root__ (two new folders had to appear):
-
-* boost
-* __build__
-* FCAPS
-* __rapidjson__
-* Sofia-PS
-* Tools
-* {files}
+> make
 
 ### Some notes for debugging
 
@@ -110,12 +103,10 @@ The repository contains
 * __StabilityEstimatorContextProcessor__ is a simple module for computing stability of intents.
 * _FCAPS/src/fcaps/premodules_ are never compiled or used files that probably will be convert to other modules.
 
-This version of the software separates modules dynamic libraries from the executable file. If you are interested in the old version that has all modules inside the executable, the branch [Modules-inside-Executable](https://github.com/AlekseyBuzmakov/FCAPS/tree/Modules-inside-Executable) should be of interest for you. However, this branch is not developing any more. Only hotfixes (probably) are added there.
-
 ## How to use
 
 When running the executable you probably have to explicitly add the folder with all libraries of boost, e.g.,
-* LD_LIBRARY_PATH=PATH_TO_FCAPS/boost/stage/lib/ PATH_TO_FCAPS/build/final_x64/Sofia -I 
+* $FCAPS\_PROJECT\_DIR/build/Sofia -I 
 
 The examples of usage can be found [here](https://github.com/AlekseyBuzmakov/FCAPS/tree/master/FCAPS/EXAMPLES#examples-of-the-application-usage). The main executable has two principal parameters: __-data__ is a json file with the context to process; and __-CP__ is a json file with the description of a context processor module that is going to process the context. In particular AddIntent module or Sofia module are examples of such context processors. Ideally, the schemas of json files for any type of json descriptions used by the program should be found [here](https://github.com/AlekseyBuzmakov/FCAPS/tree/master/FCAPS/schemas), but the world is not ideal... not yet.
 
