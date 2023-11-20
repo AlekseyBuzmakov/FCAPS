@@ -5,7 +5,7 @@ find_package(Boost COMPONENTS system filesystem REQUIRED)
 
 include_directories(${CMAKE_SOURCE_DIR}/FCAPS/include)
 
-FILE(GLOB CPP_FILES "${PROJECT_SOURCE_DIR}/*.cpp")
+FILE(GLOB_RECURSE CPP_FILES ${PROJECT_SOURCE_DIR} *.cpp)
 LIST(REMOVE_ITEM CPP_FILES "${PROJECT_SOURCE_DIR}/BlockBitSetDescriptor.cpp")
 
 add_library(${PROJECT_NAME} STATIC ${CPP_FILES})

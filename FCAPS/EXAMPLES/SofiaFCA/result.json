@@ -1,0 +1,9 @@
+[{
+"NodesCount":3,"ArcsCount":2,"Top":[0],"Bottom":[1,2],
+"Params":{"Type":"ContextProcessorModules","Name":"SofiaContextProcessorModule","Params":{"Thld":2.0,"MaxPatternNumber":10,"AdjustThreshold":true,"FindPartialOrder":true,"OutputParams":{"OutExtent":true,"OutIntent":true},"ProjectionChain":{"Type":"ProjectionChainModules","Name":"StabBinClsPatternsProjectionChainModule","Params":{"IntentWritingMode":"Indices","AttrOrder":"desc","AttrNames":["needs water to live","lives in water","lives on land","needs chlorophyll","dicotyledon","monocotyledon","can move","has limbs","breast feeds"],"alpha":0.5}}}}
+},{"Nodes":[
+  {"Ext":{"Count":8,"Names":["fish leech","bream","frog","dog","water weeds","reed","bean","corn"]},"Int":{"Count":1,"Inds":[0]},"Interest":3},
+  {"Ext":{"Count":5,"Names":["fish leech","bream","frog","water weeds","reed"]},"Int":{"Count":2,"Inds":[0,1]},"Interest":2},
+  {"Ext":{"Count":5,"Names":["frog","dog","reed","bean","corn"]},"Int":{"Count":2,"Inds":[0,2]},"Interest":2}
+]},{"Arcs":[
+  {"S":0,"D":1},  {"S":0,"D":2}]}]
