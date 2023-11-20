@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(SofiaModules LANGUAGES CXX)
+project(ContextAttributesModules LANGUAGES CXX)
 
 find_package(Boost COMPONENTS system filesystem REQUIRED)
 

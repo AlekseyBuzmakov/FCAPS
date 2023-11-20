@@ -9,7 +9,7 @@ FILE(GLOB CPP_FILES "${PROJECT_SOURCE_DIR}/*.cpp")
 
 add_library(${PROJECT_NAME} STATIC ${CPP_FILES})
 set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/FCAPS/src)
+target_include_directories(${PROJECT_NAME} BEFORE PUBLIC ${RapidJSON_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/FCAPS/src)
 target_link_libraries(${PROJECT_NAME} PUBLIC SharedTools)
 
 

@@ -1,5 +1,6 @@
+
 cmake_minimum_required(VERSION 3.5)
-project(SofiaModules LANGUAGES CXX)
+project(FilterModules LANGUAGES CXX)
 
 find_package(Boost COMPONENTS system filesystem REQUIRED)
 
@@ -16,6 +17,4 @@ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/modules/)
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_BINARY_DIR}/modules/${targetfile}
 )
-
-
 

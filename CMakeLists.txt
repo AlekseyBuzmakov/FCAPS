@@ -7,14 +7,14 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -O3")
 include("${CMAKE_SOURCE_DIR}/vendor/rapidjson.cmake")
 
 find_package(Boost COMPONENTS system filesystem REQUIRED)
-find_package(RapidJSON REQUIRED)
+#find_package(RapidJSON REQUIRED NO_DEFAULT_PATH)
 
 add_subdirectory(Tools/)
 
 include("${CMAKE_SOURCE_DIR}/FCAPS/fcaps-lib.cmake")
 
-include_directories(${CMAKE_SOURCE_DIR}/FCAPS/include)
-link_directories(${PROJECT_NAME} ${Boost_LIBRARY_DIRS})
+include_directories(BEFORE ${RapidJSON_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/FCAPS/include)
+link_directories(BEFORE ${PROJECT_NAME} ${Boost_LIBRARY_DIRS} ${rapidjson_LIBRARY_DIRS})
 
 add_executable(${PROJECT_NAME} Sofia-PS/src/main.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE Sofia-PS/inc)

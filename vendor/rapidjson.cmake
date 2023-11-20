@@ -15,10 +15,10 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/Tencent/rapidjson.git
   GIT_TAG origin/master
   GIT_SUBMODULES_RECURSE true
-  CMAKE_ARGS
-	-DRAPIDJSON_BUILD_TESTS=OFF
-	-DRAPIDJSON_BUILD_DOC=OFF
-	-DRAPIDJSON_BUILD_EXAMPLES=OFF
   OVERRIDE_FIND_PACKAGE)
 
 FetchContent_MakeAvailable(RapidJSON)
+#set(RapidJSON_DIR ${RapidJSON_SOURCE_DIR})
+#find_package(RapidJSON REQUIRED)# NO_DEFAULT_PATH)
+
+
