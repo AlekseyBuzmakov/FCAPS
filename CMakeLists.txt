@@ -11,6 +11,8 @@ find_package(RapidJSON REQUIRED)
 
 add_subdirectory(Tools/)
 
+include("${CMAKE_SOURCE_DIR}/FCAPS/fcaps-lib.cmake")
+
 include_directories(${CMAKE_SOURCE_DIR}/FCAPS/include)
 link_directories(${PROJECT_NAME} ${Boost_LIBRARY_DIRS})
 

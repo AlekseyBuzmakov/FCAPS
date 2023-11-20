@@ -1,0 +1,6 @@
+[submodule "FCAPS/src/fcaps/ParallelPatternEnumeratorModules/deps/LibgSpanForSofia"]
+	path = FCAPS/src/fcaps/ParallelPatternEnumeratorModules/deps/LibgSpanForSofia
+	url = https://github.com/AlekseyBuzmakov/LibgSpanForSofia.git
+[submodule "FCAPS/src/fcaps/ParallelPatternEnumeratorModules/deps/LibGastonForSofia"]
+	path = FCAPS/src/fcaps/ParallelPatternEnumeratorModules/deps/LibGastonForSofia
+	url = https://github.com/AlekseyBuzmakov/LibGastonForSofia.git
