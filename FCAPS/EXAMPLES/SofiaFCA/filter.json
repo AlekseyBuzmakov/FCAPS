@@ -1,0 +1,12 @@
+{
+    "Type": "LatticeFilters",
+    "Name": "ComputeAttributeShapValuesFilter",
+    "Params": {
+        "Context": "context.json",
+        "OutSuffix": ".SHAP",
+	"DeltaThld": -1,
+	"BudgetRnd": 10000,
+	"BudgetBruteForce": 10000,
+	"ShouldReorderAttributes": true
+    }
+}
