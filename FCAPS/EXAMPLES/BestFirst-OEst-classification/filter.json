@@ -1,0 +1,12 @@
+{
+    "Type": "LatticeFilters",
+    "Name": "ComputeAttributeShapValuesFilter",
+    "Params": {
+        "Context": "titanic.json",
+        "OutSuffix": ".SHAP",
+	"DeltaThld": -1,
+	"BudgetRnd": 100,
+	"BudgetBruteForce": 100,
+	"ShouldReorderAttributes": true
+    }
+}

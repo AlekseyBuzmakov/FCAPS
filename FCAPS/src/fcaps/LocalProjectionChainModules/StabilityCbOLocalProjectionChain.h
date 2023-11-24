@@ -159,6 +159,7 @@ private:
 	bool areAllInOnce;
 	TChildAnalysisMode childAnalysisMode;
 
+
 	// Memory consumption
 	mutable size_t totalAllocatedPatterns;
 	mutable size_t totalAllocatedPatternSize;

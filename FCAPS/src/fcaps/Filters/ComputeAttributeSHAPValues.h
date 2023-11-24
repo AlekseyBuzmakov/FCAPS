@@ -14,6 +14,7 @@
 
 #include <deque>
 #include <random>
+#include <set>
 
 ////////////////////////////////////////////////////////////////////
 
@@ -86,7 +87,7 @@ private:
 	// The size of the current extent
 	int curExtSize;
 	// The current extent, can be larger than the actual extent during the computation
-	std::unique_ptr<const CVectorBinarySetDescriptor> curExtent;	
+	CSharedPtr<const CVectorBinarySetDescriptor> curExtent;	
 	// The indiecs of the curent concept intent
 	std::deque<int> curIntentInds;
 	// The computed SHAP values of attributes for the current concept
@@ -94,11 +95,17 @@ private:
 
 	// The indices of the current set of attributes being analyzed
 	std::deque<int> analysedIntent;
+	// The attributes that are involved in the curExtentComputation
+	std::set<int> ignoredAttrs;
 
 	void computeSHAPValues();
 	double computeExactShap(int attr, int size);
 	int computeExactShapGenIntent(int attrIntentIndex, int prevAttrIndex, int size);
-	bool isAttrImportant(int attr) const;
+	bool isAttrImportant(int attr);
+	void computeExtent();
+	void computeExtent(int attr);
+	CSharedPtr<const CVectorBinarySetDescriptor> intersectAttrWithConcept(int attr);
+	void closeExtent();
 };
 
 #endif // COMPUTEATTRIBUTESHAPVALUES_H

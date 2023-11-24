@@ -10,7 +10,8 @@
                     "Type": "ContextAttributesModules",
                     "Name": "SAXJsonContextAttributesModule",
                     "Params": {
-                        "ContextFilePath": "titanic.json"
+                        "ContextFilePath": "titanic.json",
+			"WrittingMode":"both"
                     }
                 },
 		"AllAttributesInOnce":true

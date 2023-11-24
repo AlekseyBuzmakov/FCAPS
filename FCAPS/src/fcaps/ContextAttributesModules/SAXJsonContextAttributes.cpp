@@ -29,8 +29,12 @@ STR(
 					"description": "The path to a file containing the context in JSON format",
 					"type": "file-path"
 				},
-					"Order":{
+				"Order":{
 					"description": "The sorting order of attributes in the context: desc(ending), (asc)ending, rand(om), (n)one.",
+					"type": "string"
+				},
+				"WrittingMode": {
+					"description": "The mode for writing sets of attributes. It can be 'names', 'indices', or 'both'",
 					"type": "string"
 				}
 			}
@@ -48,7 +52,8 @@ const char* const CSAXJsonContextAttributes::Desc()
 
 CSAXJsonContextAttributes::CSAXJsonContextAttributes() :
 	objectNum(0),
-	order(AO_Desc)
+	order(AO_Desc),
+	mode(WM_Names)
 {
 	
 }
@@ -66,19 +71,36 @@ JSON CSAXJsonContextAttributes::DescribeAttributeSet(int* attrsSet, int attrsCou
 	assert(attrsSet != 0);
 
 	std::stringstream rslt;
-	rslt << "{" << "\"Count\":" << attrsCount << ", "
-	     << "\"Names\":[\n\t";
-	for( int i = 0; i < attrsCount; ++i) {
-		if( i != 0 ) {
-			rslt << ",\n\t";
+	rslt << "{" << "\"Count\":" << attrsCount << std::endl;
+	if( mode == WM_Names || mode == WM_Both )  {
+		rslt << ",\"Names\":[\n\t";
+		for( int i = 0; i < attrsCount; ++i) {
+			if( i != 0 ) {
+				rslt << ",\n\t";
+			}
+			const int attr = attrsSet[i];
+			assert(0 <= attr && attr < attrOrder.size());
+			const int internalAttr = attrOrder[attr];
+			assert(0 <= internalAttr && internalAttr < attrOrder.size());
+			rslt << "\"" << attributes[internalAttr].Name << "\"";
 		}
-		const int attr = attrsSet[i];
-		assert(0 <= attr && attr < attrOrder.size());
-		const int internalAttr = attrOrder[attr];
-		assert(0 <= internalAttr && internalAttr < attrOrder.size());
-		rslt << "\"" << attributes[internalAttr].Name << "\"";
+		rslt << "\n]" << std::endl;
 	}
-	rslt << "\n]}";
+	if( mode == WM_Indices || mode == WM_Both )  {
+		rslt << ",\"Inds\":[\n\t";
+		for( int i = 0; i < attrsCount; ++i) {
+			if( i != 0 ) {
+				rslt << ",\n\t";
+			}
+			const int attr = attrsSet[i];
+			assert(0 <= attr && attr < attrOrder.size());
+			const int internalAttr = attrOrder[attr];
+			assert(0 <= internalAttr && internalAttr < attrOrder.size());
+			rslt <<  " " << internalAttr;
+		}
+		rslt << "\n]" << std::endl;
+	}
+	rslt << "}" << std::endl;
 	return rslt.str();
 }
 
@@ -112,6 +134,16 @@ void CSAXJsonContextAttributes::LoadParams( const JSON& json )
 			order = AO_Random;
 		} else {
 			order = AO_None;
+		}
+	}
+	if(params["Params"].HasMember("WrittingMode") && params["Params"]["WrittingMode"].IsString()) {
+		const string modeStr = params["Params"]["WrittingMode"].GetString();
+		if( modeStr == "both") {
+			mode = WM_Both;
+		} else if( modeStr == "indices") {
+			mode = WM_Indices;
+		} else {
+			mode = WM_Names;
 		}
 	}
 

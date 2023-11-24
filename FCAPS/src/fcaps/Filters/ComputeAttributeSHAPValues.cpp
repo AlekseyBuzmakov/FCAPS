@@ -55,7 +55,7 @@ void addSHAPValuesToNode(
 	std::iota(idx.begin(), idx.end(), 0);
 
 	std::sort(idx.begin(), idx.end(),
-		[&shapValues](int i1, int i2) {return shapValues[i1] < shapValues[i2];} );
+		[&shapValues](int i1, int i2) {return shapValues[i1] > shapValues[i2];} );
 	for( int i = 0; i < idx.size(); ++i ) {
 		const int id = idx[i];
 		shapVals.PushBack(shapValues[id],alloc);
@@ -175,6 +175,9 @@ void CComputeAttributeShapValues::Process()
 			std::cout << "Concept " << i << " has no intent information information. IGNORED." << std::endl;
 			continue;
 		}
+		std::cout << "\rProcessing Concept " << i << " out of " << inputNodes.Size() <<"...";
+		std::cout.flush();
+
 		computeSHAPValues();
 		addSHAPValuesToNode(curSHAPValues, cpt["Int"], alloc, shouldReorderAttributes);
 	}
@@ -192,7 +195,7 @@ void CComputeAttributeShapValues::Process()
 
 	// Saving new lattice
 	JSON outputStr;
-	CreateStringFromJSON( doc, outputStr );
+	CreateStringFromJSON( doc, outputStr, true );
 	CDestStream dst(results[0]);
 	dst << outputStr;
 }
@@ -303,14 +306,12 @@ JSON CComputeAttributeShapValues::SaveParams() const
 
 inline int choose(int n, int k)
 {
-	int result = 1;
-	for(int i = n; i > n-k; --i) {
-		result *= i;
-	}
-	for(int i = 1; i <= k; ++i) {
+	double result = 1;
+	for(int i = k; i > 0; --i) {
+		result *= n-k+i;
 		result /= i;
 	}
-	return result;
+	return (int)result;
 }
 
 // Computes SHAP values for every attribute in the intent
@@ -357,8 +358,8 @@ void CComputeAttributeShapValues::computeSHAPValues()
 				++attrRndN;
 			}
 		}
-		const double rndAttrShap = (attrRndN==0?0:attrRndShap/attrRndN)*(curIntentInds.size()-2*size+1);
-		curSHAPValues.push_back((attrBFShap+attrRndShap)/curIntentInds.size());
+		const double rndAttrShap = (attrRndN==0?0:attrRndShap/attrRndN)*(curIntentInds.size()-1-2*size+1);
+		curSHAPValues.push_back((attrBFShap+rndAttrShap)/(curIntentInds.size()-1));
 	}
 }
 double CComputeAttributeShapValues::computeExactShap(int attr, int size)
@@ -389,9 +390,75 @@ int CComputeAttributeShapValues::computeExactShapGenIntent(int attrIntentIndex, 
 		return isAttrImportant(curIntentInds[attrIntentIndex]);
 	}
 }
-bool CComputeAttributeShapValues::isAttrImportant(int attr) const
+bool CComputeAttributeShapValues::isAttrImportant(int attr)
 {
-	return true;
+	curExtent.reset();
+	ignoredAttrs.clear();
+
+	computeExtent();
+	if(curExtent != 0 && curExtent->Size() == curExtSize) {
+		// Closure is without the attribute is equal to the whole closure
+		return false;
+	} else {
+		computeExtent(attr);
+		assert(curExtent != 0);
+		return curExtent->Size() == curExtSize;
+	}
+}
+
+// Computes extent by intersecting attributes in analysedIntent and then closing the extent by Delta-closure
+void CComputeAttributeShapValues::computeExtent()
+{
+	for(int i = 0; i < analysedIntent.size(); ++i) {
+		if(analysedIntent[i] == -1) {
+			continue;
+		}
+		curExtent =intersectAttrWithConcept(analysedIntent[i]);
+		ignoredAttrs.insert(analysedIntent[i]);
+	}
+	closeExtent();
+}
+// Computes extent by intersecting curExtent with the attribute attr and then closing the extent by Delta-closure
+void CComputeAttributeShapValues::computeExtent(int attr)
+{
+	curExtent =intersectAttrWithConcept(attr);
+	ignoredAttrs.insert(attr);
+	closeExtent();
+}
+// Just adds the attr to concept, i.e., just intersects curExtent with the extent of attr
+CSharedPtr<const CVectorBinarySetDescriptor> CComputeAttributeShapValues::intersectAttrWithConcept(int attr)
+{
+	if(curExtent == 0) {
+		return context[attr];
+	} else {
+		return CSharedPtr<const CVectorBinarySetDescriptor>(cmp.CalculateSimilarity(*context[attr], *curExtent), dlt);
+	}
+}
+
+// Closes curExtent by DeltaClosure using attributes out of analysedIntent
+void CComputeAttributeShapValues::closeExtent()
+{
+	while(curExtent == 0 || curExtent->Size() != curExtSize) {
+		bool hasAddedAttribute = false;
+		for(int i = 0; i < curIntentInds.size(); ++i) {
+			const int a = curIntentInds[i];
+			if(ignoredAttrs.count(a) > 0) {
+				continue;
+			}
+			auto intersection = intersectAttrWithConcept(a);
+			if(curExtent == 0 && cmp.GetMaxAttrNumber() - intersection->Size() < deltaThld
+				|| curExtent != 0 && curExtent->Size() - intersection->Size() < deltaThld) 
+			{
+				ignoredAttrs.insert(a);
+				curExtent = intersection;
+				hasAddedAttribute = true;
+				break;
+			}
+		}
+		if(!hasAddedAttribute) {
+			break;
+		}
+	}
 }
 
 

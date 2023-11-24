@@ -31,6 +31,17 @@ public:
 		AO_Count
 	};
 
+	enum TWrittingMode {
+		// Only names of attributes are written
+		WM_Names = 0,
+		// Only indices of attributes are written
+		WM_Indices,
+		// Names and indices of attributes are written
+		WM_Both,
+
+		WM_EnumCount
+	};
+
 	struct CAttribute {
 		CPatternImage Image;
 		std::string Name;
@@ -85,6 +96,8 @@ private:
 	TAttributeOrder attrOrder;
 	// The order of the attributes
 	TAttrOrderMode order;
+	// Writing mode of attributes
+	TWrittingMode mode;
 
 	void loadContext();
 };
