@@ -13,6 +13,7 @@
 
 #include <vector>
 #include <numeric>
+#include <algorithm>
 
 using namespace std;
 
@@ -23,6 +24,7 @@ using namespace std;
 const CModuleRegistrar<CComputeAttributeShapValues> CComputeAttributeShapValues::registrar;
 
 CComputeAttributeShapValues::CComputeAttributeShapValues() :
+	rng(std::random_device{}()),
 	outSuffix(".SHAP"),
 	dlt(cmp),
 	deltaThld(-1),
@@ -59,7 +61,8 @@ void addSHAPValuesToNode(
 		shapVals.PushBack(shapValues[id],alloc);
 	}
 	if(intent.HasMember("Inds") && intent["Inds"].IsArray() && intent["Inds"].Size() == idx.size()) {
-		rapidjson::Value& new_array = rapidjson::Value().SetArray();	
+		rapidjson::Value new_array(rapidjson::Value().SetArray(), alloc);	
+		new_array.Reserve(idx.size(), alloc);
 		for( int i = 0; i < idx.size(); ++i ) {
 			const int id = idx[i];
 			new_array.PushBack(intent["Inds"][id], alloc);
@@ -68,7 +71,8 @@ void addSHAPValuesToNode(
 	}
 	if(intent.HasMember("Names") && intent["Names"].IsArray() && intent["Names"].Size() == idx.size()) {
 		assert(intent["Names"].Size() == idx.size());
-		rapidjson::Value& new_array = rapidjson::Value().SetArray();	
+		rapidjson::Value new_array(rapidjson::Value().SetArray(), alloc);	
+		new_array.Reserve(idx.size(), alloc);
 		for( int i = 0; i < idx.size(); ++i ) {
 			const int id = idx[i];
 			new_array.PushBack(intent["Names"][id], alloc);
@@ -297,7 +301,97 @@ JSON CComputeAttributeShapValues::SaveParams() const
 	return result;
 }
 
+inline int choose(int n, int k)
+{
+	int result = 1;
+	for(int i = n; i > n-k; --i) {
+		result *= i;
+	}
+	for(int i = 1; i <= k; ++i) {
+		result /= i;
+	}
+	return result;
+}
+
+// Computes SHAP values for every attribute in the intent
 void CComputeAttributeShapValues::computeSHAPValues()
 {
+	for(int i = 0; i < curIntentInds.size(); ++i) {
+		const int attr = curIntentInds[i];
+		assert(attr >= 0);
+		int attrBFBudget = 0;
+		double attrBFShap = 0;
+		int size = 0;
+
+		// In the bruteforse part we increase the size of the number of attributes in the starting set,
+		//  while budget is available and compute the exact SHAP value.
+		while(attrBFBudget < budgetBF && size <= (curIntentInds.size()-1) / 2) {
+			attrBFShap += computeExactShap(attr, size);
+			attrBFBudget += choose(curIntentInds.size()-1, size);
+			if(curIntentInds.size() -1 - size != size) {
+				attrBFShap += computeExactShap(attr, curIntentInds.size() -1 - size);
+				attrBFBudget += choose(curIntentInds.size()-1, size);
+			}
+			++size;
+		}
+
+		double attrRndShap = 0;
+		int attrRndN = 0;
+		if( size <= (curIntentInds.size()-1) / 2) {
+			analysedIntent.clear();
+			std::uniform_int_distribution<int> size_gen(size,(curIntentInds.size()-1)/2);
+			const int s = size_gen(rng);
+			// There are some sizes of attributes sets there were not considered
+			for(; attrRndN < budgetRnd; ++attrRndN) {
+				const int s = size_gen(rng);
+				std::sample(
+					curIntentInds.begin(), curIntentInds.end(),
+				       	std::back_inserter(analysedIntent), s+1, rng);
+				auto curAttrItr = std::find(analysedIntent.begin(), analysedIntent.end(), attr);
+				if( curAttrItr != analysedIntent.end() ) {
+					*curAttrItr = -1;
+				} else {
+					analysedIntent.pop_back();
+				}
+				attrRndShap += isAttrImportant(attr);
+				++attrRndN;
+			}
+		}
+		const double rndAttrShap = (attrRndN==0?0:attrRndShap/attrRndN)*(curIntentInds.size()-2*size+1);
+		curSHAPValues.push_back((attrBFShap+attrRndShap)/curIntentInds.size());
+	}
 }
+double CComputeAttributeShapValues::computeExactShap(int attr, int size)
+{
+	analysedIntent.clear();
+	for(int i = 0; i < curIntentInds.size(); ++i) {
+		if(curIntentInds[i] == attr) {
+			return computeExactShapGenIntent(i, -1, size) / choose(curIntentInds.size()-1, size);
+		}
+	}
+	assert(false);
+	return -1;
+}
+int CComputeAttributeShapValues::computeExactShapGenIntent(int attrIntentIndex, int prevAttrIndex, int size)
+{
+	if( size > 0 ) {
+		int totalAttrIsImportant = 0;
+		for(int a = prevAttrIndex+1; a < curIntentInds.size()-1 - size + 1; ++a) {
+			if(a < attrIntentIndex) {
+				analysedIntent.push_back(a);
+			} else {
+				analysedIntent.push_back(a+1);
+			}
+			totalAttrIsImportant += computeExactShapGenIntent(attrIntentIndex, a, size-1);
+		}	
+		return totalAttrIsImportant;
+	} else {
+		return isAttrImportant(curIntentInds[attrIntentIndex]);
+	}
+}
+bool CComputeAttributeShapValues::isAttrImportant(int attr) const
+{
+	return true;
+}
+
 

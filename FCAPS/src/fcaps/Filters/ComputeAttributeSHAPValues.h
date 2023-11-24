@@ -13,6 +13,7 @@
 #include <rapidjson/document.h>
 
 #include <deque>
+#include <random>
 
 ////////////////////////////////////////////////////////////////////
 
@@ -54,6 +55,7 @@ public:
 
 private:
 	static const CModuleRegistrar<CComputeAttributeShapValues> registrar;
+	std::mt19937 rng;
 	// Resulting file, one file
 	std::vector<std::string> results;
 	// The path to the input lattice file.
@@ -90,7 +92,13 @@ private:
 	// The computed SHAP values of attributes for the current concept
 	std::deque<double> curSHAPValues;
 
+	// The indices of the current set of attributes being analyzed
+	std::deque<int> analysedIntent;
+
 	void computeSHAPValues();
+	double computeExactShap(int attr, int size);
+	int computeExactShapGenIntent(int attrIntentIndex, int prevAttrIndex, int size);
+	bool isAttrImportant(int attr) const;
 };
 
 #endif // COMPUTEATTRIBUTESHAPVALUES_H

@@ -4,6 +4,7 @@ obj
 .objs
 lib
 build
+build-d
 
 # rapidjson folder that is taken from other repo
 rapidjson/

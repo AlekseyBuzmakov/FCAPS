@@ -43,7 +43,6 @@ public:
 	bool operator()( DWORD c1, DWORD c2 )
 	{
 		const bool res = cmp(c1,c2);
-		assert(res != cmp(c2,c1));
 		return res;
 	}
 

@@ -5,7 +5,9 @@ set(CMAKE_DEBUG_POSTFIX d)
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -O3")
+add_compile_options("$<$<CONFIG:DEBUG>:-DDEBUG>")
+add_compile_options("$<$<CONFIG:DEBUG>:-D_DEBUG>")
+add_compile_options("$<$<CONFIG:RELEASE>:-DBOOST_DISABLE_ASSERTS>")
 
 include("${CMAKE_SOURCE_DIR}/vendor/rapidjson.cmake")
 
