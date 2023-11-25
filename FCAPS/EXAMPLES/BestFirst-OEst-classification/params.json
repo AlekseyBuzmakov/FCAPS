@@ -18,7 +18,7 @@
             }
         },
         "AdjustThreshold": false,
-        "DefualtThld": 3,
+        "DefualtThld": 5,
         "-MaxPatternNumber": 30000,
 	"MaxRAMConsumption": 2000000000,
 	"OptimisticEstimator": {

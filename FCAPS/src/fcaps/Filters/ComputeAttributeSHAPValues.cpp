@@ -30,6 +30,7 @@ CComputeAttributeShapValues::CComputeAttributeShapValues() :
 	deltaThld(-1),
 	budgetRnd(10000),
 	budgetBF(10000),
+	objectNum(0),
 	curExtSize(-1)
 {
 }
@@ -242,7 +243,8 @@ void CComputeAttributeShapValues::LoadParams( const JSON& json )
 	if( attrContext == 0 ) {
 		throw new CJsonException( place, error );
 	}
-	cmp.SetMaxAttrNumber(attrContext->GetObjectNumber());
+	objectNum = attrContext->GetObjectNumber();
+	cmp.SetMaxAttrNumber(objectNum);
 	CPatternImage image;
 	for(int a = 0; attrContext->HasAttribute(a);a = attrContext->GetNextAttribute(a)) {
 		attrContext->GetAttribute(a, image);
@@ -311,7 +313,7 @@ inline int choose(int n, int k)
 		result *= n-k+i;
 		result /= i;
 	}
-	return (int)result;
+	return std::lround(result);
 }
 
 // Computes SHAP values for every attribute in the intent
@@ -336,30 +338,35 @@ void CComputeAttributeShapValues::computeSHAPValues()
 			++size;
 		}
 
-		double attrRndShap = 0;
+		int attrRndShap = 0;
 		int attrRndN = 0;
+		double rndAttrShap = 0;
 		if( size <= (curIntentInds.size()-1) / 2) {
-			analysedIntent.clear();
-			std::uniform_int_distribution<int> size_gen(size,(curIntentInds.size()-1)/2);
-			const int s = size_gen(rng);
-			// There are some sizes of attributes sets there were not considered
-			for(; attrRndN < budgetRnd; ++attrRndN) {
-				const int s = size_gen(rng);
-				std::sample(
-					curIntentInds.begin(), curIntentInds.end(),
-				       	std::back_inserter(analysedIntent), s+1, rng);
-				auto curAttrItr = std::find(analysedIntent.begin(), analysedIntent.end(), attr);
-				if( curAttrItr != analysedIntent.end() ) {
-					*curAttrItr = -1;
-				} else {
-					analysedIntent.pop_back();
+			const int totalSizesForRnd = (curIntentInds.size()-1-size - size +1);
+			const int attrRndBudgetForSize = budgetRnd / totalSizesForRnd + 1;
+			std::uniform_int_distribution<int> size_gen(size,curIntentInds.size()-1 - size);
+			for( int s = size; s <= curIntentInds.size()-1 - size; ++s) {
+				// There are some sizes of attributes sets there were not considered
+				for(int trial = 0; trial < attrRndBudgetForSize; ++trial ) {
+					analysedIntent.clear();
+					//const int s = size_gen(rng);
+					std::sample(
+						curIntentInds.begin(), curIntentInds.end(),
+						std::back_inserter(analysedIntent), s+1, rng);
+					auto curAttrItr = std::find(analysedIntent.begin(), analysedIntent.end(), attr);
+					if( curAttrItr != analysedIntent.end() ) {
+						*curAttrItr = -1;
+					} else {
+						analysedIntent.pop_back();
+					}
+					attrRndShap += isAttrImportant(attr);
+					++attrRndN;
 				}
-				attrRndShap += isAttrImportant(attr);
-				++attrRndN;
 			}
+			assert(attrRndN > 0);
+			rndAttrShap = 1.0 * attrRndShap / attrRndN * totalSizesForRnd;
 		}
-		const double rndAttrShap = (attrRndN==0?0:attrRndShap/attrRndN)*(curIntentInds.size()-1-2*size+1);
-		curSHAPValues.push_back((attrBFShap+rndAttrShap)/(curIntentInds.size()-1));
+		curSHAPValues.push_back((attrBFShap+rndAttrShap)/(curIntentInds.size()));
 	}
 }
 double CComputeAttributeShapValues::computeExactShap(int attr, int size)
@@ -367,7 +374,7 @@ double CComputeAttributeShapValues::computeExactShap(int attr, int size)
 	analysedIntent.clear();
 	for(int i = 0; i < curIntentInds.size(); ++i) {
 		if(curIntentInds[i] == attr) {
-			return computeExactShapGenIntent(i, -1, size) / choose(curIntentInds.size()-1, size);
+			return 1.0 * computeExactShapGenIntent(i, -1, size) / choose(curIntentInds.size()-1, size);
 		}
 	}
 	assert(false);
@@ -379,11 +386,12 @@ int CComputeAttributeShapValues::computeExactShapGenIntent(int attrIntentIndex, 
 		int totalAttrIsImportant = 0;
 		for(int a = prevAttrIndex+1; a < curIntentInds.size()-1 - size + 1; ++a) {
 			if(a < attrIntentIndex) {
-				analysedIntent.push_back(a);
+				analysedIntent.push_back(curIntentInds[a]);
 			} else {
-				analysedIntent.push_back(a+1);
+				analysedIntent.push_back(curIntentInds[a+1]);
 			}
 			totalAttrIsImportant += computeExactShapGenIntent(attrIntentIndex, a, size-1);
+			analysedIntent.pop_back();
 		}	
 		return totalAttrIsImportant;
 	} else {
@@ -446,7 +454,7 @@ void CComputeAttributeShapValues::closeExtent()
 				continue;
 			}
 			auto intersection = intersectAttrWithConcept(a);
-			if(curExtent == 0 && cmp.GetMaxAttrNumber() - intersection->Size() < deltaThld
+			if(curExtent == 0 && objectNum - intersection->Size() < deltaThld
 				|| curExtent != 0 && curExtent->Size() - intersection->Size() < deltaThld) 
 			{
 				ignoredAttrs.insert(a);

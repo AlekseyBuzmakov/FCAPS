@@ -5,8 +5,8 @@
         "Context": "titanic.json",
         "OutSuffix": ".SHAP",
 	"DeltaThld": -1,
-	"BudgetRnd": 100,
-	"BudgetBruteForce": 100,
+	"BudgetRnd": 1000,
+	"BudgetBruteForce": 1000,
 	"ShouldReorderAttributes": true
     }
 }

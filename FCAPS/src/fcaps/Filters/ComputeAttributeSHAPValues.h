@@ -82,6 +82,7 @@ private:
 	CVectorBinarySetJoinComparator cmp;
 	CPatternDeleter dlt;
 	std::deque< CSharedPtr<const CVectorBinarySetDescriptor> > context;
+	int objectNum;
 
 	// Data for current concept
 	// The size of the current extent
