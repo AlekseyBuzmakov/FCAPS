@@ -14,7 +14,12 @@ You will need
 * git (on Windows it should be accesible from __cmd__, i.e., you should be able to run "$git status" from __cmd__)
 * [boost](http://www.boost.org/)
 
-Normally, the CMAKE should take the library from the system, so you can just install it in a regular way.
+First you should clone the repository
+* git clone https://github.com/AlekseyBuzmakov/FCAPS.git
+* cd FCAPS
+* git submodule update --init --recursive
+
+Then the compilation should be done. Normally, the CMAKE should take the library from the system, so you can just install it in a regular way.
 Then, building the project will be as simple as:
 
 > cd $FCAPS\_PROJECT\_DIR
